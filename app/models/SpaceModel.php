@@ -60,6 +60,15 @@ class SpaceModel extends Model {
         return $this->findAll("SELECT * FROM schedules WHERE space_id = ? ORDER BY day_of_week", [$spaceId]);
     }
 
+    public function upsertSchedule($spaceId, $dayOfWeek, $openTime, $closeTime) {
+        return $this->execute(
+            "INSERT INTO schedules (space_id, day_of_week, open_time, close_time, is_open)
+             VALUES (?, ?, ?, ?, 1)
+             ON DUPLICATE KEY UPDATE open_time = VALUES(open_time), close_time = VALUES(close_time), is_open = 1",
+            [$spaceId, $dayOfWeek, $openTime, $closeTime]
+        );
+    }
+
     public function getReservedSlots($spaceId, $date) {
         return $this->findAll(
             "SELECT start_time, end_time FROM reservations WHERE space_id = ? AND date = ? AND status IN ('confirmed','pending')",

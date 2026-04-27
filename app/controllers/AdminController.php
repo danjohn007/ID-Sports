@@ -85,7 +85,23 @@ class AdminController extends Controller {
         $spaces = $this->spaceModel->findByClub($clubId);
 
         if ($this->isPost()) {
-            $this->setFlash('success', 'Horarios guardados.');
+            $spaceId   = (int) $this->post('space_id');
+            $dayOfWeek = (int) $this->post('day_of_week');
+            $openTime  = $this->post('open_time');
+            $closeTime = $this->post('close_time');
+
+            // Validate the space actually belongs to this club
+            $validSpace = false;
+            foreach ($spaces as $sp) {
+                if ((int)$sp['id'] === $spaceId) { $validSpace = true; break; }
+            }
+
+            if ($validSpace && $openTime && $closeTime && $openTime < $closeTime) {
+                $this->spaceModel->upsertSchedule($spaceId, $dayOfWeek, $openTime, $closeTime);
+                $this->setFlash('success', 'Horario guardado correctamente.');
+            } else {
+                $this->setFlash('error', 'Datos de horario inválidos.');
+            }
             $this->redirect('admin/schedules');
         }
 
