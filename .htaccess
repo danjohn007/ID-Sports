@@ -1,6 +1,12 @@
 Options -Indexes
 RewriteEngine On
-RewriteBase /
+
+# NOTE: If your app is in a subdirectory (e.g. public_html/sports/),
+# uncomment and set the line below to match that subdirectory path:
+# RewriteBase /sports/
+#
+# If your app is at the domain root, uncomment this instead:
+# RewriteBase /
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
