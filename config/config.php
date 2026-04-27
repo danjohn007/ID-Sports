@@ -1,9 +1,9 @@
 <?php
 // Database
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'id_sports');
+define('DB_USER', 'idactivo_sportsadmin');
+define('DB_PASS', '?RdY,iRGQ+PY');
+define('DB_NAME', 'idactivo_sports');
 define('DB_CHARSET', 'utf8mb4');
 
 // Auto-detect BASE_URL
