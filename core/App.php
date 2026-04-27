@@ -20,6 +20,7 @@ class App {
         $routes = [
             '' => ['HomeController', 'index'],
             'home' => ['HomeController', 'index'],
+            'home/welcome' => ['HomeController', 'welcome'],
             'auth/login' => ['AuthController', 'login'],
             'auth/register' => ['AuthController', 'register'],
             'auth/forgot' => ['AuthController', 'forgot'],

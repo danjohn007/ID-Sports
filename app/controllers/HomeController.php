@@ -16,6 +16,16 @@ class HomeController extends Controller {
         ]);
     }
 
+    public function welcome() {
+        $this->requireAuth();
+        // Only for users with role 'user'; others go straight to home
+        if (($_SESSION['user_role'] ?? '') !== 'user') {
+            $this->redirect('home');
+        }
+        // Render the welcome/intro screen (standalone layout, no sidebar)
+        View::render('home/welcome', ['title' => 'Bienvenido'], false);
+    }
+
     public function notFound() {
         http_response_code(404);
         $this->view('home/index', ['title' => 'Página no encontrada', 'activeReservations' => [], 'promotions' => []]);

@@ -13,8 +13,26 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .sidebar-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-sky-50 hover:text-sky-600 transition-all text-sm font-medium; }
-        .sidebar-link.active { @apply bg-sky-500 text-white; }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 1rem;
+            border-radius: 0.75rem;
+            color: #4B5563;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 150ms;
+            text-decoration: none;
+        }
+        .sidebar-link:hover {
+            background-color: #f0f9ff;
+            color: #0284c7;
+        }
+        .sidebar-link.active {
+            background-color: #0EA5E9;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex">
@@ -27,7 +45,7 @@
             <span class="font-bold text-gray-900 dark:text-white text-lg">ID Sports</span>
         </a>
     </div>
-    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+    <nav class="flex-1 p-4 overflow-y-auto" style="display:flex;flex-direction:column;gap:0.25rem;">
         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-2">Principal</p>
         <a href="<?= BASE_URL ?>home" class="sidebar-link <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/home') !== false ? 'active' : '' ?>">🏠 Inicio</a>
         <a href="<?= BASE_URL ?>reservations/search" class="sidebar-link">🔍 Buscar Canchas</a>

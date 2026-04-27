@@ -19,9 +19,9 @@
             <label class="flex items-center gap-2 text-sm text-gray-600">
                 <input type="checkbox" class="rounded"> Recordarme
             </label>
-            <a href="<?= BASE_URL ?>auth/forgot" class="text-sm text-sky-500 hover:text-sky-600 font-medium">¿Olvidaste tu contraseña?</a>
+            <a href="<?= BASE_URL ?>auth/forgot" class="login-link text-sm">¿Olvidaste tu contraseña?</a>
         </div>
-        <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 rounded-xl transition-all shadow-sm hover:shadow-md">
+        <button type="submit" class="login-btn">
             Iniciar Sesión
         </button>
     </form>
@@ -32,6 +32,6 @@
     </div>
 
     <p class="text-center text-sm text-gray-600">
-        ¿No tienes cuenta? <a href="<?= BASE_URL ?>auth/register" class="text-sky-500 hover:text-sky-600 font-semibold">Regístrate gratis</a>
+        ¿No tienes cuenta? <a href="<?= BASE_URL ?>auth/register" class="login-link">Regístrate gratis</a>
     </p>
 </div>
