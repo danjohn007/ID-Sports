@@ -6,11 +6,11 @@ class LeadModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO leads (name, email, whatsapp, message, status) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO leads (name, email, phone, business_name, message, status) VALUES (?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
             $data['name'], $data['email'] ?? null,
-            $data['whatsapp'] ?? null, $data['message'] ?? '',
-            $data['status'] ?? 'new'
+            $data['phone'] ?? null, $data['business_name'] ?? null,
+            $data['message'] ?? '', $data['status'] ?? 'new'
         ]);
         return $this->lastInsertId();
     }

@@ -31,16 +31,14 @@ class UserModel extends Model {
 
     public function createOtp($userId, $email, $code) {
         $expires = date('Y-m-d H:i:s', time() + OTP_EXPIRY);
-        $this->execute("UPDATE otp_codes SET used = 1 WHERE user_id = ? AND used = 0", [$userId]);
-        $sql = "INSERT INTO otp_codes (user_id, code, expires_at) VALUES (?, ?, ?)";
-        $this->execute($sql, [$userId, $code, $expires]);
+        $this->execute("UPDATE otp_codes SET used = 1 WHERE email = ? AND used = 0", [$email]);
+        $sql = "INSERT INTO otp_codes (user_id, email, code, expires_at) VALUES (?, ?, ?, ?)";
+        $this->execute($sql, [$userId, $email, $code, $expires]);
     }
 
     public function verifyOtp($email, $code) {
         return $this->findOne(
-            "SELECT o.* FROM otp_codes o JOIN users u ON o.user_id = u.id
-             WHERE u.email = ? AND o.code = ? AND o.used = 0 AND o.expires_at > NOW()
-             ORDER BY o.id DESC LIMIT 1",
+            "SELECT * FROM otp_codes WHERE email = ? AND code = ? AND used = 0 AND expires_at > NOW() ORDER BY id DESC LIMIT 1",
             [$email, $code]
         );
     }

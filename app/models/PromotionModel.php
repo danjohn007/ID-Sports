@@ -1,7 +1,7 @@
 <?php
 class PromotionModel extends Model {
     public function getActive() {
-        return $this->findAll("SELECT * FROM promotions WHERE active = 1 AND (valid_until IS NULL OR valid_until >= CURDATE()) ORDER BY created_at DESC");
+        return $this->findAll("SELECT * FROM promotions WHERE status = 'active' AND (valid_until IS NULL OR valid_until >= CURDATE()) ORDER BY created_at DESC");
     }
 
     public function findAll($page = 1, $perPage = 20) {
@@ -15,18 +15,18 @@ class PromotionModel extends Model {
 
     public function verifyCoupon($code) {
         return $this->findOne(
-            "SELECT * FROM promotions WHERE coupon_code = ? AND active = 1 AND (valid_until IS NULL OR valid_until >= CURDATE())",
+            "SELECT * FROM promotions WHERE coupon_code = ? AND status = 'active' AND (valid_until IS NULL OR valid_until >= CURDATE())",
             [$code]
         );
     }
 
     public function create($data) {
-        $sql = "INSERT INTO promotions (title, description, type, discount_percent, coupon_code, valid_from, valid_until, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO promotions (title, description, type, discount_percent, coupon_code, valid_from, valid_until, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
             $data['title'], $data['description'] ?? '', $data['type'] ?? 'promotion',
             $data['discount_percent'] ?? 0, $data['coupon_code'] ?? null,
             $data['valid_from'] ?? null, $data['valid_until'] ?? null,
-            1
+            $data['status'] ?? 'active'
         ]);
         return $this->lastInsertId();
     }
@@ -42,3 +42,4 @@ class PromotionModel extends Model {
         return $this->execute("DELETE FROM promotions WHERE id = ?", [$id]);
     }
 }
+

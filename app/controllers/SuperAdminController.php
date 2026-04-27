@@ -45,7 +45,7 @@ class SuperAdminController extends Controller {
         if ($this->isPost()) {
             $clubId = $this->post('club_id');
             $rate = $this->post('commission_rate');
-            $clubModel->update($clubId, ['commission_rate' => $rate]);
+            $clubModel->update($clubId, ['commission_pct' => $rate]);
             $this->setFlash('success', 'Comisión actualizada.');
             $this->redirect('superadmin/commissions');
         }

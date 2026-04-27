@@ -54,8 +54,8 @@ class ClubModel extends Model {
     public function getActiveClubs($search = '') {
         if ($search) {
             return parent::findAll(
-                "SELECT * FROM clubs WHERE status = 'active' AND (name LIKE ? OR city LIKE ? OR address LIKE ?) ORDER BY name",
-                ["%$search%", "%$search%", "%$search%"]
+                "SELECT * FROM clubs WHERE status = 'active' AND (name LIKE ? OR address LIKE ?) ORDER BY name",
+                ["%$search%", "%$search%"]
             );
         }
         return parent::findAll("SELECT * FROM clubs WHERE status = 'active' ORDER BY name");
