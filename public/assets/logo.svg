@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <!-- Background pill -->
+  <rect x="0" y="0" width="200" height="60" rx="12" fill="#0EA5E9"/>
+  <!-- Soccer ball icon -->
+  <circle cx="30" cy="30" r="18" fill="white" opacity="0.15"/>
+  <circle cx="30" cy="30" r="14" fill="white"/>
+  <path d="M30 16 L34 23 L27 23 Z" fill="#0EA5E9"/>
+  <path d="M30 44 L26 37 L33 37 Z" fill="#0EA5E9"/>
+  <path d="M16 30 L23 26 L23 34 Z" fill="#0EA5E9"/>
+  <path d="M44 30 L37 34 L37 26 Z" fill="#0EA5E9"/>
+  <circle cx="30" cy="30" r="4" fill="#0EA5E9"/>
+  <!-- Text: ID -->
+  <text x="55" y="26" font-family="Arial Black, Arial" font-weight="900" font-size="22" fill="white" letter-spacing="1">ID</text>
+  <!-- Text: Sports -->
+  <text x="55" y="46" font-family="Arial, sans-serif" font-weight="700" font-size="14" fill="white" opacity="0.9" letter-spacing="2">SPORTS</text>
+  <!-- Accent line -->
+  <rect x="55" y="28" width="62" height="2" fill="white" opacity="0.4" rx="1"/>
+</svg>
