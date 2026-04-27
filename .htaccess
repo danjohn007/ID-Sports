@@ -1,6 +1,6 @@
 Options -Indexes
 RewriteEngine On
-RewriteBase /
+RewriteBase /sports/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
