@@ -12,7 +12,8 @@ class Model {
             ];
             $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
-            die(json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]));
+            error_log('DB connection failed: ' . $e->getMessage());
+            die(json_encode(['error' => 'Database connection failed. Please try again later.']));
         }
     }
 

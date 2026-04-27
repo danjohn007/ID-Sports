@@ -1,7 +1,8 @@
 <?php
 class ClubModel extends Model {
     public function findAll($where = '', $params = [], $page = 1, $perPage = 20) {
-        $offset = ($page - 1) * $perPage;
+        $perPage = max(1, (int)$perPage);
+        $offset  = max(0, ((int)$page - 1) * $perPage);
         $sql = "SELECT c.*, u.name as owner_name FROM clubs c LEFT JOIN users u ON c.owner_id = u.id";
         if ($where) $sql .= " WHERE $where";
         $sql .= " ORDER BY c.created_at DESC LIMIT $perPage OFFSET $offset";

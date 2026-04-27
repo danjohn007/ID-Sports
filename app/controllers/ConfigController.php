@@ -2,9 +2,28 @@
 class ConfigController extends Controller {
     private $configModel;
 
+    // Allowed config keys per section (prevents arbitrary key injection)
+    private static $allowedKeys = [
+        'general'  => ['app_name', 'app_tagline', 'app_description', 'timezone', 'currency', 'currency_symbol', 'contact_email', 'contact_phone', 'contact_address', 'maintenance_mode'],
+        'email'    => ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_name', 'smtp_from_email', 'smtp_encryption'],
+        'colors'   => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex'],
+        'paypal'   => ['paypal_client_id', 'paypal_client_secret', 'paypal_mode'],
+        'qr'       => ['qr_enabled', 'qr_expiry_minutes', 'qr_secret'],
+        'chatbot'  => ['chatbot_enabled', 'chatbot_provider', 'chatbot_api_key', 'chatbot_welcome', 'chatbot_system_prompt'],
+    ];
+
     public function __construct() {
         $this->requireAuth('super_admin');
         $this->configModel = new ConfigModel();
+    }
+
+    private function saveSection($section) {
+        $allowed = self::$allowedKeys[$section] ?? [];
+        foreach ($allowed as $key) {
+            if (isset($_POST[$key])) {
+                $this->configModel->set($key, $_POST[$key]);
+            }
+        }
     }
 
     public function index() {
@@ -13,9 +32,7 @@ class ConfigController extends Controller {
 
     public function general() {
         if ($this->isPost()) {
-            foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value);
-            }
+            $this->saveSection('general');
             $this->setFlash('success', 'Configuración general guardada.');
             $this->redirect('config/general');
         }
@@ -25,9 +42,7 @@ class ConfigController extends Controller {
 
     public function email() {
         if ($this->isPost()) {
-            foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value);
-            }
+            $this->saveSection('email');
             $this->setFlash('success', 'Configuración de email guardada.');
             $this->redirect('config/email');
         }
@@ -37,9 +52,7 @@ class ConfigController extends Controller {
 
     public function colors() {
         if ($this->isPost()) {
-            foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value);
-            }
+            $this->saveSection('colors');
             $this->setFlash('success', 'Colores guardados.');
             $this->redirect('config/colors');
         }
@@ -49,9 +62,7 @@ class ConfigController extends Controller {
 
     public function paypal() {
         if ($this->isPost()) {
-            foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value);
-            }
+            $this->saveSection('paypal');
             $this->setFlash('success', 'Configuración PayPal guardada.');
             $this->redirect('config/paypal');
         }
@@ -61,9 +72,7 @@ class ConfigController extends Controller {
 
     public function qr() {
         if ($this->isPost()) {
-            foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value);
-            }
+            $this->saveSection('qr');
             $this->setFlash('success', 'Configuración QR guardada.');
             $this->redirect('config/qr');
         }
@@ -150,9 +159,7 @@ class ConfigController extends Controller {
 
     public function chatbot() {
         if ($this->isPost()) {
-            foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value);
-            }
+            $this->saveSection('chatbot');
             $this->setFlash('success', 'Configuración del chatbot guardada.');
             $this->redirect('config/chatbot');
         }

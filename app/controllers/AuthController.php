@@ -90,7 +90,8 @@ class AuthController extends Controller {
                 $code = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
                 $this->userModel->createOtp($user['id'], $email, $code);
                 $_SESSION['otp_email'] = $email;
-                $success = "Código OTP generado: <strong>$code</strong> (en producción se enviaría por email/WhatsApp)";
+                // In production, send $code via email/WhatsApp here
+                $success = 'Código OTP enviado. Revisa tu correo o WhatsApp para continuar.';
             }
         }
         $this->view('auth/forgot', ['error' => $error, 'success' => $success, 'title' => 'Recuperar Contraseña'], 'auth');

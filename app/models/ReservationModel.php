@@ -29,7 +29,8 @@ class ReservationModel extends Model {
     }
 
     public function findByClub($clubId, $date = null, $status = null, $page = 1, $perPage = 20) {
-        $offset = ($page - 1) * $perPage;
+        $perPage = max(1, (int)$perPage);
+        $offset  = max(0, ((int)$page - 1) * $perPage);
         $sql = "SELECT r.*, s.name as space_name, u.name as user_name, u.email as user_email, u.whatsapp
                 FROM reservations r
                 LEFT JOIN spaces s ON r.space_id = s.id

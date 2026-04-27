@@ -52,14 +52,16 @@ class ConfigModel extends Model {
     }
 
     public function getLogs($page = 1, $perPage = 50) {
-        $offset = ($page - 1) * $perPage;
+        $perPage = max(1, (int)$perPage);
+        $offset  = max(0, ((int)$page - 1) * $perPage);
         return $this->findAll(
             "SELECT * FROM action_logs ORDER BY created_at DESC LIMIT $perPage OFFSET $offset"
         );
     }
 
     public function getErrorLogs($page = 1, $perPage = 50) {
-        $offset = ($page - 1) * $perPage;
+        $perPage = max(1, (int)$perPage);
+        $offset  = max(0, ((int)$page - 1) * $perPage);
         return $this->findAll("SELECT * FROM error_logs ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
     }
 

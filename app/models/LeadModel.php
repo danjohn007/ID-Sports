@@ -1,7 +1,8 @@
 <?php
 class LeadModel extends Model {
     public function findAll($page = 1, $perPage = 20) {
-        $offset = ($page - 1) * $perPage;
+        $perPage = max(1, (int)$perPage);
+        $offset  = max(0, ((int)$page - 1) * $perPage);
         return parent::findAll("SELECT * FROM leads ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
     }
 
