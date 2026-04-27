@@ -106,7 +106,7 @@
                         A tus necesidades. Configura tus preferencias de deporte, horarios favoritos, música de ambiente y más. ID Sports aprende de ti para ofrecerte siempre la mejor experiencia que se ajusta a tu estilo de juego.
                     </p>
                     <a href="<?= BASE_URL ?>home" class="mt-6 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
-                        Siguiente →
+                        Ir al inicio →
                     </a>
                 </div>
             </div>

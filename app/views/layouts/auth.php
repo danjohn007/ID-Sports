@@ -10,11 +10,13 @@
     <?php
     // Load login color config
     $loginColors = [];
-    try {
-        $cfgModel = new ConfigModel();
-        $loginColors = $cfgModel->getAll();
-    } catch (Exception $e) {
-        $loginColors = [];
+    if (class_exists('ConfigModel')) {
+        try {
+            $cfgModel = new ConfigModel();
+            $loginColors = $cfgModel->getAll();
+        } catch (Exception $e) {
+            $loginColors = [];
+        }
     }
     $loginBtnColor   = $loginColors['color_login_button']  ?? '#0EA5E9';
     $loginLinkColor  = $loginColors['color_login_link']    ?? '#0EA5E9';

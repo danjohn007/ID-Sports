@@ -29,8 +29,8 @@
             <hr class="border-gray-100 my-4">
             <h3 class="font-semibold text-gray-900 mb-3">🔑 Página de Login (/auth/login)</h3>
             <?php $loginColorFields = [
-                'color_login_button'  => ['Botón "Iniciar Sesión"', '#0EA5E9'],
-                'color_login_link'    => ['"¿Olvidaste tu contraseña?" y "Regístrate gratis"', '#0EA5E9'],
+                'color_login_button'  => ['Botón "Iniciar Sesion"', '#0EA5E9'],
+                'color_login_link'    => ['Olvidaste tu contrasena y Registrate gratis', '#0EA5E9'],
                 'color_login_logo_bg' => ['Fondo del Logo ID Sports', '#0EA5E9'],
             ];
             foreach ($loginColorFields as $key => [$label, $default]):
