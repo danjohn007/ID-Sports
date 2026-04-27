@@ -3,7 +3,7 @@
     <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-4">Colores actualizados</div>
     <?php endif; ?>
     <div class="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 class="font-semibold text-gray-900 mb-5">🎨 Paleta de Colores</h2>
+        <h2 class="font-semibold text-gray-900 mb-5">🎨 Paleta de Colores — General</h2>
         <form method="POST" class="space-y-4">
             <?php $colorFields = [
                 'color_primary' => ['Primary', '#0EA5E9'],
@@ -25,6 +25,28 @@
                 </div>
             </div>
             <?php endforeach; ?>
+
+            <hr class="border-gray-100 my-4">
+            <h3 class="font-semibold text-gray-900 mb-3">🔑 Página de Login (/auth/login)</h3>
+            <?php $loginColorFields = [
+                'color_login_button'  => ['Botón "Iniciar Sesión"', '#0EA5E9'],
+                'color_login_link'    => ['"¿Olvidaste tu contraseña?" y "Regístrate gratis"', '#0EA5E9'],
+                'color_login_logo_bg' => ['Fondo del Logo ID Sports', '#0EA5E9'],
+            ];
+            foreach ($loginColorFields as $key => [$label, $default]):
+                $val = $config[$key] ?? $default;
+            ?>
+            <div class="flex items-center gap-4">
+                <input type="color" name="<?= $key ?>" value="<?= htmlspecialchars($val) ?>"
+                    class="w-12 h-12 rounded-xl border border-gray-200 cursor-pointer p-1">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700"><?= $label ?></label>
+                    <input type="text" name="<?= $key ?>_hex" value="<?= htmlspecialchars($val) ?>"
+                        class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+            </div>
+            <?php endforeach; ?>
+
             <button type="submit" class="bg-sky-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm hover:bg-sky-600 transition-all">Guardar</button>
         </form>
     </div>

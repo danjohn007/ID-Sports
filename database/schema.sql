@@ -408,4 +408,7 @@ INSERT INTO `config` (`cfg_key`, `cfg_value`) VALUES
 ('smtp_from', 'noreply@idsports.mx'),
 ('chatbot_token', ''),
 ('chatbot_phone', ''),
-('qr_api_url', 'https://api.qrserver.com/v1/create-qr-code/');
+('qr_api_url', 'https://api.qrserver.com/v1/create-qr-code/'),
+('color_login_button', '#0EA5E9'),
+('color_login_link', '#0EA5E9'),
+('color_login_logo_bg', '#0EA5E9');

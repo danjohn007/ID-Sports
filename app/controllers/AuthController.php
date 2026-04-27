@@ -136,6 +136,7 @@ class AuthController extends Controller {
         switch ($role) {
             case 'super_admin': $this->redirect('superadmin/dashboard'); break;
             case 'club_admin': $this->redirect('admin/dashboard'); break;
+            case 'user': $this->redirect('home/welcome'); break;
             default: $this->redirect('home'); break;
         }
     }

@@ -6,7 +6,7 @@ class ConfigController extends Controller {
     private static $allowedKeys = [
         'general'  => ['app_name', 'app_tagline', 'app_description', 'timezone', 'currency', 'currency_symbol', 'contact_email', 'contact_phone', 'contact_address', 'maintenance_mode'],
         'email'    => ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_name', 'smtp_from_email', 'smtp_encryption'],
-        'colors'   => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex'],
+        'colors'   => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex', 'color_login_button', 'color_login_link', 'color_login_logo_bg'],
         'paypal'   => ['paypal_client_id', 'paypal_client_secret', 'paypal_mode'],
         'qr'       => ['qr_enabled', 'qr_expiry_minutes', 'qr_secret'],
         'chatbot'  => ['chatbot_enabled', 'chatbot_provider', 'chatbot_api_key', 'chatbot_welcome', 'chatbot_system_prompt'],
