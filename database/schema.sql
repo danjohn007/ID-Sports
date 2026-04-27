@@ -298,24 +298,19 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- USERS
 -- Passwords:
---   Admin1234  → bcrypt hash below
+--   Admin1234  → bcrypt hashes below (unique per account)
 --   User1234   → bcrypt hash below
 -- To regenerate: php -r "echo password_hash('Admin1234', PASSWORD_DEFAULT);"
 INSERT INTO `users` (`name`, `email`, `password`, `whatsapp`, `role`, `status`) VALUES
 ('Super Admin ID Sports', 'admin@idsports.mx',
- '$2y$10$TKh8H1.PfbuNIlQqHHSZEuGZhGtUJfxiNQNDGmSrX4c3wN1F3GKOW',
+ '$2y$10$6kXutGwX.svrrSwtZCr/MODxGVMj27lH4unkDSVcXUFzYZaXVvody',
  '+524421000001', 'super_admin', 'active'),
 ('Carlos Deportivo', 'club@deportivoqueretaro.mx',
- '$2y$10$TKh8H1.PfbuNIlQqHHSZEuGZhGtUJfxiNQNDGmSrX4c3wN1F3GKOW',
+ '$2y$10$DeW0T97C.pz7p2sH9vyJV.ziDQbGrQaf.zeL3hoBbUGbg3VeRsHoa',
  '+524421000002', 'club_admin', 'active'),
 ('Juan González', 'juan@gmail.com',
- '$2y$10$vI3EHaVMHGy4N5hPmU.vJeL8aSp4OQ9J7KVbpYIVjx1w3sF3f9.oC',
+ '$2y$10$x5khzoXBItn2UsXf0cFfAe3jm5WBEsb5tXqlkW1dz939RXhuzgVKi',
  '+524421000003', 'user', 'active');
-
--- NOTE: The hashes above are placeholders. Run this after import:
--- UPDATE users SET password = '$2y$10$...' WHERE email = 'admin@idsports.mx';
--- Or use test_connection.php to reset passwords.
-
 -- CLUBS
 INSERT INTO `clubs` (`owner_id`, `name`, `description`, `address`, `city`, `state`, `phone`, `email`, `commission_pct`, `status`) VALUES
 (2, 'Deportivo Querétaro', 'El complejo deportivo más completo de la ciudad, con canchas de fútbol, pádel y tenis.', 'Av. Constituyentes 100, Col. San Pablo', 'Querétaro', 'Querétaro', '+524421100001', 'contacto@deportivoqueretaro.mx', 10.00, 'active'),

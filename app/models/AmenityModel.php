@@ -1,7 +1,7 @@
 <?php
 class AmenityModel extends Model {
     public function findByClub($clubId) {
-        return $this->findAll("SELECT * FROM amenities WHERE club_id = ? AND deleted_at IS NULL ORDER BY name", [$clubId]);
+        return $this->findAll("SELECT * FROM amenities WHERE club_id = ? AND status = 'active' ORDER BY name", [$clubId]);
     }
 
     public function findById($id) {
@@ -9,8 +9,11 @@ class AmenityModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO amenities (club_id, name) VALUES (?, ?)";
-        $this->execute($sql, [$data['club_id'], $data['name']]);
+        $sql = "INSERT INTO amenities (club_id, name, description, price, stock) VALUES (?, ?, ?, ?, ?)";
+        $this->execute($sql, [
+            $data['club_id'], $data['name'],
+            $data['description'] ?? '', $data['price'] ?? 0.00, $data['stock'] ?? 0
+        ]);
         return $this->lastInsertId();
     }
 
@@ -22,6 +25,6 @@ class AmenityModel extends Model {
     }
 
     public function delete($id) {
-        return $this->execute("UPDATE amenities SET deleted_at = NOW() WHERE id = ?", [$id]);
+        return $this->execute("UPDATE amenities SET status = 'inactive' WHERE id = ?", [$id]);
     }
 }

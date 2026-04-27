@@ -25,8 +25,8 @@ nano config/config.php   # editar DB_HOST, DB_USER, DB_PASS, DB_NAME
 curl http://localhost/test_connection.php
 
 # 5. Iniciar sesión
-# superadmin@idsports.mx / Admin1234
-# ana@ejemplo.mx / User1234
+# admin@idsports.mx / Admin1234
+# juan@gmail.com / User1234
 ```
 
 ## Apache VirtualHost
@@ -54,7 +54,7 @@ Habilitar: `sudo a2enmod rewrite && sudo systemctl restart apache2`
 ## Credenciales de prueba
 | Email | Contraseña | Rol |
 |-------|-----------|-----|
-| superadmin@idsports.mx | Admin1234 | super_admin |
-| carlos@idsports.mx | Admin1234 | club_admin |
-| ana@ejemplo.mx | User1234 | user |
+| admin@idsports.mx | Admin1234 | super_admin |
+| club@deportivoqueretaro.mx | Admin1234 | club_admin |
+| juan@gmail.com | User1234 | user |
 App Móvil de control de acceso a espacios deportivos 

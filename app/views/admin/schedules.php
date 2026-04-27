@@ -1,71 +1,83 @@
 <div class="space-y-5">
     <div class="flex items-center justify-between">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">🕐 Horarios: <?= htmlspecialchars($space['name'] ?? '') ?></h2>
-            <p class="text-sm text-gray-500 mt-0.5">Define los bloques horarios disponibles para reservaciones</p>
+            <h2 class="text-lg font-semibold text-gray-900">🕐 Horarios por Espacio</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Define los días y bloques horarios disponibles para reservaciones</p>
         </div>
-        <a href="<?= BASE_URL ?>admin/spaces" class="text-sky-500 text-sm hover:underline">← Volver a Espacios</a>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <!-- Current schedules -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 class="font-semibold text-gray-900 mb-4">Horarios Configurados</h3>
-            <?php
-            $days = ['monday' => 'Lunes', 'tuesday' => 'Martes', 'wednesday' => 'Miércoles', 'thursday' => 'Jueves', 'friday' => 'Viernes', 'saturday' => 'Sábado', 'sunday' => 'Domingo'];
-            if (empty($schedules)):
-            ?>
-            <p class="text-gray-400 text-sm text-center py-6">Sin horarios configurados</p>
-            <?php else: ?>
-            <div class="space-y-2">
-                <?php foreach ($schedules as $sch): ?>
-                <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0 text-sm">
-                    <span class="font-medium text-gray-800"><?= $days[$sch['day_of_week']] ?? ucfirst($sch['day_of_week']) ?></span>
-                    <span class="text-gray-600"><?= substr($sch['open_time'], 0, 5) ?> – <?= substr($sch['close_time'], 0, 5) ?></span>
-                    <span class="text-sky-600 font-medium">$<?= number_format($sch['price_override'] ?? $space['price_per_hour'] ?? 0, 2) ?></span>
-                    <form method="POST" action="<?= BASE_URL ?>admin/deleteSchedule">
-                        <input type="hidden" name="id" value="<?= $sch['id'] ?>">
-                        <input type="hidden" name="space_id" value="<?= $space['id'] ?>">
-                        <button type="submit" class="text-red-400 hover:text-red-600 text-xs">✕</button>
-                    </form>
-                </div>
+    <?php
+    // day_of_week: 0=Domingo, 1=Lunes, ..., 6=Sábado
+    $dayNames = [0 => 'Domingo', 1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado'];
+    ?>
+
+    <?php foreach ($spaces as $sp): ?>
+    <div class="bg-white rounded-2xl border border-gray-100 p-5">
+        <h3 class="font-semibold text-gray-900 mb-4">🏟️ <?= htmlspecialchars($sp['name']) ?></h3>
+
+        <!-- Current schedules for this space -->
+        <?php
+        $spaceScheds = $schedulesBySpace[$sp['id']] ?? [];
+        $schedByDay = [];
+        foreach ($spaceScheds as $s) { $schedByDay[$s['day_of_week']] = $s; }
+        ?>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-100">
+                        <th class="text-left py-2 pr-4 font-medium text-gray-500">Día</th>
+                        <th class="text-left py-2 pr-4 font-medium text-gray-500">Apertura</th>
+                        <th class="text-left py-2 pr-4 font-medium text-gray-500">Cierre</th>
+                        <th class="text-left py-2 font-medium text-gray-500">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($dayNames as $num => $name): ?>
+                <tr class="border-b border-gray-50 last:border-0">
+                    <td class="py-2 pr-4 font-medium text-gray-800"><?= $name ?></td>
+                    <?php if (isset($schedByDay[$num])): ?>
+                    <td class="py-2 pr-4 text-gray-600"><?= substr($schedByDay[$num]['open_time'], 0, 5) ?></td>
+                    <td class="py-2 pr-4 text-gray-600"><?= substr($schedByDay[$num]['close_time'], 0, 5) ?></td>
+                    <td class="py-2"><span class="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">Abierto</span></td>
+                    <?php else: ?>
+                    <td class="py-2 pr-4 text-gray-300">—</td>
+                    <td class="py-2 pr-4 text-gray-300">—</td>
+                    <td class="py-2"><span class="bg-gray-100 text-gray-400 text-xs font-medium px-2 py-0.5 rounded-full">Cerrado</span></td>
+                    <?php endif; ?>
+                </tr>
                 <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <!-- Add schedule form -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 class="font-semibold text-gray-900 mb-4">Agregar Horario</h3>
-            <form method="POST" action="<?= BASE_URL ?>admin/storeSchedule" class="space-y-3">
-                <input type="hidden" name="space_id" value="<?= $space['id'] ?? '' ?>">
+        <details class="mt-4">
+            <summary class="text-sky-500 text-sm font-medium cursor-pointer hover:text-sky-600">+ Agregar / Editar Horario</summary>
+            <form method="POST" action="<?= BASE_URL ?>admin/schedules" class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <input type="hidden" name="space_id" value="<?= $sp['id'] ?>">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Día</label>
-                    <select name="day_of_week" class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        <?php foreach ($days as $val => $label): ?>
-                        <option value="<?= $val ?>"><?= $label ?></option>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Día</label>
+                    <select name="day_of_week" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <?php foreach ($dayNames as $num => $name): ?>
+                        <option value="<?= $num ?>"><?= $name ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Apertura</label>
-                        <input type="time" name="open_time" value="07:00" class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Cierre</label>
-                        <input type="time" name="close_time" value="22:00" class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Apertura</label>
+                    <input type="time" name="open_time" value="07:00" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio especial (dejar vacío para precio base)</label>
-                    <input type="number" name="price_override" step="0.01" min="0" placeholder="Ej: 350.00"
-                        class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Cierre</label>
+                    <input type="time" name="close_time" value="22:00" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                 </div>
-                <button type="submit" class="w-full bg-sky-500 text-white font-semibold py-2.5 rounded-xl text-sm hover:bg-sky-600 transition-all">
-                    Guardar Horario
-                </button>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-sky-500 text-white font-semibold py-2 rounded-lg text-sm hover:bg-sky-600 transition-all">
+                        Guardar
+                    </button>
+                </div>
             </form>
-        </div>
+        </details>
     </div>
+    <?php endforeach; ?>
 </div>

@@ -1,10 +1,11 @@
 <?php
 class IncidentModel extends Model {
     public function findByClub($clubId, $status = null) {
-        $sql = "SELECT i.*, s.name as space_name
+        $sql = "SELECT i.*, u.name as user_name, s.name as space_name
                 FROM incidents i
+                LEFT JOIN users u ON i.user_id = u.id
                 LEFT JOIN spaces s ON i.space_id = s.id
-                WHERE i.club_id = ?";
+                WHERE s.club_id = ?";
         $params = [$clubId];
         if ($status) { $sql .= " AND i.status = ?"; $params[] = $status; }
         $sql .= " ORDER BY i.created_at DESC";
@@ -16,26 +17,22 @@ class IncidentModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO incidents (club_id, space_id, reported_by, type, description) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO incidents (user_id, space_id, reservation_id, type, description) VALUES (?, ?, ?, ?, ?)";
         $this->execute($sql, [
-            $data['club_id'], $data['space_id'] ?? null,
-            $data['reported_by'] ?? null, $data['type'] ?? 'other',
-            $data['description']
+            $data['user_id'] ?? null, $data['space_id'],
+            $data['reservation_id'] ?? null,
+            $data['type'] ?? 'other', $data['description']
         ]);
         return $this->lastInsertId();
     }
 
     public function updateStatus($id, $status) {
-        $resolvedAt = $status === 'resolved' ? date('Y-m-d H:i:s') : null;
-        return $this->execute(
-            "UPDATE incidents SET status = ?, resolved_at = ? WHERE id = ?",
-            [$status, $resolvedAt, $id]
-        );
+        return $this->execute("UPDATE incidents SET status = ? WHERE id = ?", [$status, $id]);
     }
 
     public function countByClub($clubId, $status = 'open') {
         $row = $this->findOne(
-            "SELECT COUNT(*) as cnt FROM incidents WHERE club_id = ? AND status = ?",
+            "SELECT COUNT(*) as cnt FROM incidents i JOIN spaces s ON i.space_id = s.id WHERE s.club_id = ? AND i.status = ?",
             [$clubId, $status]
         );
         return $row['cnt'] ?? 0;

@@ -27,7 +27,7 @@
                     <td class="px-4 py-3 font-medium"><?= htmlspecialchars($l['name']) ?></td>
                     <td class="px-4 py-3">
                         <p><?= htmlspecialchars($l['email'] ?? '') ?></p>
-                        <p class="text-gray-400 text-xs"><?= htmlspecialchars($l['whatsapp'] ?? '') ?></p>
+                        <p class="text-gray-400 text-xs"><?= htmlspecialchars($l['phone'] ?? '') ?></p>
                     </td>
                     <td class="px-4 py-3 max-w-xs">
                         <p class="text-gray-600 truncate"><?= htmlspecialchars(substr($l['message'] ?? '', 0, 60)) ?></p>
