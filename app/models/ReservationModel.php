@@ -43,16 +43,15 @@ class ReservationModel extends Model {
     }
 
     public function create($data) {
-        $qrData = 'RES-' . uniqid();
-        $sql = "INSERT INTO reservations (user_id, space_id, date, start_time, end_time, num_people, subtotal, service_fee, amenities_total, discount, total, payment_method, payment_status, qr_code, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO reservations (user_id, space_id, date, start_time, end_time, subtotal, discount, total, coupon_code, notes, status, payment_ref) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
             $data['user_id'], $data['space_id'], $data['date'],
-            $data['start_time'], $data['end_time'], $data['num_people'] ?? 1,
-            $data['subtotal'], $data['service_fee'] ?? 0,
-            $data['amenities_total'] ?? 0, $data['discount'] ?? 0,
-            $data['total'], $data['payment_method'] ?? 'pending',
-            $data['payment_status'] ?? 'pending', $qrData,
-            $data['notes'] ?? ''
+            $data['start_time'], $data['end_time'],
+            $data['subtotal'] ?? $data['total'] ?? 0,
+            $data['discount'] ?? 0,
+            $data['total'], $data['coupon_code'] ?? null,
+            $data['notes'] ?? '', $data['status'] ?? 'pending',
+            $data['payment_ref'] ?? null
         ]);
         return $this->lastInsertId();
     }
@@ -61,8 +60,8 @@ class ReservationModel extends Model {
         return $this->execute("UPDATE reservations SET status = ? WHERE id = ?", [$status, $id]);
     }
 
-    public function updatePaymentStatus($id, $status) {
-        return $this->execute("UPDATE reservations SET payment_status = ? WHERE id = ?", [$status, $id]);
+    public function updatePaymentRef($id, $ref) {
+        return $this->execute("UPDATE reservations SET payment_ref = ? WHERE id = ?", [$ref, $id]);
     }
 
     public function getMonthlyStats($userId) {
@@ -80,7 +79,7 @@ class ReservationModel extends Model {
              FROM reservations r
              LEFT JOIN spaces s ON r.space_id = s.id
              LEFT JOIN users u ON r.user_id = u.id
-             WHERE s.club_id = ? AND r.date = CURDATE() AND r.status = 'active'
+             WHERE s.club_id = ? AND r.date = CURDATE() AND r.status IN ('confirmed','pending')
              ORDER BY r.start_time",
             [$clubId]
         );
@@ -88,10 +87,10 @@ class ReservationModel extends Model {
 
     public function getSystemStats() {
         return [
-            'total' => $this->findOne("SELECT COUNT(*) as cnt FROM reservations")['cnt'] ?? 0,
-            'today' => $this->findOne("SELECT COUNT(*) as cnt FROM reservations WHERE date = CURDATE()")['cnt'] ?? 0,
-            'revenue' => $this->findOne("SELECT SUM(total) as total FROM reservations WHERE payment_status = 'paid'")['total'] ?? 0,
-            'monthly_revenue' => $this->findAll("SELECT DATE_FORMAT(date,'%Y-%m') as month, SUM(total) as total FROM reservations WHERE payment_status='paid' GROUP BY month ORDER BY month DESC LIMIT 6"),
+            'total'           => $this->findOne("SELECT COUNT(*) as cnt FROM reservations")['cnt'] ?? 0,
+            'today'           => $this->findOne("SELECT COUNT(*) as cnt FROM reservations WHERE date = CURDATE()")['cnt'] ?? 0,
+            'revenue'         => $this->findOne("SELECT SUM(total) as total FROM reservations WHERE status = 'confirmed'")['total'] ?? 0,
+            'monthly_revenue' => $this->findAll("SELECT DATE_FORMAT(date,'%Y-%m') as month, SUM(total) as total FROM reservations WHERE status IN ('confirmed','completed') GROUP BY month ORDER BY month DESC LIMIT 6"),
         ];
     }
 
@@ -101,7 +100,7 @@ class ReservationModel extends Model {
     }
 
     public function revenueByClub($clubId) {
-        $row = $this->findOne("SELECT SUM(r.total) as total FROM reservations r JOIN spaces s ON r.space_id = s.id WHERE s.club_id = ? AND r.payment_status = 'paid'", [$clubId]);
+        $row = $this->findOne("SELECT SUM(r.total) as total FROM reservations r JOIN spaces s ON r.space_id = s.id WHERE s.club_id = ? AND r.status IN ('confirmed','completed')", [$clubId]);
         return $row['total'] ?? 0;
     }
 }

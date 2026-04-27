@@ -14,62 +14,60 @@ class ConfigController extends Controller {
     public function general() {
         if ($this->isPost()) {
             foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') {
-                    $this->configModel->set($key, $value, 'general');
-                }
+                if ($key !== 'submit') $this->configModel->set($key, $value);
             }
             $this->setFlash('success', 'Configuración general guardada.');
             $this->redirect('config/general');
         }
-        $config = $this->configModel->getGroup('general');
+        $config = $this->configModel->getAll();
         $this->view('config/general', ['title' => 'Configuración General', 'config' => $config], 'admin');
     }
 
     public function email() {
         if ($this->isPost()) {
             foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value, 'email');
+                if ($key !== 'submit') $this->configModel->set($key, $value);
             }
             $this->setFlash('success', 'Configuración de email guardada.');
             $this->redirect('config/email');
         }
-        $config = $this->configModel->getGroup('email');
+        $config = $this->configModel->getAll();
         $this->view('config/email', ['title' => 'Configuración Email', 'config' => $config], 'admin');
     }
 
     public function colors() {
         if ($this->isPost()) {
             foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value, 'colors');
+                if ($key !== 'submit') $this->configModel->set($key, $value);
             }
             $this->setFlash('success', 'Colores guardados.');
             $this->redirect('config/colors');
         }
-        $config = $this->configModel->getGroup('colors');
+        $config = $this->configModel->getAll();
         $this->view('config/colors', ['title' => 'Colores del Sistema', 'config' => $config], 'admin');
     }
 
     public function paypal() {
         if ($this->isPost()) {
             foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value, 'paypal');
+                if ($key !== 'submit') $this->configModel->set($key, $value);
             }
             $this->setFlash('success', 'Configuración PayPal guardada.');
             $this->redirect('config/paypal');
         }
-        $config = $this->configModel->getGroup('paypal');
+        $config = $this->configModel->getAll();
         $this->view('config/paypal', ['title' => 'Configuración PayPal', 'config' => $config], 'admin');
     }
 
     public function qr() {
         if ($this->isPost()) {
             foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value, 'qr');
+                if ($key !== 'submit') $this->configModel->set($key, $value);
             }
             $this->setFlash('success', 'Configuración QR guardada.');
             $this->redirect('config/qr');
         }
-        $config = $this->configModel->getGroup('qr');
+        $config = $this->configModel->getAll();
         $this->view('config/qr', ['title' => 'API QR', 'config' => $config], 'admin');
     }
 
@@ -81,23 +79,19 @@ class ConfigController extends Controller {
             $action = $this->post('action');
             if ($action === 'create') {
                 $this->configModel->addIotDevice([
-                    'club_id' => $this->post('club_id'),
-                    'name' => $this->post('name'),
+                    'club_id'     => $this->post('club_id') ?: null,
+                    'name'        => $this->post('name'),
                     'device_type' => $this->post('device_type'),
-                    'ip_address' => $this->post('ip_address'),
-                    'port' => $this->post('port') ?: 80,
-                    'username' => $this->post('username'),
-                    'password' => $this->post('password'),
-                    'channel' => $this->post('channel') ?: 1,
+                    'ip_address'  => $this->post('ip_address'),
+                    'username'    => $this->post('username'),
+                    'password'    => $this->post('password'),
                 ]);
                 $this->setFlash('success', 'Dispositivo IoT agregado.');
             } elseif ($action === 'update') {
                 $this->configModel->updateIotDevice($this->post('id'), [
-                    'name' => $this->post('name'),
+                    'name'       => $this->post('name'),
                     'ip_address' => $this->post('ip_address'),
-                    'port' => $this->post('port') ?: 80,
-                    'username' => $this->post('username'),
-                    'channel' => $this->post('channel') ?: 1,
+                    'username'   => $this->post('username'),
                 ]);
                 $this->setFlash('success', 'Dispositivo actualizado.');
             } elseif ($action === 'delete') {
@@ -111,10 +105,35 @@ class ConfigController extends Controller {
         $this->view('config/iot', ['title' => 'Dispositivos IoT', 'devices' => $devices, 'clubs' => $clubs], 'admin');
     }
 
+    public function storeIot() {
+        $this->configModel->addIotDevice([
+            'club_id'     => $this->post('club_id') ?: null,
+            'name'        => $this->post('name'),
+            'device_type' => $this->post('device_type'),
+            'ip_address'  => $this->post('ip_address'),
+            'username'    => $this->post('username'),
+            'password'    => $this->post('password'),
+        ]);
+        $this->setFlash('success', 'Dispositivo IoT agregado.');
+        $this->redirect('config/iot');
+    }
+
+    public function deleteIot() {
+        $this->configModel->deleteIotDevice($this->post('id'));
+        $this->setFlash('success', 'Dispositivo eliminado.');
+        $this->redirect('config/iot');
+    }
+
     public function logs() {
         $page = max(1, (int)$this->get('page', 1));
         $logs = $this->configModel->getLogs($page);
         $this->view('config/logs', ['title' => 'Bitácora de Acciones', 'logs' => $logs, 'page' => $page], 'admin');
+    }
+
+    public function clearLogs() {
+        $this->configModel->clearLogs();
+        $this->setFlash('success', 'Bitácora limpiada.');
+        $this->redirect('config/logs');
     }
 
     public function errors() {
@@ -123,15 +142,21 @@ class ConfigController extends Controller {
         $this->view('config/errors', ['title' => 'Monitor de Errores', 'errors' => $errors, 'page' => $page], 'admin');
     }
 
+    public function clearErrors() {
+        $this->configModel->clearErrors();
+        $this->setFlash('success', 'Log de errores limpiado.');
+        $this->redirect('config/errors');
+    }
+
     public function chatbot() {
         if ($this->isPost()) {
             foreach ($_POST as $key => $value) {
-                if ($key !== 'submit') $this->configModel->set($key, $value, 'chatbot');
+                if ($key !== 'submit') $this->configModel->set($key, $value);
             }
             $this->setFlash('success', 'Configuración del chatbot guardada.');
             $this->redirect('config/chatbot');
         }
-        $config = $this->configModel->getGroup('chatbot');
+        $config = $this->configModel->getAll();
         $this->view('config/chatbot', ['title' => 'Chatbot WhatsApp', 'config' => $config], 'admin');
     }
 }

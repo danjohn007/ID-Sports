@@ -1,24 +1,24 @@
 <?php
 class ConfigModel extends Model {
     public function get($key, $default = null) {
-        $row = $this->findOne("SELECT config_value FROM config WHERE config_key = ?", [$key]);
-        return $row ? $row['config_value'] : $default;
+        $row = $this->findOne("SELECT cfg_value FROM config WHERE cfg_key = ?", [$key]);
+        return $row ? $row['cfg_value'] : $default;
     }
 
-    public function set($key, $value, $group = 'general') {
-        $existing = $this->findOne("SELECT id FROM config WHERE config_key = ?", [$key]);
+    public function set($key, $value) {
+        $existing = $this->findOne("SELECT id FROM config WHERE cfg_key = ?", [$key]);
         if ($existing) {
-            $this->execute("UPDATE config SET config_value = ?, config_group = ? WHERE config_key = ?", [$value, $group, $key]);
+            $this->execute("UPDATE config SET cfg_value = ? WHERE cfg_key = ?", [$value, $key]);
         } else {
-            $this->execute("INSERT INTO config (config_key, config_value, config_group) VALUES (?, ?, ?)", [$key, $value, $group]);
+            $this->execute("INSERT INTO config (cfg_key, cfg_value) VALUES (?, ?)", [$key, $value]);
         }
     }
 
-    public function getGroup($group) {
-        $rows = $this->findAll("SELECT config_key, config_value FROM config WHERE config_group = ?", [$group]);
+    public function getAll() {
+        $rows = $this->findAll("SELECT cfg_key, cfg_value FROM config");
         $result = [];
         foreach ($rows as $row) {
-            $result[$row['config_key']] = $row['config_value'];
+            $result[$row['cfg_key']] = $row['cfg_value'];
         }
         return $result;
     }
@@ -31,11 +31,11 @@ class ConfigModel extends Model {
     }
 
     public function addIotDevice($data) {
-        $sql = "INSERT INTO iot_devices (club_id, name, device_type, ip_address, port, username, password, channel) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO iot_devices (club_id, name, device_type, ip_address, api_url, username, password) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
-            $data['club_id'], $data['name'], $data['device_type'],
-            $data['ip_address'], $data['port'] ?? 80,
-            $data['username'] ?? '', $data['password'] ?? '', $data['channel'] ?? 1
+            $data['club_id'] ?: null, $data['name'], $data['device_type'] ?? 'generic',
+            $data['ip_address'] ?? null, $data['api_url'] ?? null,
+            $data['username'] ?? '', $data['password'] ?? ''
         ]);
         return $this->lastInsertId();
     }
@@ -54,7 +54,7 @@ class ConfigModel extends Model {
     public function getLogs($page = 1, $perPage = 50) {
         $offset = ($page - 1) * $perPage;
         return $this->findAll(
-            "SELECT l.*, u.name as user_name FROM action_logs l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.created_at DESC LIMIT $perPage OFFSET $offset"
+            "SELECT * FROM action_logs ORDER BY created_at DESC LIMIT $perPage OFFSET $offset"
         );
     }
 
@@ -63,12 +63,20 @@ class ConfigModel extends Model {
         return $this->findAll("SELECT * FROM error_logs ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
     }
 
-    public function logAction($userId, $action, $description = '') {
+    public function logAction($userId, $action) {
         $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $name = $_SESSION['user_name'] ?? null;
         $this->execute(
-            "INSERT INTO action_logs (user_id, action, description, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)",
-            [$userId, $action, $description, $ip, $ua]
+            "INSERT INTO action_logs (user_id, user_name, action, ip_address) VALUES (?, ?, ?, ?)",
+            [$userId, $name, $action, $ip]
         );
+    }
+
+    public function clearLogs() {
+        $this->execute("DELETE FROM action_logs");
+    }
+
+    public function clearErrors() {
+        $this->execute("DELETE FROM error_logs");
     }
 }

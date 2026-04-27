@@ -20,11 +20,11 @@ class ClubModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO clubs (owner_id, name, description, address, city, state, phone, email, website, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO clubs (owner_id, name, description, address, whatsapp, commission_pct, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
             $data['owner_id'], $data['name'], $data['description'] ?? '',
-            $data['address'] ?? '', $data['city'] ?? 'Querétaro', $data['state'] ?? 'Querétaro',
-            $data['phone'] ?? '', $data['email'] ?? '', $data['website'] ?? '',
+            $data['address'] ?? '', $data['whatsapp'] ?? '',
+            $data['commission_pct'] ?? 10.00,
             $data['status'] ?? 'pending'
         ]);
         return $this->lastInsertId();

@@ -314,7 +314,7 @@ INSERT INTO `promotions` (`type`, `title`, `description`, `discount_percent`, `c
 ('coupon', 'Verano Deportivo', 'Descuento especial de verano en todas las canchas.', 10.00, 'VERANO10', '2024-06-01', '2025-08-31', 1);
 
 INSERT INTO `leads` (`name`, `email`, `whatsapp`, `message`, `status`) VALUES
-('Roberto Mendoza', 'roberto@gmai.com', '+524424000001', 'Me interesa registrar mi club de pádel en la plataforma.', 'new'),
+('Roberto Mendoza', 'roberto@gmail.com', '+524424000001', 'Me interesa registrar mi club de pádel en la plataforma.', 'new'),
 ('Club Deportivo Las Águilas', 'info@aguilas.mx', '+524424000002', 'Tenemos 5 canchas de tenis y queremos digitalizarnos.', 'contacted'),
 ('María Luisa Vega', 'mlvega@correo.mx', '+524424000003', 'Tengo una alberca y quiero ofrecer clases de natación.', 'new');
 

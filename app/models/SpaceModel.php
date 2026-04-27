@@ -62,7 +62,7 @@ class SpaceModel extends Model {
 
     public function getReservedSlots($spaceId, $date) {
         return $this->findAll(
-            "SELECT start_time, end_time FROM reservations WHERE space_id = ? AND date = ? AND status = 'active'",
+            "SELECT start_time, end_time FROM reservations WHERE space_id = ? AND date = ? AND status IN ('confirmed','pending')",
             [$spaceId, $date]
         );
     }
