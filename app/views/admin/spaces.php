@@ -61,13 +61,24 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Deporte</label>
                     <select name="sport_type" class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        <option value="football">Fútbol</option>
-                        <option value="padel">Pádel</option>
-                        <option value="tennis">Tenis</option>
-                        <option value="basketball">Básquetbol</option>
-                        <option value="volleyball">Voleibol</option>
-                        <option value="swimming">Natación</option>
-                        <option value="other">Otro</option>
+                        <?php
+                        try {
+                            $__sportTypes = (new SportTypeModel())->getAll();
+                        } catch (Exception $__e) {
+                            $__sportTypes = [
+                                ['slug'=>'football','name'=>'Fútbol'],
+                                ['slug'=>'padel','name'=>'Pádel'],
+                                ['slug'=>'tennis','name'=>'Tenis'],
+                                ['slug'=>'basketball','name'=>'Basketball'],
+                                ['slug'=>'volleyball','name'=>'Voleibol'],
+                                ['slug'=>'swimming','name'=>'Natación'],
+                                ['slug'=>'other','name'=>'Otro'],
+                            ];
+                        }
+                        foreach ($__sportTypes as $__st):
+                        ?>
+                        <option value="<?= htmlspecialchars($__st['slug']) ?>"><?= htmlspecialchars($__st['name']) ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div>

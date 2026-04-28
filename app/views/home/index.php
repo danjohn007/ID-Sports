@@ -1,26 +1,57 @@
 <?php
 /* ── Sport SVG icon helper ──────────────────────────────── */
+if (!function_exists('sportSvg')) {
 function sportSvg(string $type): string {
     $icons = [
-        'football'   => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3v3.5M12 20.5v-3m-5-11l2.5 3M16.5 6l-2.5 3M4.5 15l3-1.5m9 0l3 1.5" stroke="currentColor" stroke-width="1.4"/>',
-        'padel'      => '<rect x="4" y="8" width="11" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 11h2a2 2 0 012 2v0a2 2 0 01-2 2h-2" stroke="currentColor" stroke-width="1.8"/><line x1="8" y1="2" x2="11" y2="5" stroke="currentColor" stroke-width="1.8"/>',
-        'tennis'     => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12c0-3.3 2-6 4.5-6" stroke="currentColor" stroke-width="1.4"/><path d="M21 12c0 3.3-2 6-4.5 6" stroke="currentColor" stroke-width="1.4"/>',
-        'basketball' => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.4"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.4"/><path d="M5 5.5A12 12 0 0119 18.5" stroke="currentColor" stroke-width="1.4"/>',
-        'swimming'   => '<path d="M3 17c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M3 12c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="19" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 7l-4 4" stroke="currentColor" stroke-width="1.8"/>',
-        'volleyball' => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3c0 5 3 8 9 9" stroke="currentColor" stroke-width="1.4"/><path d="M12 21c0-5-3-8-9-9" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 8.5c5 1 8 4 8.5 10.5" stroke="currentColor" stroke-width="1.4"/>',
+        'football'      => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3v3.5M12 20.5v-3m-5-11l2.5 3M16.5 6l-2.5 3M4.5 15l3-1.5m9 0l3 1.5" stroke="currentColor" stroke-width="1.4"/>',
+        'football_sala' => '<rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="3" y1="12" x2="8" y2="12" stroke="currentColor" stroke-width="1.4"/><line x1="16" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.4"/>',
+        'futbol_7'      => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 8h3l-1.5 3H13l-3 5" stroke="currentColor" stroke-width="1.4" fill="none"/>',
+        'futbol_rapido' => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 8l6 4-6 4V8z" fill="currentColor"/>',
+        'padel'         => '<rect x="4" y="8" width="11" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 11h2a2 2 0 012 2v0a2 2 0 01-2 2h-2" stroke="currentColor" stroke-width="1.8"/><line x1="8" y1="2" x2="11" y2="5" stroke="currentColor" stroke-width="1.8"/>',
+        'tennis'        => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12c0-3.3 2-6 4.5-6" stroke="currentColor" stroke-width="1.4"/><path d="M21 12c0 3.3-2 6-4.5 6" stroke="currentColor" stroke-width="1.4"/>',
+        'basketball'    => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.4"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.4"/><path d="M5 5.5A12 12 0 0119 18.5" stroke="currentColor" stroke-width="1.4"/>',
+        'volleyball'    => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3c0 5 3 8 9 9" stroke="currentColor" stroke-width="1.4"/><path d="M12 21c0-5-3-8-9-9" stroke="currentColor" stroke-width="1.4"/>',
+        'swimming'      => '<path d="M3 17c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="19" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 7l-4 4" stroke="currentColor" stroke-width="1.8"/>',
+        'baseball'      => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 3.6C10 8 10 16 9 20.4M15 3.6C14 8 14 16 15 20.4" stroke="currentColor" stroke-width="1.2"/>',
+        'squash'        => '<rect x="4" y="10" width="9" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="11" y1="4" x2="8" y2="8" stroke="currentColor" stroke-width="1.8"/><circle cx="14" cy="9" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+        'badminton'     => '<line x1="4" y1="20" x2="12" y2="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8c2-3 6-6 6-6s-1 4-4 6" stroke="currentColor" stroke-width="1.4" fill="none"/>',
+        'gym'           => '<path d="M6 4v16M18 4v16M3 8h18M3 16h18" stroke="currentColor" stroke-width="1.8"/>',
+        'yoga'          => '<circle cx="12" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v6m-4 4s1-4 4-4 4 4 4 4" stroke="currentColor" stroke-width="1.8"/>',
+        'cycling'       => '<circle cx="7" cy="16" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="16" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 16l5-8 5 8" stroke="currentColor" stroke-width="1.4" fill="none"/>',
+        'handball'      => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+        'rugby'         => '<ellipse cx="12" cy="12" rx="9" ry="6" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+        'other'         => '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="currentColor" opacity=".5"/>',
     ];
-    return '<svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">' . ($icons[$type] ?? $icons['football']) . '</svg>';
+    return '<svg viewBox="0 0 24 24" width="26" height="26" xmlns="http://www.w3.org/2000/svg">' . ($icons[$type] ?? $icons['other']) . '</svg>';
+}
 }
 
-/* ── Sport accent-color map (uses --primary as base) ─────── */
-$sportAccents = [
-    'football'   => ['from'=>'#10b981','to'=>'#059669'],
-    'padel'      => ['from'=>'#3b82f6','to'=>'#1d4ed8'],
-    'tennis'     => ['from'=>'#f59e0b','to'=>'#d97706'],
-    'basketball' => ['from'=>'#f97316','to'=>'#ea580c'],
-    'swimming'   => ['from'=>'#06b6d4','to'=>'#0891b2'],
-    'volleyball' => ['from'=>'#8b5cf6','to'=>'#7c3aed'],
+/* ── Default sport accents (fallback pre-migration) ─────── */
+$sportAccentsFallback = [
+    'football'=>['from'=>'#10b981','to'=>'#059669'],'football_sala'=>['from'=>'#16a34a','to'=>'#15803d'],
+    'futbol_7'=>['from'=>'#22c55e','to'=>'#16a34a'],'futbol_rapido'=>['from'=>'#4ade80','to'=>'#22c55e'],
+    'padel'=>['from'=>'#3b82f6','to'=>'#1d4ed8'],'tennis'=>['from'=>'#f59e0b','to'=>'#d97706'],
+    'basketball'=>['from'=>'#f97316','to'=>'#ea580c'],'volleyball'=>['from'=>'#8b5cf6','to'=>'var(--secondary)'],
+    'swimming'=>['from'=>'#06b6d4','to'=>'#0891b2'],'baseball'=>['from'=>'#ef4444','to'=>'#dc2626'],
+    'squash'=>['from'=>'#a78bfa','to'=>'var(--secondary)'],'badminton'=>['from'=>'#fb923c','to'=>'#f97316'],
+    'gym'=>['from'=>'#64748b','to'=>'#475569'],'yoga'=>['from'=>'#ec4899','to'=>'#db2777'],
+    'cycling'=>['from'=>'#0ea5e9','to'=>'#0284c7'],'other'=>['from'=>'#94a3b8','to'=>'#64748b'],
 ];
+
+/* ── Build home sport list from DB or fallback ──────────── */
+$sportMap = !empty($sportTypeMap) ? $sportTypeMap : [];
+if (empty($sportMap)) {
+    $lblFallback = ['football'=>'Fútbol','football_sala'=>'Fútbol Sala','futbol_7'=>'Fútbol 7',
+                    'futbol_rapido'=>'Fútbol Rápido','padel'=>'Pádel','tennis'=>'Tenis',
+                    'basketball'=>'Basketball','volleyball'=>'Voleibol','swimming'=>'Natación',
+                    'baseball'=>'Béisbol','squash'=>'Squash','badminton'=>'Badminton',
+                    'gym'=>'Gimnasio','yoga'=>'Yoga','cycling'=>'Ciclismo','other'=>'Otro'];
+    foreach ($sportAccentsFallback as $s => $acc) {
+        $sportMap[$s] = ['slug'=>$s,'name'=>$lblFallback[$s] ?? ucfirst($s),
+                          'color_from'=>$acc['from'],'color_to'=>$acc['to'],'image_path'=>null];
+    }
+}
+$homeSports = array_values(array_slice($sportMap, 0, 8, true));
 ?>
 
 <style>
@@ -70,7 +101,7 @@ $sportAccents = [
     padding: 1.25rem 1.375rem;
     color: #fff;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     box-shadow: 0 8px 28px rgba(var(--primary-rgb), 0.35);
 }
 .today-card::before {
@@ -98,12 +129,12 @@ $sportAccents = [
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0.875rem 1.125rem;
-    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 1.125rem;
     border: 1px solid var(--border-gl);
     background: var(--bg-card);
     text-decoration: none;
-    min-width: 88px;
+    min-width: 96px;
     transition: all 140ms;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
@@ -120,23 +151,62 @@ $sportAccents = [
 }
 .day-pill .day-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
 .day-pill.active .day-label { color: rgba(255,255,255,0.8); }
-.day-pill .day-num { font-family: 'Jockey One', sans-serif; font-size: 1.875rem; color: var(--text-pri); line-height: 1.1; margin: 0.1rem 0; }
+.day-pill .day-num { font-family: 'Jockey One', sans-serif; font-size: 2rem; color: var(--text-pri); line-height: 1.05; margin: 0.1rem 0; }
 .day-pill.active .day-num { color: #fff; }
-.day-pill .day-avail { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
+.day-pill .day-avail { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
 .day-pill.active .day-avail { color: rgba(255,255,255,0.75); }
+
+/* ── Carousel wrapper ──────────────────────────────────── */
+.carousel-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+.carousel-track {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 4px 0 8px;
+    flex: 1;
+    min-width: 0;
+}
+.carousel-track > * { scroll-snap-align: start; }
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-track { -ms-overflow-style: none; scrollbar-width: none; }
+.carousel-btn {
+    flex-shrink: 0;
+    width: 2.125rem; height: 2.125rem;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-gl2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-sec);
+    transition: all 130ms;
+    z-index: 2;
+}
+.carousel-btn:hover { background: var(--bg-card-hover); color: var(--primary); border-color: rgba(var(--primary-rgb),0.4); }
+.carousel-btn.left  { margin-right: 0.375rem; }
+.carousel-btn.right { margin-left: 0.375rem; }
 
 /* ── Sport cards ───────────────────────────────────────── */
 .sport-card {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 0.5rem;
+    gap: 0.4rem;
+    padding: 0.625rem 0.5rem;
     border-radius: 0.875rem;
     text-decoration: none;
     border: 1px solid var(--border-gl);
     background: var(--bg-card);
     transition: all 150ms ease;
+    min-width: 78px;
+    max-width: 88px;
 }
 .sport-card:hover {
     border-color: rgba(var(--primary-rgb), 0.45);
@@ -144,18 +214,22 @@ $sportAccents = [
     box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.18);
 }
 .sport-icon-wrap {
-    width: 2.75rem; height: 2.75rem;
-    border-radius: 0.75rem;
+    width: 2.375rem; height: 2.375rem;
+    border-radius: 0.625rem;
     display: flex; align-items: center; justify-content: center;
     transition: transform 150ms;
+    overflow: hidden;
 }
-.sport-card:hover .sport-icon-wrap { transform: scale(1.1); }
+.sport-icon-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.sport-card:hover .sport-icon-wrap { transform: scale(1.08); }
 .sport-card span {
     font-family: 'Jockey One', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     text-align: center;
     color: var(--text-sec);
     line-height: 1.2;
+    word-break: break-word;
+    max-width: 80px;
 }
 
 /* ── Club cards ─────────────────────────────────────────── */
@@ -176,7 +250,7 @@ $sportAccents = [
 .club-cover { height: 7rem; position: relative; overflow: hidden; }
 .club-cover-placeholder {
     width: 100%; height: 100%;
-    background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     display: flex; align-items: center; justify-content: center;
     opacity: 0.7;
 }
@@ -369,52 +443,67 @@ $sportAccents = [
     </div>
     <?php endif; ?>
 
-    <!-- RF2.3 – 5-Day Quick Booking -->
+    <!-- RF2.3 – 5-Day Quick Booking (Carousel) -->
     <div class="home-section">
         <div class="home-section-header">
             <h2 class="home-section-title">Reservar por Día</h2>
             <a href="<?= BASE_URL ?>reservations/search" class="home-section-link">Ver todo &rarr;</a>
         </div>
-        <div style="display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:4px" class="no-scroll">
-            <?php foreach ($upcomingDays as $idx => $day): ?>
-            <a href="<?= BASE_URL ?>reservations/search?date=<?= $day['date'] ?>"
-               class="day-pill <?= $idx === 0 ? 'active' : '' ?>">
-                <span class="day-label"><?= $day['label'] ?></span>
-                <span class="day-num"><?= $day['day_num'] ?></span>
-                <span class="day-avail"><?= $day['available'] ?> libre<?= $day['available'] != 1 ? 's' : '' ?></span>
-            </a>
-            <?php endforeach; ?>
+        <div class="carousel-wrap">
+            <button class="carousel-btn left" onclick="scrollCarousel('dayTrack',-1)" aria-label="Anterior">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="carousel-track" id="dayTrack">
+                <?php foreach ($upcomingDays as $idx => $day): ?>
+                <a href="<?= BASE_URL ?>reservations/search?date=<?= $day['date'] ?>"
+                   class="day-pill <?= $idx === 0 ? 'active' : '' ?>">
+                    <span class="day-label"><?= $day['label'] ?></span>
+                    <span class="day-num"><?= $day['day_num'] ?></span>
+                    <span class="day-avail"><?= $day['available'] ?> libre<?= $day['available'] != 1 ? 's' : '' ?></span>
+                </a>
+                <?php endforeach; ?>
+            </div>
+            <button class="carousel-btn right" onclick="scrollCarousel('dayTrack',1)" aria-label="Siguiente">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
         </div>
     </div>
 
-    <!-- RF2.4 – Sport Categories -->
+    <!-- RF2.4 – Sport Categories (Carousel) -->
     <div class="home-section">
-        <h2 class="home-section-title" style="margin-bottom:0.875rem">Deportes</h2>
-        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.625rem">
-            <?php
-            $sports = [
-                ['key'=>'football',   'label'=>'Fútbol'],
-                ['key'=>'padel',      'label'=>'Pádel'],
-                ['key'=>'tennis',     'label'=>'Tenis'],
-                ['key'=>'basketball', 'label'=>'Basketball'],
-                ['key'=>'swimming',   'label'=>'Natación'],
-                ['key'=>'volleyball', 'label'=>'Voleibol'],
-            ];
-            ?>
-            <?php foreach ($sports as $sport):
-                $acc = $sportAccents[$sport['key']] ?? ['from'=>'var(--primary)','to'=>'#6366f1'];
-            ?>
-            <a href="<?= BASE_URL ?>reservations/search?sport=<?= $sport['key'] ?>" class="sport-card">
-                <div class="sport-icon-wrap"
-                     style="background:linear-gradient(135deg,<?= $acc['from'] ?>,<?= $acc['to'] ?>);color:#fff">
-                    <?= sportSvg($sport['key']) ?>
-                </div>
-                <span><?= $sport['label'] ?></span>
-            </a>
-            <?php endforeach; ?>
+        <div class="home-section-header">
+            <h2 class="home-section-title">Deportes</h2>
+            <a href="<?= BASE_URL ?>reservations/search" class="home-section-link">Ver todos &rarr;</a>
+        </div>
+        <div class="carousel-wrap">
+            <button class="carousel-btn left" onclick="scrollCarousel('sportTrack',-1)" aria-label="Anterior">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="carousel-track" id="sportTrack">
+                <?php foreach ($homeSports as $sport):
+                    $from = htmlspecialchars($sport['color_from'] ?? 'var(--primary)');
+                    $to   = htmlspecialchars($sport['color_to']   ?? 'var(--secondary)');
+                    $slug = htmlspecialchars($sport['slug']);
+                    $name = htmlspecialchars($sport['name']);
+                ?>
+                <a href="<?= BASE_URL ?>reservations/search?sport=<?= $slug ?>" class="sport-card">
+                    <div class="sport-icon-wrap"
+                         style="background:linear-gradient(135deg,<?= $from ?>,<?= $to ?>);color:#fff">
+                        <?php if (!empty($sport['image_path'])): ?>
+                        <img src="<?= BASE_URL . htmlspecialchars($sport['image_path']) ?>" alt="<?= $name ?>">
+                        <?php else: ?>
+                        <?= sportSvg($sport['slug']) ?>
+                        <?php endif; ?>
+                    </div>
+                    <span><?= $name ?></span>
+                </a>
+                <?php endforeach; ?>
+            </div>
+            <button class="carousel-btn right" onclick="scrollCarousel('sportTrack',1)" aria-label="Siguiente">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
         </div>
     </div>
-
     <!-- RF2.5 – Clubes Seguidos -->
     <div class="home-section">
         <div class="home-section-header">
@@ -675,4 +764,12 @@ function closeQrModal() {
 }
 
 /* ── Apply coupon ─────────────────────────────────────── */
+
+/* ── Carousel scroll helper ──────────────────────────── */
+function scrollCarousel(trackId, dir) {
+    var track = document.getElementById(trackId);
+    if (!track) return;
+    var itemW = track.firstElementChild ? track.firstElementChild.offsetWidth + 8 : 110;
+    track.scrollBy({ left: dir * itemW * 2, behavior: 'smooth' });
+}
 </script>

@@ -11,6 +11,15 @@ class HomeController extends Controller {
         $notifModel           = new NotificationModel();
         $membershipModel      = new ClubMembershipModel();
 
+        // Sport types from master list (RF2.4)
+        $sportTypeMap = [];
+        try {
+            $sportTypeMap = (new SportTypeModel())->getMap();
+        } catch (Exception $e) {
+            // table may not exist yet (migration not run) — fall back gracefully
+            $sportTypeMap = [];
+        }
+
         // Today's reservation (RF2.2)
         $todayReservation = $reservationModel->getTodayForUser($userId);
 
@@ -52,6 +61,7 @@ class HomeController extends Controller {
             'followedClubs'       => $followedClubs,
             'nearbyClubs'         => $nearbyClubs,
             'unreadNotifications' => $unreadNotifications,
+            'sportTypeMap'        => $sportTypeMap,
         ]);
     }
 
@@ -141,6 +151,7 @@ class HomeController extends Controller {
             'followedClubs'       => [],
             'nearbyClubs'         => [],
             'unreadNotifications' => 0,
+            'sportTypeMap'        => [],
         ]);
     }
 }

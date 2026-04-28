@@ -188,3 +188,46 @@ Migración: `database/migration_v3_mysql57.sql`
 ```bash
 mysql -u root -p id_sports < database/migration_v3_mysql57.sql
 ```
+
+---
+
+### v1.3 — Carruseles de Días/Deportes, Variable `--secondary`, Gestión de Deportes
+
+#### 🎠 Carruseles en el Home
+
+| Sección | Cambio |
+|---------|--------|
+| **Reservar por Día** | Convertido a carrusel horizontal con flechas prev/next; píldoras ampliadas (`min-width: 96px`, número en `2rem`) |
+| **Deportes** | Convertido a carrusel; tarjetas más compactas (`78–88 px`), centradas; cada deporte tiene su color distintivo; soporte para imagen PNG subida por Super Admin |
+
+#### 🎨 Variable CSS `--secondary`
+
+- `main.php` ahora expone `--secondary` y `--secondary-rgb` calculados desde `config.color_secondary`
+- Todos los degradados que antes usaban `#6366f1` hardcodeado ahora usan `var(--secondary)`, incluyendo: tarjeta "Reserva de Hoy", placeholder de cobertura de clubs, degradados de canchas en `/spaces/detail`, `/reservations/search`, `/clubs/detail`
+- El Super Admin puede cambiar el color secundario desde **Config → Colores** y el cambio se refleja en toda la aplicación al instante
+
+#### ⚽ Gestión de Tipos de Deporte (`/config/sports`)
+
+Nueva sección en el panel Super Admin:
+
+- **Lista maestra** de 20 deportes pre-cargada: Fútbol, Fútbol Sala, Fútbol 7, Fútbol Rápido, Pádel, Tenis, Basketball, Voleibol, Natación, Béisbol, Softbol, Squash, Badminton, Rugby, Handball, Gimnasio, Yoga/Pilates, CrossFit, Ciclismo Indoor, Otro
+- **Icono PNG**: cada deporte puede tener una imagen PNG/JPG/WEBP subida (≤ 1 MB) almacenada en `public/assets/sports/`; si no hay imagen se usa el SVG inline correspondiente
+- **Degradado editable**: color de inicio y fin del degradado de la tarjeta de cada deporte
+- **Activar/desactivar** deportes (ocultar del Home y buscador)
+- **Crear nuevos deportes** con validación de slug único
+
+#### 🗃️ Base de datos (MySQL 5.7 compatible)
+
+Migración: `database/migration_v4_sports.sql`
+
+- Crea tabla `sport_types` con: `id`, `slug`, `name`, `color_from`, `color_to`, `image_path`, `sort_order`, `is_active`
+- Pre-carga los 20 deportes usando `INSERT IGNORE` (idempotente)
+- No requiere `ADD COLUMN IF NOT EXISTS` — 100% MySQL 5.7 compatible
+
+```bash
+mysql -u root -p id_sports < database/migration_v4_sports.sql
+```
+
+#### 📋 Dropdown de deporte en admin de canchas
+
+El select de `sport_type` en la pantalla de administración de canchas ahora carga dinámicamente desde `sport_types`, con fallback estático si la migración aún no se ha ejecutado.

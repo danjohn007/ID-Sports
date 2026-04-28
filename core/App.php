@@ -64,6 +64,8 @@ class App {
             'config/remove-logo'         => ['ConfigController', 'removeLogo'],
             'config/upload-slide-image'  => ['ConfigController', 'uploadSlideImage'],
             'config/remove-slide-image'  => ['ConfigController', 'removeSlideImage'],
+            'config/sports'              => ['ConfigController', 'sports'],
+            'config/upload-sport-image'  => ['ConfigController', 'uploadSportImage'],
             'config/paypal' => ['ConfigController', 'paypal'],
             'config/qr' => ['ConfigController', 'qr'],
             'config/iot' => ['ConfigController', 'iot'],

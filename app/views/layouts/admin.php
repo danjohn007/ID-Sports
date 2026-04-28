@@ -47,6 +47,10 @@
         <a href="<?= BASE_URL ?>config/general" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700 transition-colors text-gray-300 hover:text-white">⚙️ General</a>
         <a href="<?= BASE_URL ?>config/email" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700 transition-colors text-gray-300 hover:text-white">📧 Email SMTP</a>
         <a href="<?= BASE_URL ?>config/colors" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700 transition-colors text-gray-300 hover:text-white">🎨 Colores</a>
+        <a href="<?= BASE_URL ?>config/sports" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700 transition-colors text-gray-300 hover:text-white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v3.5M12 20.5v-3"/></svg>
+            Deportes
+        </a>
         <a href="<?= BASE_URL ?>config/onboarding" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700 transition-colors text-gray-300 hover:text-white">🎬 Onboarding</a>
         <a href="<?= BASE_URL ?>config/paypal" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700 transition-colors text-gray-300 hover:text-white">💳 PayPal</a>
         <a href="<?= BASE_URL ?>config/qr" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700 transition-colors text-gray-300 hover:text-white">📷 API QR</a>

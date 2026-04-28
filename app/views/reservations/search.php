@@ -235,7 +235,7 @@ $sportAccents = [
     <p class="count-label"><?= htmlspecialchars($listLabel) ?></p>
     <div class="space-grid">
         <?php foreach ($list as $space):
-            $acc = $sportAccents[$space['sport_type']] ?? ['a'=>'var(--primary)','b'=>'#6366f1'];
+            $acc = $sportAccents[$space['sport_type']] ?? ['a'=>'var(--primary)','b'=>'var(--secondary)'];
         ?>
         <div class="space-card">
             <div class="space-hero" style="background:linear-gradient(135deg,<?= $acc['a'] ?>,<?= $acc['b'] ?>)">

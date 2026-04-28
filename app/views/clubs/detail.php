@@ -113,7 +113,7 @@ function clubSportSvg(string $type, int $size = 32): string {
 <div style="max-width:100%">
 
     <!-- Hero / Cover -->
-    <div style="position:relative;height:13rem;border-radius:1.25rem;overflow:hidden;margin-bottom:1rem;background:linear-gradient(135deg,var(--primary),#6366f1);display:flex;align-items:center;justify-content:center">
+    <div style="position:relative;height:13rem;border-radius:1.25rem;overflow:hidden;margin-bottom:1rem;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center">
         <?php if (!empty($club['cover_image'])): ?>
         <img src="<?= htmlspecialchars($club['cover_image']) ?>" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" alt="">
         <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35)"></div>
@@ -196,7 +196,7 @@ function clubSportSvg(string $type, int $size = 32): string {
                 Canchas disponibles
             </h2>
             <?php foreach ($byType as $sportType => $sportSpaces): ?>
-            <?php $acc = $sportAccentsClub[$sportType] ?? ['a'=>'var(--primary)','b'=>'#6366f1']; ?>
+            <?php $acc = $sportAccentsClub[$sportType] ?? ['a'=>'var(--primary)','b'=>'var(--secondary)']; ?>
             <div style="margin-bottom:1.25rem">
                 <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.625rem">
                     <div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,<?= $acc['a'] ?>,<?= $acc['b'] ?>);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0">

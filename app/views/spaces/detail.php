@@ -127,7 +127,7 @@ $sportAccentsDet = [
     'swimming'   => ['a'=>'#06b6d4','b'=>'#0891b2'],
     'volleyball' => ['a'=>'#8b5cf6','b'=>'#7c3aed'],
 ];
-$acc = $sportAccentsDet[$space['sport_type'] ?? 'football'] ?? ['a'=>'var(--primary)','b'=>'#6366f1'];
+$acc = $sportAccentsDet[$space['sport_type'] ?? 'football'] ?? ['a'=>'var(--primary)','b'=>'var(--secondary)'];
 
 function detSportSvg(string $type, int $size = 80): string {
     $icons = [

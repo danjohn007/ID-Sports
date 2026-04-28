@@ -15,6 +15,7 @@
         try { $cfg = (new ConfigModel())->getAll(); } catch (Exception $e) { $cfg = []; }
     }
     $primaryColor      = $cfg['color_primary']      ?? '#0EA5E9';
+    $secondaryColor    = $cfg['color_secondary']    ?? '#6366f1';
     $lightPrimaryColor = $cfg['color_light_primary'] ?? $primaryColor;
     $logoPath = $cfg['app_logo_path'] ?? '';
     $logoSrc  = $logoPath ? BASE_URL . htmlspecialchars($logoPath) : BASE_URL . 'public/assets/logo.svg';
@@ -25,6 +26,10 @@
     $r = hexdec(substr($hex,0,2)); $g = hexdec(substr($hex,2,2)); $b = hexdec(substr($hex,4,2));
     $primaryGlow  = "rgba($r,$g,$b,0.22)";
     $primaryGlow5 = "rgba($r,$g,$b,0.09)";
+
+    $shex = ltrim($secondaryColor, '#');
+    if (strlen($shex) === 3) $shex = $shex[0].$shex[0].$shex[1].$shex[1].$shex[2].$shex[2];
+    $sr = hexdec(substr($shex,0,2)); $sg = hexdec(substr($shex,2,2)); $sb = hexdec(substr($shex,4,2));
 
     $lhex = ltrim($lightPrimaryColor, '#');
     if (strlen($lhex) === 3) $lhex = $lhex[0].$lhex[0].$lhex[1].$lhex[1].$lhex[2].$lhex[2];
@@ -37,6 +42,8 @@
             --primary-rgb:    <?= $r ?>,<?= $g ?>,<?= $b ?>;
             --primary-glow:   <?= $primaryGlow ?>;
             --primary-glow5:  <?= $primaryGlow5 ?>;
+            --secondary:      <?= htmlspecialchars($secondaryColor) ?>;
+            --secondary-rgb:  <?= $sr ?>,<?= $sg ?>,<?= $sb ?>;
             --bg-deep:        #060B19;
             --bg-mid:         #0D1117;
             --bg-card:        rgba(15, 18, 30, 0.85);
