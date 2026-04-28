@@ -9,10 +9,11 @@ class UserModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO users (name, email, password, whatsapp, birth_date, role) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO users (name, email, password, whatsapp, state, birth_date, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
             $data['name'], $data['email'], $data['password'],
-            $data['whatsapp'] ?? null, $data['birth_date'] ?? null, $data['role'] ?? 'user'
+            $data['whatsapp'] ?? null, $data['state'] ?? null,
+            $data['birth_date'] ?? null, $data['role'] ?? 'user'
         ]);
         return $this->lastInsertId();
     }

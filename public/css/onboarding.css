@@ -1,0 +1,233 @@
+/* ============================================================
+   ID Sports — Onboarding Carousel
+   Design System: Glassmorphism · Primary-Accent-Only · WCAG AA
+   Fonts: Jockey One (titles) + Poppins (body)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Jockey+One&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root { --primary-color: #0EA5E9; }
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #060B19;
+    font-family: 'Poppins', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Wrapper ────────────────────────────────────────────── */
+.ob-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── Slides track ───────────────────────────────────────── */
+.ob-slides {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    will-change: transform;
+    transition: transform .55s cubic-bezier(.4,0,.2,1);
+}
+
+.ob-slide {
+    width: 33.3333%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+
+/* ── Slide background ───────────────────────────────────── */
+.ob-slide-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-color: #060B19;
+}
+
+.ob-slide-bg-1 { background: linear-gradient(160deg, #060B19 0%, #0D1117 50%, #0f2744 100%); }
+.ob-slide-bg-2 { background: linear-gradient(160deg, #060B19 0%, #0d1b2a 40%, #0f3460 100%); }
+.ob-slide-bg-3 { background: linear-gradient(160deg, #060B19 0%, #0d2014 40%, #0d3320 100%); }
+
+/* Bottom gradient — only covers bottom 30% to fade content into controls */
+.ob-slide-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+        rgba(6,11,25,0.97) 0%,
+        rgba(6,11,25,0.80) 20%,
+        rgba(6,11,25,0.15) 55%,
+        transparent 100%
+    );
+}
+
+/* Primary-color radial glow (accent, injected via --primary-color) */
+.ob-slide-bg-glow {
+    position: absolute;
+    width: 70%;
+    padding-top: 70%;
+    border-radius: 50%;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, var(--primary-color), transparent 70%);
+    opacity: 0.12;
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ── Slide content ──────────────────────────────────────── */
+/* padding-bottom must clear the controls panel (~210px) */
+.ob-slide-content {
+    position: relative;
+    z-index: 2;
+    padding: 36px 32px 230px;   /* 230px clears the fixed controls area */
+}
+
+.ob-slide-title {
+    font-family: 'Jockey One', sans-serif;
+    font-size: clamp(2.25rem, 8vw, 3rem);
+    color: #FFFFFF;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 16px rgba(0,0,0,.5);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.ob-slide-desc {
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255,255,255,.75);   /* increased from .6 → .75 for better legibility */
+    line-height: 1.7;
+    max-width: 360px;
+}
+
+/* ── Controls (fixed bottom — glassmorphism panel) ──────── */
+.ob-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    padding: 24px 28px 48px;
+    /* Glassmorphism panel */
+    background: rgba(6,11,25, 0.75);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    box-shadow: 0 -8px 40px rgba(0,0,0,.45);
+}
+
+/* ── Dots ───────────────────────────────────────────────── */
+.ob-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.ob-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,.2);
+    transition: width .35s cubic-bezier(.4,0,.2,1), background .35s;
+    cursor: pointer;
+}
+
+.ob-dot.active {
+    width: 28px;
+    background: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* ── CTA button (primary accent — always white text) ────── */
+.ob-btn {
+    width: 100%;
+    padding: 17px;
+    border: none;
+    border-radius: 16px;
+    background: var(--primary-color);
+    color: #FFFFFF !important;   /* WCAG: force white regardless of accent */
+    font-size: 1.0625rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: filter .2s, transform .1s, box-shadow .2s;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    max-width: 500px;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,.4);
+}
+
+.ob-btn:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+}
+.ob-btn:active { transform: scale(.97) translateY(0); }
+
+/* ── Skip link ──────────────────────────────────────────── */
+.ob-skip {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    color: rgba(255,255,255,.4);
+    font-size: 0.875rem;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color .2s;
+    letter-spacing: .02em;
+}
+
+.ob-skip:hover { color: rgba(255,255,255,.7); }
+
+/* ── Logo (fixed top-left — glassmorphism) ──────────────── */
+.ob-logo {
+    position: fixed;
+    top: 22px;
+    left: 22px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 50px;
+    background: rgba(255,255,255, 0.07);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255,255,255, 0.12);
+    text-decoration: none;
+    transition: background .2s;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+
+.ob-logo:hover { background: rgba(255,255,255, 0.11); }
+
+.ob-logo img {
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.ob-logo span {
+    color: #fff;
+    font-family: 'Jockey One', sans-serif;
+    font-size: 0.9375rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}

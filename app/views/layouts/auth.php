@@ -4,84 +4,194 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($title ?? 'ID Sports') ?> — <?= APP_NAME ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jockey+One&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/auth.css">
     <?php
-    // Load login color config
-    $loginColors = [];
+    $cfg = [];
     if (class_exists('ConfigModel')) {
-        try {
-            $cfgModel = new ConfigModel();
-            $loginColors = $cfgModel->getAll();
-        } catch (Exception $e) {
-            $loginColors = [];
-        }
+        try { $cfg = (new ConfigModel())->getAll(); } catch (Exception $e) { $cfg = []; }
     }
-    $loginBtnColor   = $loginColors['color_login_button']  ?? '#0EA5E9';
-    $loginLinkColor  = $loginColors['color_login_link']    ?? '#0EA5E9';
-    $loginLogoBg     = $loginColors['color_login_logo_bg'] ?? '#0EA5E9';
+    $primaryColor      = $cfg['color_primary']       ?? '#0EA5E9';
+    $lightPrimaryColor = $cfg['color_light_primary']  ?? $primaryColor;
+    $btnColor          = $cfg['color_login_button']   ?? $primaryColor;
+    $authBgImage       = $cfg['auth_bg_image']        ?? '';
+    $logoPath          = $cfg['app_logo_path']         ?? '';
+    $logoSrc           = $logoPath ? BASE_URL . htmlspecialchars($logoPath) : BASE_URL . 'public/assets/logo.svg';
+    $appName           = defined('APP_NAME') ? APP_NAME : 'ID Sports';
+
+    // Compute primary-color rgba variants for CSS variables (so gradient reacts to admin color)
+    $hex = ltrim($primaryColor, '#');
+    if (strlen($hex) === 3) { $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2]; }
+    $r = hexdec(substr($hex,0,2)); $g = hexdec(substr($hex,2,2)); $b = hexdec(substr($hex,4,2));
+    $primaryGlow  = "rgba($r,$g,$b,0.22)";
+    $primaryGlowLight = "rgba($r,$g,$b,0.09)";
+
+    // Compute light-mode primary rgba variants
+    $lhex = ltrim($lightPrimaryColor, '#');
+    if (strlen($lhex) === 3) { $lhex = $lhex[0].$lhex[0].$lhex[1].$lhex[1].$lhex[2].$lhex[2]; }
+    $lr = hexdec(substr($lhex,0,2)); $lg = hexdec(substr($lhex,2,2)); $lb = hexdec(substr($lhex,4,2));
+    $lightPrimaryGlow  = "rgba($lr,$lg,$lb,0.20)";
+    $lightPrimaryGlow5 = "rgba($lr,$lg,$lb,0.09)";
     ?>
     <style>
-        body { font-family: 'Inter', sans-serif; }
         :root {
-            --login-btn-color:  <?= htmlspecialchars($loginBtnColor) ?>;
-            --login-link-color: <?= htmlspecialchars($loginLinkColor) ?>;
-            --login-logo-bg:    <?= htmlspecialchars($loginLogoBg) ?>;
+            --primary:        <?= htmlspecialchars($primaryColor) ?>;
+            --btn-color:      <?= htmlspecialchars($btnColor) ?>;
+            --primary-glow:   <?= $primaryGlow ?>;
+            --primary-glow5:  <?= $primaryGlowLight ?>;
         }
-        .login-logo-bg { background-color: var(--login-logo-bg); }
-        .login-btn {
-            background-color: var(--login-btn-color);
-            color: #ffffff;
-            width: 100%;
-            font-weight: 600;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            transition: filter 150ms;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
+        /* Light mode overrides the primary accent to the admin-configured light color */
+        html[data-theme="light"] {
+            --primary:       <?= htmlspecialchars($lightPrimaryColor) ?>;
+            --btn-color:     <?= htmlspecialchars($lightPrimaryColor) ?>;
+            --primary-glow:  <?= $lightPrimaryGlow ?>;
+            --primary-glow5: <?= $lightPrimaryGlow5 ?>;
         }
-        .login-btn:hover { filter: brightness(0.9); }
-        .login-link { color: var(--login-link-color); font-weight: 600; }
-        .login-link:hover { filter: brightness(0.8); }
     </style>
+    <?php if (($currentPage ?? '') === 'login'): ?>
+    <script>
+        // Redirect to onboarding if not yet seen (hide flash to prevent layout flash)
+        if (!localStorage.getItem('ids_onboarding_seen')) {
+            document.documentElement.style.visibility = 'hidden';
+            window.location.replace('<?= BASE_URL ?>auth/onboarding');
+        }
+    </script>
+    <?php endif; ?>
+    <!-- Apply theme immediately to avoid flash -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('auth_theme');
+            if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+        }());
+    </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-violet-50 flex items-center justify-center p-4">
+<body class="auth-page">
 
+<!-- ── Background ─────────────────────────────────────── -->
+<div class="auth-bg" <?php if ($authBgImage): ?>style="background-image:url('<?= htmlspecialchars($authBgImage) ?>')"<?php endif; ?>>
+    <?php if (!$authBgImage): ?><div class="auth-bg-default"></div><?php endif; ?>
+    <!-- Giant "ID SPORTS" watermark — Jockey One, primary color glow, breathing pulse -->
+    <div class="auth-bg-title"><?= htmlspecialchars($appName) ?></div>
+</div>
+
+<!-- ── Logo ───────────────────────────────────────────── -->
+<div class="auth-logo">
+    <a href="<?= BASE_URL ?>" class="auth-logo-icon">
+        <img src="<?= $logoSrc ?>" alt="<?= htmlspecialchars($appName) ?>">
+        <span><?= htmlspecialchars($appName) ?></span>
+    </a>
+</div>
+
+<!-- ── Flash message ──────────────────────────────────── -->
 <?php if (!empty($_SESSION['flash'])): ?>
-<div id="flash-msg" class="fixed top-4 right-4 z-50 max-w-sm w-full">
-    <div class="rounded-2xl p-4 shadow-lg <?= $_SESSION['flash']['type'] === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800' ?> flex items-center gap-3">
-        <span class="text-xl"><?= $_SESSION['flash']['type'] === 'success' ? '✅' : '❌' ?></span>
-        <p class="text-sm font-medium"><?= htmlspecialchars($_SESSION['flash']['message']) ?></p>
-        <button onclick="this.closest('#flash-msg').remove()" class="ml-auto text-gray-400 hover:text-gray-600">✕</button>
-    </div>
+<div id="auth-flash" class="auth-flash <?= $_SESSION['flash']['type'] === 'success' ? 'success' : 'error' ?>">
+    <span><?= $_SESSION['flash']['type'] === 'success' ? '✅' : '❌' ?></span>
+    <p><?= htmlspecialchars($_SESSION['flash']['message']) ?></p>
+    <button class="auth-flash-close" onclick="this.closest('.auth-flash').remove()">✕</button>
 </div>
 <?php unset($_SESSION['flash']); endif; ?>
 
-<div class="w-full max-w-md">
-    <div class="text-center mb-8">
-        <a href="<?= BASE_URL ?>">
-            <span class="login-logo-bg inline-flex items-center gap-3 px-6 py-3 rounded-2xl mx-auto mb-4">
-                <img src="<?= BASE_URL ?>public/assets/logo.svg" alt="ID Sports" class="h-9" style="filter:brightness(0) invert(1);">
-                <span class="text-white font-bold text-lg tracking-wide">ID SPORTS</span>
-            </span>
-        </a>
-        <h1 class="text-2xl font-bold text-gray-900"><?= htmlspecialchars($title ?? '') ?></h1>
-    </div>
-
-    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+<!-- ── Bottom Sheet ───────────────────────────────────── -->
+<div class="auth-sheet">
+    <div class="auth-sheet-inner">
+        <div class="auth-sheet-handle"></div>
         <?= $content ?>
+        <p class="auth-copyright">
+            © <?= date('Y') ?> <?= htmlspecialchars($appName) ?> v<?= APP_VERSION ?>
+        </p>
     </div>
-
-    <p class="text-center text-xs text-gray-400 mt-6">© <?= date('Y') ?> <?= APP_NAME ?> v<?= APP_VERSION ?></p>
 </div>
 
+<!-- ── Theme toggle button ─────────────────────────────── -->
+<button class="auth-theme-toggle" id="authThemeToggle" title="Cambiar tema claro/oscuro">🌙</button>
+
 <script>
-    setTimeout(() => {
-        const f = document.getElementById('flash-msg');
-        if (f) f.remove();
-    }, 5000);
+    document.documentElement.style.visibility = 'visible';
+    // Auto-dismiss flash after 5 s
+    (function () {
+        var f = document.getElementById('auth-flash');
+        if (!f) return;
+        setTimeout(function () {
+            f.style.opacity = '0';
+            f.style.transition = 'opacity .5s';
+            setTimeout(function () { if (f) f.remove(); }, 500);
+        }, 5000);
+    }());
+
+    /* ── Theme toggle ──────────────────────────────────── */
+    (function () {
+        var btn  = document.getElementById('authThemeToggle');
+        var html = document.documentElement;
+        function applyTheme(t) {
+            if (t === 'light') {
+                html.setAttribute('data-theme', 'light');
+                btn.textContent = '☀️';
+            } else {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌙';
+            }
+        }
+        // Init from stored preference
+        applyTheme(localStorage.getItem('auth_theme') || 'dark');
+
+        btn.addEventListener('click', function () {
+            var current = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            var next    = current === 'light' ? 'dark' : 'light';
+            localStorage.setItem('auth_theme', next);
+            applyTheme(next);
+        });
+    }());
+
+    /* ── JS-generated starfield + sport particles ──────── */
+    (function createStarfield() {
+        var bg = document.querySelector('.auth-bg');
+        if (!bg) return;
+
+        var container = document.createElement('div');
+        container.className = 'auth-starfield';
+
+        var sportEmojis = ['⚽','🏀','🎾','🏊','🏋️','🎯','🏐','🥊','🏆','⚡',
+                           '🥅','🏈','🏒','🥋','🎱','🏓','🏸','🤿','🛹','🏄'];
+        var driftDurations = [18,22,20,25,19,23,21,17,24,20,
+                               16,26,18,22,20,24,19,21,23,17];
+        var driftDelays    = [0,2,5,1,7,3,9,4,6,11,
+                               1,8,3,10,5,2,7,4,9,6];
+
+        // 55 tiny star dots — pure CSS animation, no JS loop
+        for (var i = 0; i < 55; i++) {
+            var star = document.createElement('span');
+            star.className = 'auth-star';
+            var size = 1 + Math.random() * 2.8;
+            star.style.cssText = [
+                'left:'               + (Math.random() * 100) + '%',
+                'top:'                + (Math.random() * 100) + '%',
+                'width:'              + size.toFixed(2) + 'px',
+                'height:'             + size.toFixed(2) + 'px',
+                'animation-delay:'    + (Math.random() * 14).toFixed(2) + 's',
+                'animation-duration:' + (3 + Math.random() * 8).toFixed(2) + 's',
+            ].join(';');
+            container.appendChild(star);
+        }
+
+        // 20 sport emoji particles — positioned randomly like a starfield
+        for (var j = 0; j < 20; j++) {
+            var p = document.createElement('span');
+            p.className = 'auth-particle';
+            p.textContent = sportEmojis[j];
+            var driftN = (j % 10) + 1;
+            p.style.cssText = [
+                'position:absolute',
+                'left:'               + (2 + Math.random() * 90).toFixed(1) + '%',
+                'top:'                + (2 + Math.random() * 88).toFixed(1) + '%',
+                'animation:drift-'    + driftN + ' ' + driftDurations[j] + 's ease-in-out infinite ' + driftDelays[j] + 's',
+            ].join(';');
+            container.appendChild(p);
+        }
+
+        // Insert starfield as first child of .auth-bg
+        bg.insertBefore(container, bg.firstChild);
+    }());
 </script>
 </body>
 </html>

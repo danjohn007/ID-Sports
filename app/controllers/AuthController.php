@@ -6,6 +6,54 @@ class AuthController extends Controller {
         $this->userModel = new UserModel();
     }
 
+    /* ── Onboarding splash (served before login) ─────────── */
+    public function onboarding() {
+        // Already logged in → go to their dashboard
+        if (isset($_SESSION['user_id'])) {
+            $this->redirectByRole($_SESSION['user_role']);
+        }
+
+        $cfg = [];
+        try { $cfg = (new ConfigModel())->getAll(); } catch (Exception $e) { $cfg = []; }
+
+        $primaryColor = $cfg['color_primary']      ?? '#0EA5E9';
+        $btnColor     = $cfg['color_login_button'] ?? $primaryColor;
+
+        $slides = [
+            [
+                'title' => $cfg['onboarding_slide1_title'] ?? 'Encuentra tu cancha ideal',
+                'desc'  => $cfg['onboarding_slide1_desc']  ?? 'Busca y reserva espacios deportivos cerca de ti, en tiempo real.',
+                'image' => $cfg['onboarding_slide1_image'] ?? '',
+                'icon'  => '🏟️',
+            ],
+            [
+                'title' => $cfg['onboarding_slide2_title'] ?? 'Reserva y accede sin filas',
+                'desc'  => $cfg['onboarding_slide2_desc']  ?? 'Tu código QR te da acceso inmediato a la cancha reservada.',
+                'image' => $cfg['onboarding_slide2_image'] ?? '',
+                'icon'  => '📲',
+            ],
+            [
+                'title' => $cfg['onboarding_slide3_title'] ?? 'Juega con la comunidad',
+                'desc'  => $cfg['onboarding_slide3_desc']  ?? 'Conecta con deportistas de tu ciudad y forma tu equipo.',
+                'image' => $cfg['onboarding_slide3_image'] ?? '',
+                'icon'  => '🤝',
+            ],
+        ];
+
+        // Render standalone (no layout)
+        $logoPath = $cfg['app_logo_path'] ?? '';
+        $logoSrc  = $logoPath ? BASE_URL . $logoPath : BASE_URL . 'public/assets/logo.svg';
+        $appName  = defined('APP_NAME') ? APP_NAME : 'ID Sports';
+
+        $this->view('auth/onboarding', [
+            'slides'   => $slides,
+            'btnColor' => $btnColor,
+            'baseUrl'  => BASE_URL,
+            'logoSrc'  => $logoSrc,
+            'appName'  => $appName,
+        ], false);
+    }
+
     public function login() {
         if (isset($_SESSION['user_id'])) {
             $this->redirectByRole($_SESSION['user_role']);
@@ -13,7 +61,7 @@ class AuthController extends Controller {
 
         $error = '';
         if ($this->isPost()) {
-            $email = $this->post('email');
+            $email    = $this->post('email');
             $password = $this->post('password');
 
             if (empty($email) || empty($password)) {
@@ -24,12 +72,12 @@ class AuthController extends Controller {
                     if ($user['status'] !== 'active') {
                         $error = 'Tu cuenta está suspendida o inactiva.';
                     } else {
-                        $_SESSION['user_id'] = $user['id'];
-                        $_SESSION['user_name'] = $user['name'];
-                        $_SESSION['user_email'] = $user['email'];
-                        $_SESSION['user_role'] = $user['role'];
+                        $_SESSION['user_id']     = $user['id'];
+                        $_SESSION['user_name']   = $user['name'];
+                        $_SESSION['user_email']  = $user['email'];
+                        $_SESSION['user_role']   = $user['role'];
                         $_SESSION['user_avatar'] = $user['avatar'];
-                        $_SESSION['dark_mode'] = $user['dark_mode'];
+                        $_SESSION['dark_mode']   = $user['dark_mode'];
                         $this->setFlash('success', '¡Bienvenido, ' . $user['name'] . '!');
                         $this->redirectByRole($user['role']);
                     }
@@ -39,7 +87,11 @@ class AuthController extends Controller {
             }
         }
 
-        $this->view('auth/login', ['error' => $error, 'title' => 'Iniciar Sesión'], 'auth');
+        $this->view('auth/login', [
+            'error'       => $error,
+            'title'       => 'Iniciar Sesión',
+            'currentPage' => 'login',
+        ], 'auth');
     }
 
     public function register() {
@@ -49,26 +101,28 @@ class AuthController extends Controller {
 
         $error = '';
         if ($this->isPost()) {
-            $name = $this->post('name');
-            $email = $this->post('email');
-            $password = $this->post('password');
+            $name             = $this->post('name');
+            $email            = $this->post('email');
+            $password         = $this->post('password');
             $password_confirm = $this->post('password_confirm');
-            $whatsapp = $this->post('whatsapp');
+            $whatsapp         = $this->post('whatsapp');
+            $state            = $this->post('state');
 
             if (empty($name) || empty($email) || empty($password)) {
                 $error = 'Por favor completa todos los campos requeridos.';
             } elseif ($password !== $password_confirm) {
                 $error = 'Las contraseñas no coinciden.';
-            } elseif (strlen($password) < 6) {
-                $error = 'La contraseña debe tener al menos 6 caracteres.';
+            } elseif (strlen($password) < 8) {
+                $error = 'La contraseña debe tener al menos 8 caracteres.';
             } elseif ($this->userModel->findByEmail($email)) {
                 $error = 'Este email ya está registrado.';
             } else {
                 $this->userModel->create([
-                    'name' => $name,
-                    'email' => $email,
+                    'name'     => $name,
+                    'email'    => $email,
                     'password' => password_hash($password, PASSWORD_DEFAULT),
                     'whatsapp' => $whatsapp,
+                    'state'    => $state,
                 ]);
                 $this->setFlash('success', 'Cuenta creada exitosamente. ¡Inicia sesión!');
                 $this->redirect('auth/login');
@@ -79,11 +133,11 @@ class AuthController extends Controller {
     }
 
     public function forgot() {
-        $error = '';
+        $error   = '';
         $success = '';
         if ($this->isPost()) {
             $email = $this->post('email');
-            $user = $this->userModel->findByEmail($email);
+            $user  = $this->userModel->findByEmail($email);
             if (!$user) {
                 $error = 'No encontramos una cuenta con ese email.';
             } else {
@@ -94,25 +148,33 @@ class AuthController extends Controller {
                 $success = 'Código OTP enviado. Revisa tu correo o WhatsApp para continuar.';
             }
         }
-        $this->view('auth/forgot', ['error' => $error, 'success' => $success, 'title' => 'Recuperar Contraseña'], 'auth');
+        $this->view('auth/forgot', [
+            'error'   => $error,
+            'success' => $success,
+            'title'   => 'Recuperar Contraseña',
+        ], 'auth');
     }
 
     public function reset() {
         $error = '';
         if ($this->isPost()) {
-            $email = $_SESSION['otp_email'] ?? $this->post('email');
-            $code = $this->post('code');
-            $password = $this->post('password');
+            $email            = $_SESSION['otp_email'] ?? $this->post('email');
+            $code             = $this->post('code');
+            $password         = $this->post('password');
             $password_confirm = $this->post('password_confirm');
 
-            if ($password !== $password_confirm) {
+            if (strlen($password) < 8) {
+                $error = 'La contraseña debe tener al menos 8 caracteres.';
+            } elseif ($password !== $password_confirm) {
                 $error = 'Las contraseñas no coinciden.';
             } else {
                 $otp = $this->userModel->verifyOtp($email, $code);
                 if (!$otp) {
                     $error = 'Código inválido o expirado.';
                 } else {
-                    $this->userModel->update($otp['user_id'], ['password' => password_hash($password, PASSWORD_DEFAULT)]);
+                    $this->userModel->update($otp['user_id'], [
+                        'password' => password_hash($password, PASSWORD_DEFAULT),
+                    ]);
                     $this->userModel->markOtpUsed($otp['id']);
                     unset($_SESSION['otp_email']);
                     $this->setFlash('success', 'Contraseña actualizada. ¡Inicia sesión!');
@@ -121,7 +183,11 @@ class AuthController extends Controller {
             }
         }
         $email = $_SESSION['otp_email'] ?? '';
-        $this->view('auth/reset', ['error' => $error, 'email' => $email, 'title' => 'Restablecer Contraseña'], 'auth');
+        $this->view('auth/reset', [
+            'error' => $error,
+            'email' => $email,
+            'title' => 'Restablecer Contraseña',
+        ], 'auth');
     }
 
     public function logout() {
@@ -135,9 +201,9 @@ class AuthController extends Controller {
     private function redirectByRole($role) {
         switch ($role) {
             case 'super_admin': $this->redirect('superadmin/dashboard'); break;
-            case 'club_admin': $this->redirect('admin/dashboard'); break;
-            case 'user': $this->redirect('home/welcome'); break;
-            default: $this->redirect('home'); break;
+            case 'club_admin':  $this->redirect('admin/dashboard');      break;
+            case 'user':        $this->redirect('home');                 break;
+            default:            $this->redirect('home');                 break;
         }
     }
 }

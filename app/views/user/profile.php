@@ -7,14 +7,37 @@
     <?php endif; ?>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-violet-500 flex items-center justify-center text-white font-bold text-2xl">
-                <?= strtoupper(substr($user['name'] ?? 'U', 0, 1)) ?>
+
+        <!-- Avatar section -->
+        <div class="flex items-start gap-5 mb-6">
+            <div class="relative flex-shrink-0">
+                <?php $avatarPath = $user['avatar'] ?? ''; ?>
+                <?php if ($avatarPath): ?>
+                <img src="<?= BASE_URL . htmlspecialchars($avatarPath) ?>?v=<?= time() ?>"
+                     alt="Avatar"
+                     class="w-20 h-20 rounded-2xl object-cover border-2 border-gray-100">
+                <?php else: ?>
+                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-400 to-violet-500 flex items-center justify-center text-white font-bold text-3xl">
+                    <?= strtoupper(substr($user['name'] ?? 'U', 0, 1)) ?>
+                </div>
+                <?php endif; ?>
+                <!-- Upload overlay -->
+                <label for="avatarInput" class="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer text-white text-xl">
+                    📷
+                </label>
             </div>
-            <div>
+            <div class="flex-1">
                 <h2 class="text-xl font-bold text-gray-900"><?= htmlspecialchars($user['name'] ?? '') ?></h2>
                 <p class="text-sm text-gray-500"><?= htmlspecialchars($user['email'] ?? '') ?></p>
                 <span class="inline-block bg-sky-100 text-sky-700 text-xs font-medium px-2.5 py-0.5 rounded-full capitalize mt-1"><?= htmlspecialchars($user['role'] ?? 'user') ?></span>
+                <!-- Quick avatar upload form -->
+                <form method="POST" action="<?= BASE_URL ?>user/upload-avatar" enctype="multipart/form-data" class="mt-3 flex items-center gap-2">
+                    <input type="file" id="avatarInput" name="avatar_file"
+                           accept="image/jpeg,image/png,image/webp"
+                           class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-sky-50 file:text-sky-600 file:text-xs file:font-medium hover:file:bg-sky-100 cursor-pointer"
+                           onchange="this.form.submit()">
+                    <span class="text-xs text-gray-400">JPG, PNG o WEBP · máx 2 MB</span>
+                </form>
             </div>
         </div>
 

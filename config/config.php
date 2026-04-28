@@ -17,4 +17,4 @@ define('BASE_URL', $protocol . '://' . $host . $scriptDir . '/');
 define('APP_NAME', 'ID Sports');
 define('APP_VERSION', '1.0.0');
 define('SESSION_NAME', 'id_sports_session');
-define('OTP_EXPIRY', 600); // 10 minutes
+define('OTP_EXPIRY', 900); // 15 minutes

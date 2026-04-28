@@ -1,0 +1,237 @@
+/* ============================================================
+   ID Sports — Config Colors Panel
+   Design System: Glassmorphism · Dark · Poppins + Jockey One
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Jockey+One&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ── Variables ──────────────────────────────────────────── */
+:root {
+    --cfg-bg:      #0D1117;
+    --cfg-card:    rgba(15, 18, 30, 0.90);
+    --cfg-border:  rgba(255,255,255, 0.08);
+    --cfg-input:   rgba(255,255,255, 0.05);
+    --cfg-text:    #ffffff;
+    --cfg-muted:   #94a3b8;
+    --cfg-accent:  #0EA5E9;
+}
+
+/* ── Color swatch rows ──────────────────────────────────── */
+.cc-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--cfg-input);
+    border: 1px solid var(--cfg-border);
+    border-radius: 14px;
+    transition: border-color .2s, background .2s;
+    margin-bottom: 10px;
+}
+.cc-row:hover { border-color: rgba(255,255,255,.15); background: rgba(255,255,255,.07); }
+
+.cc-swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,.12);
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 2px;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    overflow: hidden;
+}
+.cc-swatch::-webkit-color-swatch-wrapper { padding: 0; border-radius: 10px; }
+.cc-swatch::-webkit-color-swatch         { border: none; border-radius: 10px; }
+
+.cc-info { flex: 1; min-width: 0; }
+
+.cc-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--cfg-muted);
+    margin-bottom: 5px;
+}
+
+.cc-hex-input {
+    width: 100%;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 9px;
+    padding: 8px 12px;
+    color: var(--cfg-text);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: .8125rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+.cc-hex-input:focus {
+    border-color: var(--cfg-accent);
+    box-shadow: 0 0 0 2px rgba(14,165,233,.15);
+}
+
+/* ── Live preview card ──────────────────────────────────── */
+.cc-preview {
+    position: sticky;
+    top: 80px;
+    background: var(--cfg-card);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid var(--cfg-border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.4);
+    color: var(--cfg-text);
+    font-family: 'Poppins', sans-serif;
+}
+
+.cc-preview-title {
+    font-family: 'Jockey One', sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--cfg-muted);
+    margin-bottom: 18px;
+}
+
+/* Mini mock of the login button */
+.cc-preview-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: .9375rem;
+    font-weight: 700;
+    color: #fff !important;
+    cursor: default;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 14px;
+    transition: background .15s;
+}
+
+.cc-preview-link {
+    font-size: .875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color .15s;
+}
+
+.cc-preview-glow {
+    margin-top: 16px;
+    height: 4px;
+    border-radius: 2px;
+    opacity: .5;
+    transition: background .15s;
+}
+
+.cc-preview-screen {
+    margin-top: 16px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.07);
+}
+
+.cc-preview-screen-top {
+    padding: 14px;
+    text-align: center;
+}
+
+.cc-preview-screen-name {
+    font-family: 'Jockey One', sans-serif;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    transition: color .15s, text-shadow .15s;
+}
+
+.cc-section-heading {
+    font-family: 'Jockey One', sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--cfg-text);
+    margin: 24px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.cc-section-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--cfg-border);
+}
+
+/* ── URL field ──────────────────────────────────────────── */
+.cc-url-field {
+    width: 100%;
+    background: var(--cfg-input);
+    border: 1px solid var(--cfg-border);
+    border-radius: 14px;
+    padding: 13px 16px;
+    color: var(--cfg-text);
+    font-family: 'Poppins', sans-serif;
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+.cc-url-field:focus {
+    border-color: var(--cfg-accent);
+    box-shadow: 0 0 0 3px rgba(14,165,233,.1);
+}
+.cc-url-field::placeholder { color: rgba(255,255,255,.25); }
+
+/* ── Save button ────────────────────────────────────────── */
+.cc-save-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--cfg-accent);
+    color: #fff !important;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: filter .2s, transform .1s, box-shadow .2s;
+    box-shadow: 0 4px 20px rgba(14,165,233,.25);
+    margin-top: 20px;
+}
+.cc-save-btn:hover  { filter: brightness(1.12); transform: translateY(-1px); }
+.cc-save-btn:active { transform: scale(.97) translateY(0); }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.cc-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+    align-items: start;
+}
+@media (max-width: 900px) { .cc-grid { grid-template-columns: 1fr; } }
+
+.cc-form-panel {
+    background: var(--cfg-card);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid var(--cfg-border);
+    border-radius: 20px;
+    padding: 28px;
+    color: var(--cfg-text);
+}
+
+.cc-hint {
+    font-size: .7rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--cfg-muted);
+    margin-top: 6px;
+    font-weight: 300;
+}

@@ -1,26 +1,29 @@
-<div class="space-y-5">
-    <?php if ($error): ?>
-    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-    <?php if ($success): ?>
-    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm"><?= $success ?></div>
-    <a href="<?= BASE_URL ?>auth/reset" class="block w-full bg-violet-500 hover:bg-violet-600 text-white font-semibold py-3 rounded-xl text-center transition-all">
+<h1 class="auth-title">Recuperar acceso</h1>
+<p class="auth-subtitle">Te enviaremos un código a tu correo</p>
+
+<?php if ($error): ?>
+<div class="auth-error">⚠️ <?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<?php if ($success): ?>
+    <div class="auth-success">✅ <?= htmlspecialchars($success) ?></div>
+    <a href="<?= BASE_URL ?>auth/reset" class="auth-btn-primary" style="display:block;text-align:center;text-decoration:none;padding:15px;margin-top:0;">
         Ingresar Código OTP →
     </a>
-    <?php else: ?>
-    <p class="text-sm text-gray-600 text-center">Ingresa tu email y te enviaremos un código OTP para restablecer tu contraseña.</p>
-    <form method="POST" class="space-y-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Correo Electrónico</label>
-            <input type="email" name="email" required placeholder="tu@email.com"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
-        </div>
-        <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 rounded-xl transition-all">
-            Enviar Código
-        </button>
-    </form>
-    <?php endif; ?>
-    <p class="text-center text-sm">
-        <a href="<?= BASE_URL ?>auth/login" class="text-sky-500 hover:text-sky-600 font-medium">← Volver al login</a>
+<?php else: ?>
+    <p style="font-size:.875rem;color:#9CA3AF;text-align:center;margin-bottom:24px;">
+        Ingresa tu correo y te enviaremos un código de 6 dígitos para restablecer tu contraseña.
     </p>
-</div>
+    <form method="POST" class="auth-form">
+        <div class="auth-input-group">
+            <label class="auth-label" for="forgotEmail">Correo Electrónico</label>
+            <input type="email" id="forgotEmail" name="email" class="auth-input"
+                placeholder="tu@email.com" required autocomplete="email">
+        </div>
+        <button type="submit" class="auth-btn-primary">Enviar Código</button>
+    </form>
+<?php endif; ?>
+
+<p class="auth-footer-text">
+    <a href="<?= BASE_URL ?>auth/login" class="auth-link">← Volver al login</a>
+</p>
