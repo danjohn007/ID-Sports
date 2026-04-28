@@ -154,63 +154,7 @@ $sportAccents = [
     line-height: 1.2;
 }
 
-/* ── Promo cards ────────────────────────────────────────── */
-.promo-card {
-    flex-shrink: 0;
-    width: 15rem;
-    border-radius: 1rem;
-    overflow: hidden;
-    position: relative;
-    color: #fff;
-}
-.promo-card::before {
-    content: '';
-    position: absolute;
-    top: -30%; right: -20%;
-    width: 60%; padding-bottom: 60%;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    pointer-events: none;
-}
-.promo-card .promo-body { position: relative; padding: 1rem; }
-.promo-badge {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.25);
-    backdrop-filter: blur(4px);
-    font-size: 0.68rem; font-weight: 700;
-    padding: 0.2rem 0.55rem; border-radius: 20px;
-    margin-bottom: 0.5rem;
-}
-.promo-discount { font-size: 2rem; font-weight: 900; line-height: 1; margin: 0.375rem 0; }
-.promo-discount sup { font-size: 1rem; vertical-align: super; font-weight: 700; }
-.promo-code {
-    background: rgba(255,255,255,0.18);
-    border: 1px dashed rgba(255,255,255,0.4);
-    border-radius: 0.5rem;
-    padding: 0.3rem 0.5rem;
-    text-align: center;
-    font-family: monospace;
-    font-weight: 800;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    margin: 0.5rem 0;
-}
-.promo-btn {
-    width: 100%;
-    padding: 0.45rem;
-    border-radius: 0.625rem;
-    border: 1px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.18);
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 140ms;
-}
-.promo-btn:hover { background: rgba(255,255,255,0.28); }
-
-/* ── Nearby club cards ─────────────────────────────────── */
+/* ── Club cards ─────────────────────────────────────────── */
 .club-card {
     display: block;
     border-radius: 1rem;
@@ -469,57 +413,64 @@ $sportAccents = [
         </div>
     </div>
 
-    <!-- RF2.5 – Social Feed: Promotions -->
-    <?php if (!empty($socialFeed)): ?>
+    <!-- RF2.5 – Clubes Seguidos -->
     <div class="home-section">
         <div class="home-section-header">
-            <h2 class="home-section-title">Ofertas para ti</h2>
+            <h2 class="home-section-title">Clubes seguidos</h2>
+            <a href="<?= BASE_URL ?>clubs" class="home-section-link">Explorar &rarr;</a>
         </div>
-        <div style="display:flex;gap:0.75rem;overflow-x:auto;padding-bottom:6px" class="no-scroll">
-            <?php
-            $promoGrads = [
-                'coupon' => 'linear-gradient(135deg,#7c3aed,#4f46e5)',
-                'promo'  => 'linear-gradient(135deg,#0ea5e9,#2563eb)',
-                'news'   => 'linear-gradient(135deg,#059669,#0d9488)',
-            ];
-            $promoTypeLabels = ['coupon'=>'Cupón','promo'=>'Promo','news'=>'Novedad'];
-            ?>
-            <?php foreach ($socialFeed as $promo):
-                $grad = $promoGrads[$promo['type'] ?? 'promo'] ?? $promoGrads['promo'];
-                $typeLabel = $promoTypeLabels[$promo['type'] ?? 'promo'] ?? 'Promo';
-            ?>
-            <div class="promo-card" style="background:<?= $grad ?>">
-                <div class="promo-body">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem">
-                        <span class="promo-badge">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
-                            </svg>
-                            <?= htmlspecialchars($typeLabel) ?>
-                        </span>
+        <?php if (!empty($followedClubs)): ?>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.75rem">
+            <?php foreach ($followedClubs as $club): ?>
+            <a href="<?= BASE_URL ?>clubs/detail/<?= (int)$club['club_id'] ?>" class="club-card">
+                <div class="club-cover">
+                    <?php if (!empty($club['cover_image'])): ?>
+                    <img src="<?= htmlspecialchars($club['cover_image']) ?>" style="width:100%;height:100%;object-fit:cover" alt="">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent)"></div>
+                    <?php elseif (!empty($club['logo'])): ?>
+                    <div class="club-cover-placeholder" style="opacity:1">
+                        <img src="<?= htmlspecialchars($club['logo']) ?>" style="width:3rem;height:3rem;object-fit:contain;border-radius:0.5rem" alt="">
                     </div>
-                    <?php if (!empty($promo['club_name'])): ?>
-                    <p style="font-size:0.68rem;color:rgba(255,255,255,0.65);margin-bottom:0.2rem"><?= htmlspecialchars($promo['club_name']) ?></p>
+                    <?php else: ?>
+                    <div class="club-cover-placeholder">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
                     <?php endif; ?>
-                    <h3 style="font-size:0.875rem;font-weight:700;line-height:1.3;color:#fff;margin:0"><?= htmlspecialchars($promo['title']) ?></h3>
-                    <?php if ($promo['discount_percent'] > 0): ?>
-                    <p class="promo-discount"><sup>-</sup><?= (int)$promo['discount_percent'] ?>%<span style="font-size:1rem;font-weight:700"> OFF</span></p>
-                    <?php endif; ?>
-                    <?php if (!empty($promo['coupon_code'])): ?>
-                    <div class="promo-code"><?= htmlspecialchars($promo['coupon_code']) ?></div>
-                    <?php endif; ?>
-                    <?php if (!empty($promo['valid_until'])): ?>
-                    <p style="font-size:0.68rem;color:rgba(255,255,255,0.55);margin-bottom:0.5rem">Hasta <?= date('d/m/Y', strtotime($promo['valid_until'])) ?></p>
-                    <?php endif; ?>
-                    <button onclick="applyCoupon('<?= htmlspecialchars($promo['coupon_code'] ?? '', ENT_QUOTES) ?>')" class="promo-btn">
-                        Aplicar descuento &rarr;
-                    </button>
+                    <span class="club-dist-badge" style="background:rgba(var(--primary-rgb),0.5);border-color:rgba(var(--primary-rgb),0.3)">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Siguiendo
+                    </span>
                 </div>
-            </div>
+                <div class="club-info">
+                    <div class="club-name"><?= htmlspecialchars($club['club_name']) ?></div>
+                    <div class="club-city">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+                        <?= htmlspecialchars($club['city'] ?? 'Querétaro') ?>
+                    </div>
+                    <div class="club-cta">Ver canchas &rarr;</div>
+                </div>
+            </a>
             <?php endforeach; ?>
         </div>
+        <?php else: ?>
+        <div class="empty-cta" style="padding:1.5rem;text-align:center">
+            <div class="empty-cta-icon" style="margin-bottom:0.75rem">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                </svg>
+            </div>
+            <p style="font-size:0.8125rem;color:var(--text-sec);margin:0 0 0.875rem">Aún no sigues ningún club</p>
+            <a href="<?= BASE_URL ?>clubs" class="home-cta-btn" style="font-size:0.8125rem;padding:0.5rem 1.25rem">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Explorar clubes
+            </a>
+        </div>
+        <?php endif; ?>
     </div>
-    <?php endif; ?>
 
     <!-- RF2.6 – Nearby Clubs -->
     <?php if (!empty($nearbyClubs)): ?>
@@ -688,9 +639,4 @@ function closeQrModal() {
 }
 
 /* ── Apply coupon ─────────────────────────────────────── */
-function applyCoupon(code) {
-    if (!code) return;
-    sessionStorage.setItem('ids_coupon', code);
-    window.location.href = '<?= BASE_URL ?>reservations/search';
-}
 </script>

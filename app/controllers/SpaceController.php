@@ -28,6 +28,13 @@ class SpaceController extends Controller {
             ? round(array_sum(array_column($reviews, 'rating')) / count($reviews), 1)
             : 0;
 
+        // Is the current user following the club?
+        $isFollowing = false;
+        if (!empty($space['club_id'])) {
+            $membershipModel = new ClubMembershipModel();
+            $isFollowing = $membershipModel->isMember($_SESSION['user_id'], $space['club_id']);
+        }
+
         // Pre-compute available slots for today and next 4 days
         $slotsPreview = [];
         for ($i = 0; $i < 5; $i++) {
@@ -42,6 +49,7 @@ class SpaceController extends Controller {
             'amenities'    => $amenities,
             'reviews'      => $reviews,
             'avgRating'    => $avgRating,
+            'isFollowing'  => $isFollowing,
             'slotsPreview' => $slotsPreview,
         ]);
     }

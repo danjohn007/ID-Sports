@@ -31,21 +31,15 @@ class HomeController extends Controller {
             ];
         }
 
-        // Clubs followed by user + their promotions (RF2.5)
-        $followedClubIds = $membershipModel->getClubIdsByUser($userId);
-        if (!empty($followedClubIds)) {
-            $socialFeed = $promotionModel->getForClubs($followedClubIds);
-        } else {
-            $socialFeed = $promotionModel->getActive();
-        }
+        // Clubs followed by user (RF2.5 — "Clubes Seguidos")
+        $followedClubs   = $membershipModel->getByUser($userId);
+        $followedClubIds = array_column($followedClubs, 'club_id');
+        $socialFeed      = [];
 
         // Nearby clubs (RF2.6) - lat/lng from session or defaults
         $lat = $_SESSION['user_lat'] ?? null;
         $lng = $_SESSION['user_lng'] ?? null;
         $nearbyClubs = $clubModel->getNearby($lat, $lng, 6);
-
-        // General promotions
-        $promotions = $promotionModel->getActive();
 
         // Notifications count (RF2.1 bell)
         $unreadNotifications = $notifModel->countUnread($userId);
@@ -55,9 +49,8 @@ class HomeController extends Controller {
             'todayReservation'    => $todayReservation,
             'activeReservations'  => $activeReservations,
             'upcomingDays'        => $upcomingDays,
-            'socialFeed'          => $socialFeed,
+            'followedClubs'       => $followedClubs,
             'nearbyClubs'         => $nearbyClubs,
-            'promotions'          => $promotions,
             'unreadNotifications' => $unreadNotifications,
         ]);
     }
@@ -145,9 +138,8 @@ class HomeController extends Controller {
             'todayReservation'    => null,
             'activeReservations'  => [],
             'upcomingDays'        => [],
-            'socialFeed'          => [],
+            'followedClubs'       => [],
             'nearbyClubs'         => [],
-            'promotions'          => [],
             'unreadNotifications' => 0,
         ]);
     }

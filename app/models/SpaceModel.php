@@ -6,7 +6,7 @@ class SpaceModel extends Model {
 
     public function findById($id) {
         return $this->findOne(
-            "SELECT s.*, c.name as club_name, c.address as club_address, c.city as club_city FROM spaces s LEFT JOIN clubs c ON s.club_id = c.id WHERE s.id = ?",
+            "SELECT s.*, s.club_id, c.name as club_name, c.address as club_address, c.city as club_city FROM spaces s LEFT JOIN clubs c ON s.club_id = c.id WHERE s.id = ?",
             [$id]
         );
     }

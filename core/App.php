@@ -43,6 +43,7 @@ class App {
             'reservations/slots' => ['ReservationController', 'slots'],
             'clubs' => ['ClubController', 'index'],
             'clubs/detail' => ['ClubController', 'detail'],
+            'clubs/toggle-follow' => ['ClubController', 'toggleFollow'],
             'admin/dashboard' => ['AdminController', 'dashboard'],
             'admin/spaces' => ['AdminController', 'spaces'],
             'admin/schedules' => ['AdminController', 'schedules'],

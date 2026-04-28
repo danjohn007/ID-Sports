@@ -2,7 +2,7 @@
 class ClubMembershipModel extends Model {
     public function getByUser($userId) {
         return $this->findAll(
-            "SELECT cm.*, c.name as club_name, c.logo, c.city
+            "SELECT cm.*, c.name as club_name, c.logo, c.cover_image, c.city
              FROM club_memberships cm
              LEFT JOIN clubs c ON cm.club_id = c.id
              WHERE cm.user_id = ? AND cm.status = 'active'
