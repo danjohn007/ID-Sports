@@ -2,8 +2,8 @@
     <div class="bg-white rounded-2xl border border-gray-100 p-6">
         <h2 class="font-semibold text-gray-900 mb-1">🎬 Pantallas de Onboarding</h2>
         <p class="text-sm text-gray-500 mb-6">
-            Configura los textos e imágenes que verán los usuarios al abrir la app por primera vez.<br>
-            Las imágenes deben ser URLs públicas (ej. <code>https://…/cancha.jpg</code>). Si se dejan vacías, se usa un fondo de gradiente por defecto.
+            Configura los textos e imágenes de las 3 pantallas de bienvenida.<br>
+            Puedes subir una imagen desde tu dispositivo o pegar una URL pública.
         </p>
 
         <form method="POST" class="space-y-8">
@@ -36,18 +36,41 @@
                             class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"><?= htmlspecialchars($desc) ?></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">URL de imagen de fondo</label>
-                        <input type="url" name="onboarding_slide<?= $n ?>_image"
-                            value="<?= htmlspecialchars($img) ?>"
-                            placeholder="https://ejemplo.com/imagen.jpg"
-                            class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Imagen de fondo</label>
+                        <!-- Current image preview -->
                         <?php if ($img): ?>
-                        <div class="mt-2">
-                            <img src="<?= htmlspecialchars($img) ?>" alt="Preview"
-                                class="h-24 w-full object-cover rounded-xl opacity-80"
+                        <div class="mb-2">
+                            <img src="<?= htmlspecialchars($img) ?>" alt="Preview Slide <?= $n ?>"
+                                class="h-28 w-full object-cover rounded-xl opacity-85"
                                 onerror="this.style.display='none'">
                         </div>
                         <?php endif; ?>
+                        <!-- Upload file for slide image -->
+                        <form method="POST" action="<?= BASE_URL ?>config/upload-slide-image"
+                              enctype="multipart/form-data" class="flex flex-wrap items-center gap-2 mb-2"
+                              id="slideUploadForm<?= $n ?>">
+                            <input type="hidden" name="slide_num" value="<?= $n ?>">
+                            <input type="file" name="slide_image" id="slideFile<?= $n ?>"
+                                   accept="image/png,image/jpeg,image/webp,image/gif"
+                                   class="hidden"
+                                   onchange="document.getElementById('slideFileName<?= $n ?>').textContent=this.files[0]?'📄 '+this.files[0].name:''">
+                            <button type="button"
+                                    onclick="document.getElementById('slideFile<?= $n ?>').click()"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-semibold hover:bg-indigo-100 transition-all">
+                                📂 Seleccionar imagen
+                            </button>
+                            <button type="submit"
+                                    class="px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-semibold hover:bg-indigo-600 transition-all">
+                                ⬆️ Subir imagen
+                            </button>
+                            <span id="slideFileName<?= $n ?>" class="text-xs text-gray-400"></span>
+                        </form>
+                        <!-- Or paste URL -->
+                        <input type="url" name="onboarding_slide<?= $n ?>_image"
+                            value="<?= htmlspecialchars($img) ?>"
+                            placeholder="O pega una URL: https://ejemplo.com/imagen.jpg"
+                            class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <p class="text-xs text-gray-400 mt-1">Si subes una imagen se actualiza automáticamente la URL anterior.</p>
                     </div>
                 </div>
             </div>

@@ -178,6 +178,16 @@ class ConfigController extends Controller {
         $this->view('config/onboarding', ['title' => 'Pantallas de Onboarding', 'config' => $config], 'admin');
     }
 
+    /* ── MIME type detection helper ───────────────────────── */
+    private function detectMimeType($tmpPath) {
+        if (class_exists('finfo')) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            return $finfo->file($tmpPath);
+        }
+        $info = @getimagesize($tmpPath);
+        return $info ? $info['mime'] : null;
+    }
+
     /* ── Logo image upload ──────────────────────────────────── */
     public function uploadLogo() {
         if (!$this->isPost()) {
@@ -192,24 +202,16 @@ class ConfigController extends Controller {
         }
 
         $file = $_FILES['logo_file'];
-
-        // Validate MIME type using finfo (not extension)
-        if (!class_exists('finfo')) {
-            $this->setFlash('error', 'La extensión PHP "fileinfo" es requerida para subir imágenes. Contacta al administrador del servidor.');
-            $this->redirect('config/general');
-            return;
-        }
-
-        $finfo    = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($file['tmp_name']);
-        $allowed  = [
+        $allowed = [
             'image/png'     => 'png',
             'image/jpeg'    => 'jpg',
             'image/svg+xml' => 'svg',
             'image/webp'    => 'webp',
         ];
 
-        if (!array_key_exists($mimeType, $allowed)) {
+        $mimeType = $this->detectMimeType($file['tmp_name']);
+
+        if (!$mimeType || !array_key_exists($mimeType, $allowed)) {
             $this->setFlash('error', 'Tipo de archivo no permitido. Usa PNG, JPG, SVG o WEBP.');
             $this->redirect('config/general');
             return;
@@ -222,24 +224,117 @@ class ConfigController extends Controller {
             return;
         }
 
-        $ext      = $allowed[$mimeType];
-        $filename = 'logo_custom.' . $ext;
-        $destDir  = ROOT . '/public/assets/';
-        $destPath = $destDir . $filename;
+        $ext     = $allowed[$mimeType];
+        $destDir = ROOT . '/public/assets/logos/';
 
-        if (!is_dir($destDir) || !is_writable($destDir)) {
-            $this->setFlash('error', 'El directorio de destino no es escribible.');
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0755, true);
+        }
+
+        if (!is_writable($destDir)) {
+            $this->setFlash('error', 'El directorio de destino no es escribible. Verifica permisos en public/assets/logos/.');
             $this->redirect('config/general');
             return;
         }
 
+        $filename = 'logo_custom.' . $ext;
+        $destPath = $destDir . $filename;
+
         if (move_uploaded_file($file['tmp_name'], $destPath)) {
-            $this->configModel->set('app_logo_path', 'public/assets/' . $filename);
+            $this->configModel->set('app_logo_path', 'public/assets/logos/' . $filename);
             $this->setFlash('success', '✅ Logo actualizado correctamente.');
         } else {
-            $this->setFlash('error', 'No se pudo guardar el archivo. Verifica los permisos.');
+            $this->setFlash('error', 'No se pudo guardar el archivo. Verifica los permisos en public/assets/logos/.');
         }
 
         $this->redirect('config/general');
+    }
+
+    /* ── Remove logo (reset to default) ───────────────────── */
+    public function removeLogo() {
+        if (!$this->isPost()) {
+            $this->redirect('config/general');
+            return;
+        }
+        $logoPath = $this->configModel->get('app_logo_path') ?? '';
+        if ($logoPath) {
+            $fullPath = ROOT . '/' . ltrim($logoPath, '/');
+            if (is_file($fullPath) && !unlink($fullPath)) {
+                // File exists but could not be deleted — clear config anyway
+                error_log('ConfigController::removeLogo — could not delete file: ' . $fullPath);
+            }
+        }
+        $this->configModel->set('app_logo_path', '');
+        $this->setFlash('success', 'Logo eliminado. Se usará el logo predeterminado.');
+        $this->redirect('config/general');
+    }
+
+    /* ── Upload a slide background image ──────────────────── */
+    public function uploadSlideImage() {
+        if (!$this->isPost()) {
+            $this->redirect('config/onboarding');
+            return;
+        }
+
+        $slideNum = (int)$this->post('slide_num');
+        if ($slideNum < 1 || $slideNum > 3) {
+            $this->setFlash('error', 'Número de slide inválido.');
+            $this->redirect('config/onboarding');
+            return;
+        }
+
+        if (empty($_FILES['slide_image']['name']) || $_FILES['slide_image']['error'] !== UPLOAD_ERR_OK) {
+            $this->setFlash('error', 'No se seleccionó ningún archivo o hubo un error de subida.');
+            $this->redirect('config/onboarding');
+            return;
+        }
+
+        $file = $_FILES['slide_image'];
+        $allowed = [
+            'image/png'  => 'png',
+            'image/jpeg' => 'jpg',
+            'image/webp' => 'webp',
+            'image/gif'  => 'gif',
+        ];
+
+        $mimeType = $this->detectMimeType($file['tmp_name']);
+
+        if (!$mimeType || !array_key_exists($mimeType, $allowed)) {
+            $this->setFlash('error', 'Tipo no permitido. Usa PNG, JPG, WEBP o GIF.');
+            $this->redirect('config/onboarding');
+            return;
+        }
+
+        if ($file['size'] > 5 * 1024 * 1024) {
+            $this->setFlash('error', 'El archivo supera el límite de 5 MB.');
+            $this->redirect('config/onboarding');
+            return;
+        }
+
+        $destDir = ROOT . '/public/assets/slides/';
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0755, true);
+        }
+
+        if (!is_writable($destDir)) {
+            $this->setFlash('error', 'Directorio no escribible: public/assets/slides/');
+            $this->redirect('config/onboarding');
+            return;
+        }
+
+        $ext      = $allowed[$mimeType];
+        $filename = 'slide' . $slideNum . '_bg.' . $ext;
+        $destPath = $destDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $destPath)) {
+            $relPath = BASE_URL . 'public/assets/slides/' . $filename . '?v=' . time();
+            $key     = 'onboarding_slide' . $slideNum . '_image';
+            $this->configModel->set($key, $relPath);
+            $this->setFlash('success', '✅ Imagen del Slide ' . $slideNum . ' actualizada.');
+        } else {
+            $this->setFlash('error', 'No se pudo guardar la imagen.');
+        }
+
+        $this->redirect('config/onboarding');
     }
 }

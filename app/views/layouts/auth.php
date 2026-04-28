@@ -43,25 +43,19 @@
         }
     </script>
     <?php endif; ?>
+    <!-- Apply theme immediately to avoid flash -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('auth_theme');
+            if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+        }());
+    </script>
 </head>
 <body class="auth-page">
 
 <!-- ── Background ─────────────────────────────────────── -->
 <div class="auth-bg" <?php if ($authBgImage): ?>style="background-image:url('<?= htmlspecialchars($authBgImage) ?>')"<?php endif; ?>>
     <?php if (!$authBgImage): ?><div class="auth-bg-default"></div><?php endif; ?>
-    <!-- Floating sport particles orbiting in background -->
-    <div class="auth-particles">
-        <span class="auth-particle">⚽</span>
-        <span class="auth-particle">🏀</span>
-        <span class="auth-particle">🎾</span>
-        <span class="auth-particle">🏊</span>
-        <span class="auth-particle">🏋️</span>
-        <span class="auth-particle">🎯</span>
-        <span class="auth-particle">🏐</span>
-        <span class="auth-particle">🥊</span>
-        <span class="auth-particle">🏆</span>
-        <span class="auth-particle">⚡</span>
-    </div>
     <!-- Giant "ID SPORTS" watermark — Jockey One, primary color glow, breathing pulse -->
     <div class="auth-bg-title"><?= htmlspecialchars($appName) ?></div>
 </div>
@@ -88,11 +82,14 @@
     <div class="auth-sheet-inner">
         <div class="auth-sheet-handle"></div>
         <?= $content ?>
-        <p class="text-center" style="font-size:.7rem;color:rgba(255,255,255,.2);margin-top:28px;font-family:'Poppins',sans-serif;">
+        <p class="auth-copyright">
             © <?= date('Y') ?> <?= htmlspecialchars($appName) ?> v<?= APP_VERSION ?>
         </p>
     </div>
 </div>
+
+<!-- ── Theme toggle button ─────────────────────────────── -->
+<button class="auth-theme-toggle" id="authThemeToggle" title="Cambiar tema claro/oscuro">🌙</button>
 
 <script>
     document.documentElement.style.visibility = 'visible';
@@ -105,6 +102,80 @@
             f.style.transition = 'opacity .5s';
             setTimeout(function () { if (f) f.remove(); }, 500);
         }, 5000);
+    }());
+
+    /* ── Theme toggle ──────────────────────────────────── */
+    (function () {
+        var btn  = document.getElementById('authThemeToggle');
+        var html = document.documentElement;
+        function applyTheme(t) {
+            if (t === 'light') {
+                html.setAttribute('data-theme', 'light');
+                btn.textContent = '☀️';
+            } else {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌙';
+            }
+        }
+        // Init from stored preference
+        applyTheme(localStorage.getItem('auth_theme') || 'dark');
+
+        btn.addEventListener('click', function () {
+            var current = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            var next    = current === 'light' ? 'dark' : 'light';
+            localStorage.setItem('auth_theme', next);
+            applyTheme(next);
+        });
+    }());
+
+    /* ── JS-generated starfield + sport particles ──────── */
+    (function createStarfield() {
+        var bg = document.querySelector('.auth-bg');
+        if (!bg) return;
+
+        var container = document.createElement('div');
+        container.className = 'auth-starfield';
+
+        var sportEmojis = ['⚽','🏀','🎾','🏊','🏋️','🎯','🏐','🥊','🏆','⚡',
+                           '🥅','🏈','🏒','🥋','🎱','🏓','🏸','🤿','🛹','🏄'];
+        var driftDurations = [18,22,20,25,19,23,21,17,24,20,
+                               16,26,18,22,20,24,19,21,23,17];
+        var driftDelays    = [0,2,5,1,7,3,9,4,6,11,
+                               1,8,3,10,5,2,7,4,9,6];
+
+        // 55 tiny star dots — pure CSS animation, no JS loop
+        for (var i = 0; i < 55; i++) {
+            var star = document.createElement('span');
+            star.className = 'auth-star';
+            var size = 1 + Math.random() * 2.8;
+            star.style.cssText = [
+                'left:'               + (Math.random() * 100) + '%',
+                'top:'                + (Math.random() * 100) + '%',
+                'width:'              + size.toFixed(2) + 'px',
+                'height:'             + size.toFixed(2) + 'px',
+                'animation-delay:'    + (Math.random() * 14).toFixed(2) + 's',
+                'animation-duration:' + (3 + Math.random() * 8).toFixed(2) + 's',
+            ].join(';');
+            container.appendChild(star);
+        }
+
+        // 20 sport emoji particles — positioned randomly like a starfield
+        for (var j = 0; j < 20; j++) {
+            var p = document.createElement('span');
+            p.className = 'auth-particle';
+            p.textContent = sportEmojis[j];
+            var driftN = (j % 10) + 1;
+            p.style.cssText = [
+                'position:absolute',
+                'left:'               + (2 + Math.random() * 90).toFixed(1) + '%',
+                'top:'                + (2 + Math.random() * 88).toFixed(1) + '%',
+                'animation:drift-'    + driftN + ' ' + driftDurations[j] + 's ease-in-out infinite ' + driftDelays[j] + 's',
+            ].join(';');
+            container.appendChild(p);
+        }
+
+        // Insert starfield as first child of .auth-bg
+        bg.insertBefore(container, bg.firstChild);
     }());
 </script>
 </body>
