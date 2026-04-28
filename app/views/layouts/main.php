@@ -363,15 +363,6 @@
                       style="background:var(--primary)"></span>
                 <?php endif; ?>
             </button>
-            <!-- New reservation -->
-            <a href="<?= BASE_URL ?>reservations/search"
-               class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white transition-all"
-               style="background:var(--primary);box-shadow:0 4px 12px rgba(var(--primary-rgb),0.35)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Nueva Reserva
-            </a>
         </div>
     </header>
 

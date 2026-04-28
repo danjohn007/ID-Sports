@@ -14,8 +14,8 @@ class HomeController extends Controller {
         // Today's reservation (RF2.2)
         $todayReservation = $reservationModel->getTodayForUser($userId);
 
-        // Active reservations
-        $activeReservations = $reservationModel->findByUser($userId, 'active');
+        // Active reservations (today + future, not cancelled/past)
+        $activeReservations = $reservationModel->getActiveForUser($userId);
 
         // 5-day availability picker (RF2.3)
         $upcomingDays = [];

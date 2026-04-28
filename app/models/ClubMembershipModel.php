@@ -24,7 +24,8 @@ class ClubMembershipModel extends Model {
             "SELECT id FROM club_memberships WHERE user_id = ? AND club_id = ? AND status = 'active'",
             [$userId, $clubId]
         );
-        return $row !== null;
+        // findOne returns false (not null) when no row found
+        return $row !== false && !empty($row);
     }
 
     public function join($userId, $clubId) {

@@ -98,28 +98,32 @@ $sportAccents = [
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0.625rem 1rem;
-    border-radius: 0.875rem;
+    padding: 0.875rem 1.125rem;
+    border-radius: 1rem;
     border: 1px solid var(--border-gl);
     background: var(--bg-card);
     text-decoration: none;
-    min-width: 68px;
+    min-width: 88px;
     transition: all 140ms;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 .day-pill:hover {
     border-color: rgba(var(--primary-rgb), 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(var(--primary-rgb),0.18);
 }
 .day-pill.active {
     background: var(--primary);
     border-color: var(--primary);
-    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.4);
+    box-shadow: 0 6px 22px rgba(var(--primary-rgb), 0.5);
+    transform: translateY(-2px);
 }
-.day-pill .day-label { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; }
-.day-pill.active .day-label { color: rgba(255,255,255,0.75); }
-.day-pill .day-num { font-family: 'Jockey One', sans-serif; font-size: 1.5rem; color: var(--text-pri); line-height: 1.15; }
+.day-pill .day-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+.day-pill.active .day-label { color: rgba(255,255,255,0.8); }
+.day-pill .day-num { font-family: 'Jockey One', sans-serif; font-size: 1.875rem; color: var(--text-pri); line-height: 1.1; margin: 0.1rem 0; }
 .day-pill.active .day-num { color: #fff; }
-.day-pill .day-avail { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
-.day-pill.active .day-avail { color: rgba(255,255,255,0.7); }
+.day-pill .day-avail { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
+.day-pill.active .day-avail { color: rgba(255,255,255,0.75); }
 
 /* ── Sport cards ───────────────────────────────────────── */
 .sport-card {
@@ -205,8 +209,9 @@ $sportAccents = [
     background: var(--bg-card);
     border: 1px solid var(--border-gl);
     transition: all 140ms;
+    cursor: pointer;
 }
-.res-row:hover { border-color: rgba(var(--primary-rgb), 0.3); }
+.res-row:hover { border-color: rgba(var(--primary-rgb), 0.4); background: var(--bg-card-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(var(--primary-rgb),0.12); }
 .res-icon {
     width: 2.625rem; height: 2.625rem;
     border-radius: 0.625rem;
@@ -215,13 +220,10 @@ $sportAccents = [
     background: rgba(var(--primary-rgb), 0.12);
     color: var(--primary);
 }
-.res-status-badge {
-    font-size: 0.65rem; font-weight: 700;
-    padding: 0.15rem 0.5rem; border-radius: 20px;
-    background: rgba(16,185,129,0.15);
-    color: #34d399;
-    display: inline-block; margin-top: 0.2rem;
-}
+/* status badges */
+.res-badge-now    { font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:20px;background:rgba(16,185,129,0.18);color:#34d399;display:inline-block;margin-top:0.2rem; }
+.res-badge-soon   { font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:20px;background:rgba(var(--primary-rgb),0.18);color:var(--primary);display:inline-block;margin-top:0.2rem; }
+.res-badge-pend   { font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:20px;background:rgba(245,158,11,0.18);color:#fbbf24;display:inline-block;margin-top:0.2rem; }
 
 /* ── Empty state ───────────────────────────────────────── */
 .empty-cta {
@@ -353,7 +355,7 @@ $sportAccents = [
                 &nbsp;&middot;&nbsp;
                 <?= substr($res['start_time'], 0, 5) ?> – <?= substr($res['end_time'], 0, 5) ?>
             </p>
-            <button onclick="openQrModal('<?= htmlspecialchars($res['qr_code'] ?? 'RES-' . $res['id'], ENT_QUOTES) ?>','<?= htmlspecialchars($res['space_name'], ENT_QUOTES) ?>')"
+            <button onclick="openQrModal('<?= htmlspecialchars($res['qr_code'] ?? 'RES-' . $res['id'], ENT_QUOTES) ?>','<?= htmlspecialchars($res['space_name'], ENT_QUOTES) ?>','<?= htmlspecialchars($res['club_name'] ?? '', ENT_QUOTES) ?>','<?= htmlspecialchars(date('d/m/Y'), ENT_QUOTES) ?>','<?= htmlspecialchars(substr($res['start_time'],0,5).' – '.substr($res['end_time'],0,5), ENT_QUOTES) ?>','')"
                     style="margin-top:1rem;display:inline-flex;align-items:center;gap:0.5rem;background:#fff;color:var(--primary);font-weight:700;font-size:0.8125rem;padding:0.55rem 1.1rem;border-radius:0.75rem;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:all 140ms"
                     onmouseover="this.style.filter='brightness(0.95)'"
                     onmouseout="this.style.filter='none'">
@@ -527,24 +529,41 @@ $sportAccents = [
     <div class="home-section">
         <div class="home-section-header">
             <h2 class="home-section-title">Mis Reservaciones</h2>
-            <a href="<?= BASE_URL ?>reservations/history" class="home-section-link">Ver todas &rarr;</a>
+            <a href="<?= BASE_URL ?>reservations/history" class="home-section-link">Ver historial &rarr;</a>
         </div>
         <div style="display:flex;flex-direction:column;gap:0.5rem">
-            <?php foreach (array_slice($activeReservations, 0, 3) as $res): ?>
-            <div class="res-row">
+            <?php foreach (array_slice($activeReservations, 0, 5) as $res):
+                $nowTs   = time();
+                $resDate = $res['date'];
+                $startTs = strtotime($resDate . ' ' . $res['start_time']);
+                $endTs   = strtotime($resDate . ' ' . $res['end_time']);
+                $isNow   = $nowTs >= $startTs && $nowTs < $endTs;
+                $isSoon  = !$isNow && $startTs > $nowTs && ($startTs - $nowTs) < 7200;
+                if ($isNow)        { $badgeClass = 'res-badge-now';  $badgeText = 'En curso'; }
+                elseif ($isSoon)   { $badgeClass = 'res-badge-soon'; $badgeText = 'Próxima'; }
+                elseif ($res['status'] === 'pending') { $badgeClass = 'res-badge-pend'; $badgeText = 'Pendiente'; }
+                else               { $badgeClass = 'res-badge-soon'; $badgeText = 'Confirmada'; }
+                $qrData = htmlspecialchars($res['qr_code'] ?? ('RES-' . $res['id']), ENT_QUOTES);
+                $spaceName = htmlspecialchars($res['space_name'], ENT_QUOTES);
+                $clubName  = htmlspecialchars($res['club_name'] ?? '', ENT_QUOTES);
+                $dateLabel = htmlspecialchars(date('d/m/Y', strtotime($resDate)), ENT_QUOTES);
+                $timeLabel = htmlspecialchars(substr($res['start_time'],0,5).' – '.substr($res['end_time'],0,5), ENT_QUOTES);
+                $total     = htmlspecialchars('$'.number_format($res['total'],0), ENT_QUOTES);
+            ?>
+            <div class="res-row"
+                 onclick="openResModal('<?= $qrData ?>','<?= $spaceName ?>','<?= $clubName ?>','<?= $dateLabel ?>','<?= $timeLabel ?>','<?= $total ?>')">
                 <div class="res-icon">
                     <?= sportSvg($res['sport_type'] ?? 'football') ?>
                 </div>
                 <div style="flex:1;min-width:0">
                     <p style="font-weight:600;font-size:0.875rem;color:var(--text-pri);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0"><?= htmlspecialchars($res['space_name']) ?></p>
-                    <p style="font-size:0.7rem;color:var(--text-muted);margin:1px 0"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
-                    <p style="font-size:0.7rem;color:var(--text-muted)">
-                        <?= date('d/m/Y', strtotime($res['date'])) ?> &middot; <?= substr($res['start_time'],0,5) ?> – <?= substr($res['end_time'],0,5) ?>
-                    </p>
+                    <p style="font-size:0.7rem;color:var(--text-muted);margin:1px 0 0"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
+                    <span class="<?= $badgeClass ?>"><?= $badgeText ?></span>
                 </div>
                 <div style="text-align:right;flex-shrink:0">
                     <p style="font-weight:700;font-size:0.875rem;color:var(--text-pri);margin:0">$<?= number_format($res['total'],0) ?></p>
-                    <span class="res-status-badge">Activa</span>
+                    <p style="font-size:0.68rem;color:var(--text-muted);margin:2px 0 0"><?= date('d/m', strtotime($res['date'])) ?> · <?= substr($res['start_time'],0,5) ?></p>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="margin-top:4px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -582,6 +601,9 @@ $sportAccents = [
         </button>
         <h3 style="font-family:'Jockey One',sans-serif;font-size:1.125rem;color:var(--text-pri);margin:0">QR de Acceso</h3>
         <p id="qrSpaceName" style="font-size:0.75rem;color:var(--text-muted);margin:0.25rem 0 0"></p>
+        <!-- Reservation detail rows -->
+        <div id="qrResInfo" style="background:rgba(var(--primary-rgb),0.07);border:1px solid rgba(var(--primary-rgb),0.15);border-radius:0.75rem;padding:0.625rem 0.875rem;margin:0.75rem 0;text-align:left;font-size:0.78rem;display:none">
+        </div>
         <div class="qr-canvas-wrap">
             <div id="qrcode"></div>
         </div>
@@ -619,19 +641,33 @@ if (!sessionStorage.getItem('ids_loc')) {
 }
 
 /* ── QR Modal ─────────────────────────────────────────── */
-function openQrModal(code, spaceName) {
+function openQrModal(code, spaceName, clubName, dateLabel, timeLabel, total) {
     document.getElementById('qrSpaceName').textContent = spaceName;
     document.getElementById('qrCodeText').textContent  = code;
+    var info = document.getElementById('qrResInfo');
+    if (clubName || dateLabel || timeLabel || total) {
+        info.style.display = 'block';
+        var rows = '';
+        if (clubName)  rows += '<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--text-muted)">Club</span><span style="color:var(--text-pri);font-weight:600">' + clubName + '</span></div>';
+        if (dateLabel) rows += '<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--text-muted)">Fecha</span><span style="color:var(--text-pri);font-weight:600">' + dateLabel + '</span></div>';
+        if (timeLabel) rows += '<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--text-muted)">Horario</span><span style="color:var(--text-pri);font-weight:600">' + timeLabel + '</span></div>';
+        if (total)     rows += '<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Total</span><span style="color:var(--primary);font-weight:700">' + total + '</span></div>';
+        info.innerHTML = rows;
+    } else {
+        info.style.display = 'none';
+    }
     var wrap = document.getElementById('qrcode');
     wrap.innerHTML = '';
     var canvas = document.createElement('canvas');
     wrap.appendChild(canvas);
     QRCode.toCanvas(canvas, code, {width: 196, margin: 1, color:{dark:'#000',light:'#fff'}}, function(){});
     document.getElementById('qrModal').style.display = 'flex';
-    // Attempt to maximize brightness for scanner readability
     try {
         if (window.screen && window.screen.brightness !== undefined) screen.brightness = 1;
     } catch(e) {}
+}
+function openResModal(code, spaceName, clubName, dateLabel, timeLabel, total) {
+    openQrModal(code, spaceName, clubName, dateLabel, timeLabel, total);
 }
 function closeQrModal() {
     document.getElementById('qrModal').style.display = 'none';

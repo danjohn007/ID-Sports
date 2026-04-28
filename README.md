@@ -125,3 +125,66 @@ Los Super Admins pueden subir el logo de la empresa desde **Config → General**
 | `config/general` | Configuración general + **subida de logo** |
 | `config/colors` | Colores + URL imagen de fondo del login |
 | `config/onboarding` | Editar títulos, descripciones e imágenes de cada slide |
+
+---
+
+### v1.2 — Módulos 2 y 3: Dashboard de Usuario, Búsqueda, Detalle de Cancha y Club
+
+#### 📱 Módulo 2 — Dashboard / Inicio (Home)
+
+| Sección | Descripción |
+|---------|-------------|
+| **RF2.1 Cabecera** | Avatar circular, saludo "Hola, [Nombre]" en Jockey One, campana de notificaciones con drawer |
+| **RF2.2 Reserva de Hoy** | Solo aparece si hay reserva activa para **hoy** (status `confirmed`/`active`, end_time > NOW()). Botón "Ver QR de Acceso" abre un modal con el código QR generado al confirmar la reserva |
+| **RF2.3 Reservar por Día** | 5 píldoras (hoy + 4 días) más grandes y llamativas; muestra espacios disponibles cruzando `spaces` y `schedules`; redirige a búsqueda filtrando por fecha |
+| **RF2.4 Deportes** | Grid 6 columnas con iconos SVG por deporte; clic filtra búsqueda por `?sport=<tipo>` |
+| **RF2.5 Clubes Seguidos** | Sustituye sección de ofertas; muestra clubes que el usuario sigue via `club_memberships`; estado vacío con CTA "Explorar clubes" |
+| **RF2.6 Cerca de ti** | Glassmorphism cards; GPS via Web API → coordenadas al backend; orden por distancia |
+| **Mis Reservaciones** | Solo muestra reservaciones activas/futuras (date >= hoy, status != cancelado); click en una fila abre modal QR con detalle completo; badges diferenciados: **En curso** (verde), **Próxima** (azul), **Pendiente** (amarillo) |
+
+#### 🔍 Módulo 3 — Búsqueda de Canchas
+
+- Cards sin botón "Reservar" — solo **"Ver detalle"** para flujo correcto
+- Nombre del club es enlace directo al detalle del club
+- Filtros: texto libre, tipo de deporte (chips), fecha
+- Sin emojis; colores completamente via CSS variables
+
+#### 🏟️ Detalle de Cancha (`/spaces/detail/{id}`)
+
+- Hero con gradiente por deporte o foto de cancha
+- Calendario de 5 días + slots de hora generados dinámicamente según horarios del club
+- Selector de duración (1-3 h) con cálculo de precio en tiempo real
+- Amenidades con selector de cantidad
+- Botón **Seguir / Siguiendo** el club (AJAX `POST /clubs/toggle-follow/{id}`)
+- Enlace al panel del club
+
+#### 🏟️ Detalle de Club (`/clubs/detail/{id}`)
+
+- Canchas agrupadas por deporte con cabecera de color por tipo
+- Carrusel de fotos por cancha (hasta 5)
+- Botón **Seguir / Siguiendo** (AJAX); estado guardado en `club_memberships`
+- Reseñas de usuarios
+- Botones de contacto: WhatsApp y Google Maps
+
+#### 🔧 Backend
+
+| Archivo | Cambio |
+|---------|--------|
+| `ClubController` | `toggleFollow` — AJAX endpoint `POST clubs/toggle-follow/{id}` |
+| `ReservationModel` | `getActiveForUser()` — solo reservas activas/futuras (MySQL 5.7 compatible) |
+| `ClubMembershipModel` | **Bug fix**: `isMember()` ahora compara `!== false` (PDO `fetch()` devuelve `false`, no `null`) |
+| `SpaceModel` | `getAvailableSlots()` — cruza horarios y reservas existentes |
+| `ReviewModel` | `findByClub()` — reseñas agrupadas por club |
+
+#### 🗃️ Base de datos (MySQL 5.7 compatible)
+
+Migración: `database/migration_v3_mysql57.sql`
+
+- Usa `INFORMATION_SCHEMA` para verificar si columna ya existe antes de agregarla (MySQL 5.7 no soporta `ADD COLUMN IF NOT EXISTS`)
+- Agrega: `clubs.latitude`, `clubs.longitude`, `promotions.club_id`, `users.last_lat`, `users.last_lng`
+- Crea: tabla `notifications`, tabla `club_memberships` (si no existen)
+- Segura para ejecutar múltiples veces
+
+```bash
+mysql -u root -p id_sports < database/migration_v3_mysql57.sql
+```
