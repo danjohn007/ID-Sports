@@ -13,12 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Jockey+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl) ?>public/css/onboarding.css">
     <style>:root { --primary-color: <?= htmlspecialchars($btnColor) ?>; }</style>
-    <script>
-        // If user already saw onboarding, jump straight to login
-        if (localStorage.getItem('ids_onboarding_seen')) {
-            window.location.replace('<?= htmlspecialchars($baseUrl) ?>auth/login');
-        }
-    </script>
 </head>
 <body>
 <div class="ob-wrapper" id="obWrapper">

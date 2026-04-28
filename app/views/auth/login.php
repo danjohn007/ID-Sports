@@ -67,6 +67,14 @@
     ¿No tienes cuenta? <a href="<?= BASE_URL ?>auth/register" class="auth-link">Regístrate gratis</a>
 </p>
 
+<p style="text-align:center;margin-top:14px;">
+    <a href="<?= BASE_URL ?>auth/onboarding" class="auth-link"
+       style="font-size:.75rem;opacity:.55;font-weight:500;"
+       onclick="localStorage.removeItem('ids_onboarding_seen')">
+        🎬 Ver introducción
+    </a>
+</p>
+
 <script>
 function authTogglePwd(id) {
     var f = document.getElementById(id);
