@@ -1,7 +1,22 @@
 <?php
 class PromotionModel extends Model {
     public function getActive() {
-        return $this->findAll("SELECT * FROM promotions WHERE status = 'active' AND (valid_until IS NULL OR valid_until >= CURDATE()) ORDER BY created_at DESC");
+        return $this->findAll("SELECT p.*, c.name as club_name FROM promotions p LEFT JOIN clubs c ON p.club_id = c.id WHERE p.status = 'active' AND (p.valid_until IS NULL OR p.valid_until >= CURDATE()) ORDER BY p.created_at DESC");
+    }
+
+    public function getForClubs($clubIds) {
+        if (empty($clubIds)) return [];
+        $in = implode(',', array_map('intval', $clubIds));
+        return parent::findAll(
+            "SELECT p.*, c.name as club_name, c.logo as club_logo
+             FROM promotions p
+             LEFT JOIN clubs c ON p.club_id = c.id
+             WHERE p.status = 'active'
+               AND p.club_id IN ($in)
+               AND (p.valid_until IS NULL OR p.valid_until >= CURDATE())
+             ORDER BY p.created_at DESC
+             LIMIT 10"
+        );
     }
 
     public function findAll($page = 1, $perPage = 20) {

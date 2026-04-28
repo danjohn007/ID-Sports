@@ -31,6 +31,71 @@ class SpaceModel extends Model {
         return $this->findAll($sql, $params);
     }
 
+    public function getAvailableByDate($date, $sportType = '') {
+        $dayOfWeek = (int)date('w', strtotime($date)); // 0=Sun..6=Sat
+        $sql = "SELECT s.*, c.name as club_name, c.address, c.city,
+                       c.latitude, c.longitude,
+                       sch.open_time, sch.close_time
+                FROM spaces s
+                LEFT JOIN clubs c ON s.club_id = c.id
+                LEFT JOIN schedules sch ON sch.space_id = s.id AND sch.day_of_week = ?
+                WHERE s.status = 'active'
+                  AND c.status = 'active'
+                  AND (sch.is_open = 1 OR sch.id IS NULL)";
+        $params = [$dayOfWeek];
+        if ($sportType) {
+            $sql .= " AND s.sport_type = ?";
+            $params[] = $sportType;
+        }
+        $sql .= " ORDER BY s.price_per_hour ASC";
+        return $this->findAll($sql, $params);
+    }
+
+    public function countAvailableByDate($date, $sportType = '') {
+        $dayOfWeek = (int)date('w', strtotime($date));
+        $sql = "SELECT COUNT(DISTINCT s.id) as cnt
+                FROM spaces s
+                LEFT JOIN clubs c ON s.club_id = c.id
+                LEFT JOIN schedules sch ON sch.space_id = s.id AND sch.day_of_week = ?
+                WHERE s.status = 'active'
+                  AND c.status = 'active'
+                  AND (sch.is_open = 1 OR sch.id IS NULL)";
+        $params = [$dayOfWeek];
+        if ($sportType) {
+            $sql .= " AND s.sport_type = ?";
+            $params[] = $sportType;
+        }
+        $row = $this->findOne($sql, $params);
+        return $row['cnt'] ?? 0;
+    }
+
+    public function getAvailableSlots($spaceId, $date) {
+        $dayOfWeek = (int)date('w', strtotime($date));
+        $schedule = $this->findOne(
+            "SELECT open_time, close_time FROM schedules WHERE space_id = ? AND day_of_week = ? AND is_open = 1",
+            [$spaceId, $dayOfWeek]
+        );
+        if (!$schedule) {
+            $schedule = ['open_time' => '07:00:00', 'close_time' => '22:00:00'];
+        }
+        $reserved = $this->getReservedSlots($spaceId, $date);
+        $openHour  = (int)substr($schedule['open_time'], 0, 2);
+        $closeHour = (int)substr($schedule['close_time'], 0, 2);
+        $slots = [];
+        for ($h = $openHour; $h < $closeHour; $h++) {
+            $slotStart = sprintf('%02d:00', $h);
+            $slotEnd   = sprintf('%02d:00', $h + 1);
+            $busy = false;
+            foreach ($reserved as $r) {
+                $rs = substr($r['start_time'], 0, 5);
+                $re = substr($r['end_time'], 0, 5);
+                if ($slotStart < $re && $slotEnd > $rs) { $busy = true; break; }
+            }
+            $slots[] = ['time' => $slotStart, 'available' => !$busy];
+        }
+        return $slots;
+    }
+
     public function create($data) {
         $sql = "INSERT INTO spaces (club_id, name, sport_type, description, capacity, price_per_hour, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [

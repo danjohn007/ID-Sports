@@ -14,14 +14,23 @@ class ReservationController extends Controller {
 
     public function search() {
         $this->requireAuth();
-        $query = $this->get('q');
+        $query     = $this->get('q');
         $sportType = $this->get('sport');
-        $spaces = $this->spaceModel->search($query, $sportType);
+        $date      = $this->get('date');
+
+        // Only run filtered search if params given, otherwise pass empty array (view shows all)
+        if ($query || $sportType || $date) {
+            $spaces = $this->spaceModel->search($query, $sportType);
+        } else {
+            $spaces = [];
+        }
+
         $this->view('reservations/search', [
-            'title' => 'Buscar Espacios',
-            'spaces' => $spaces,
-            'query' => $query,
+            'title'     => 'Buscar Canchas',
+            'spaces'    => $spaces,
+            'query'     => $query,
             'sportType' => $sportType,
+            'date'      => $date,
         ]);
     }
 
@@ -103,6 +112,23 @@ class ReservationController extends Controller {
                 'payment_status' => 'paid',
             ]);
 
+            // Generate unique QR code string (RF3.6)
+            $qrCode = 'IDSPORTS-RES-' . $reservationId . '-' . strtoupper(bin2hex(random_bytes(4)));
+            $this->reservationModel->updateQrCode($reservationId, $qrCode);
+
+            // Create confirmation notification
+            try {
+                $notifModel = new NotificationModel();
+                $spaceInfo = $this->spaceModel->findById($spaceId);
+                $notifModel->create(
+                    $userId,
+                    '¡Reservación confirmada!',
+                    'Tu cancha ' . ($spaceInfo['name'] ?? '') . ' está lista para el ' . date('d/m/Y', strtotime($date)) . ' a las ' . substr($start_time, 0, 5) . '.',
+                    'reservation',
+                    $reservationId
+                );
+            } catch (Exception $e) {}
+
             $reservation = $this->reservationModel->findById($reservationId);
             $this->view('reservations/confirm', [
                 'title' => 'Reservación Confirmada',
@@ -111,6 +137,21 @@ class ReservationController extends Controller {
         } else {
             $this->redirect('reservations/search');
         }
+    }
+
+    public function slots() {
+        $this->requireAuth();
+        $spaceId = $this->get('space_id');
+        $date    = $this->get('date', date('Y-m-d'));
+        if (!$spaceId) {
+            header('Content-Type: application/json');
+            echo json_encode([]);
+            exit;
+        }
+        $slots = $this->spaceModel->getAvailableSlots($spaceId, $date);
+        header('Content-Type: application/json');
+        echo json_encode($slots);
+        exit;
     }
 
     public function history() {

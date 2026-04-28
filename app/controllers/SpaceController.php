@@ -1,0 +1,58 @@
+<?php
+class SpaceController extends Controller {
+    private $spaceModel;
+    private $reviewModel;
+    private $amenityModel;
+
+    public function __construct() {
+        $this->spaceModel  = new SpaceModel();
+        $this->reviewModel = new ReviewModel();
+        $this->amenityModel = new AmenityModel();
+    }
+
+    public function detail($spaceId = null) {
+        $this->requireAuth();
+        if (!$spaceId) {
+            $spaceId = $this->get('id');
+        }
+        $space = $this->spaceModel->findById($spaceId);
+        if (!$space) {
+            $this->setFlash('error', 'Espacio no encontrado.');
+            $this->redirect('reservations/search');
+        }
+
+        $schedules  = $this->spaceModel->getSchedules($spaceId);
+        $amenities  = $this->amenityModel->findByClub($space['club_id'] ?? 0);
+        $reviews    = $this->reviewModel->findBySpace($spaceId);
+        $avgRating  = count($reviews)
+            ? round(array_sum(array_column($reviews, 'rating')) / count($reviews), 1)
+            : 0;
+
+        // Pre-compute available slots for today and next 4 days
+        $slotsPreview = [];
+        for ($i = 0; $i < 5; $i++) {
+            $date = date('Y-m-d', strtotime("+$i days"));
+            $slotsPreview[$date] = $this->spaceModel->getAvailableSlots($spaceId, $date);
+        }
+
+        $this->view('spaces/detail', [
+            'title'        => $space['name'],
+            'space'        => $space,
+            'schedules'    => $schedules,
+            'amenities'    => $amenities,
+            'reviews'      => $reviews,
+            'avgRating'    => $avgRating,
+            'slotsPreview' => $slotsPreview,
+        ]);
+    }
+
+    public function slots($spaceId = null) {
+        $this->requireAuth();
+        if (!$spaceId) $spaceId = $this->get('id');
+        $date = $this->get('date', date('Y-m-d'));
+        $slots = $this->spaceModel->getAvailableSlots($spaceId, $date);
+        header('Content-Type: application/json');
+        echo json_encode($slots);
+        exit;
+    }
+}

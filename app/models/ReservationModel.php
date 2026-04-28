@@ -57,6 +57,13 @@ class ReservationModel extends Model {
         return $this->lastInsertId();
     }
 
+    public function updateQrCode($id, $qrCode) {
+        return $this->execute(
+            "UPDATE reservations SET qr_code = ?, status = 'confirmed' WHERE id = ?",
+            [$qrCode, $id]
+        );
+    }
+
     public function updateStatus($id, $status) {
         return $this->execute("UPDATE reservations SET status = ? WHERE id = ?", [$status, $id]);
     }
@@ -70,6 +77,20 @@ class ReservationModel extends Model {
             "SELECT DATE_FORMAT(date, '%Y-%m') as month, SUM(total) as total, COUNT(*) as count
              FROM reservations WHERE user_id = ? AND status != 'cancelled'
              GROUP BY month ORDER BY month DESC LIMIT 12",
+            [$userId]
+        );
+    }
+
+    public function getTodayForUser($userId) {
+        return $this->findOne(
+            "SELECT r.*, s.name as space_name, s.sport_type, c.name as club_name
+             FROM reservations r
+             LEFT JOIN spaces s ON r.space_id = s.id
+             LEFT JOIN clubs c ON s.club_id = c.id
+             WHERE r.user_id = ? AND r.date = CURDATE()
+               AND r.status IN ('active','confirmed')
+             ORDER BY r.start_time ASC
+             LIMIT 1",
             [$userId]
         );
     }
