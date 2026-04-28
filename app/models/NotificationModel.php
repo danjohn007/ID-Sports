@@ -1,6 +1,7 @@
 <?php
 class NotificationModel extends Model {
     public function getForUser($userId, $limit = 20) {
+        $limit = max(1, min(100, (int)$limit));
         return $this->findAll(
             "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT $limit",
             [$userId]

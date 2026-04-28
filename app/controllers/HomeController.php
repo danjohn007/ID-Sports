@@ -87,8 +87,14 @@ class HomeController extends Controller {
         $userId  = $_SESSION['user_id'];
         $current = $_SESSION['dark_mode'] ?? 0;
         $new     = $current ? 0 : 1;
-        $_SESSION['dark_mode'] = $new;
-        (new UserModel())->update($userId, ['dark_mode' => $new]);
+        try {
+            (new UserModel())->update($userId, ['dark_mode' => $new]);
+            $_SESSION['dark_mode'] = $new;
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['dark_mode' => $current, 'error' => 'Update failed']);
+            exit;
+        }
         header('Content-Type: application/json');
         echo json_encode(['dark_mode' => $new]);
         exit;

@@ -53,6 +53,7 @@ class ClubModel extends Model {
     }
 
     public function getNearby($lat = null, $lng = null, $limit = 6) {
+        $limit = max(1, min(50, (int)$limit));
         if ($lat && $lng) {
             // Distance formula compatible with MySQL 5.7
             return parent::findAll(

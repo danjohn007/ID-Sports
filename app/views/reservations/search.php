@@ -112,7 +112,7 @@
         <?php endforeach; ?>
     </div>
 
-    <?php elseif (isset($sportType) && $sportType !== '' || !empty($date) || !empty($query)): ?>
+    <?php elseif ((isset($sportType) && $sportType !== '') || !empty($date) || !empty($query)): ?>
     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 p-12 text-center">
         <p class="text-5xl mb-4">🏟️</p>
         <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">Sin resultados</h3>

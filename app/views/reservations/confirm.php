@@ -125,8 +125,13 @@
 
             <form method="POST">
                 <input type="hidden" name="confirmed" value="1">
-                <?php foreach ($_POST as $k => $v): ?>
-                <input type="hidden" name="<?= htmlspecialchars($k) ?>" value="<?= htmlspecialchars(is_array($v) ? implode(',', $v) : $v) ?>">
+                <?php
+                $allowedFields = ['space_id', 'date', 'start_time', 'end_time', 'num_people', 'coupon', 'notes', 'payment_method'];
+                foreach ($allowedFields as $field):
+                    if (!isset($_POST[$field])) continue;
+                    $v = is_array($_POST[$field]) ? implode(',', array_map('htmlspecialchars', $_POST[$field])) : htmlspecialchars($_POST[$field]);
+                ?>
+                <input type="hidden" name="<?= htmlspecialchars($field) ?>" value="<?= $v ?>">
                 <?php endforeach; ?>
                 <div class="flex gap-3">
                     <a href="javascript:history.back()" class="flex-1 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-medium py-3 rounded-2xl text-center text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">

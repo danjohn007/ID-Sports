@@ -112,8 +112,8 @@ class ReservationController extends Controller {
                 'payment_status' => 'paid',
             ]);
 
-            // Generate unique QR code string (RF3.6)
-            $qrCode = 'IDSPORTS-RES-' . $reservationId . '-' . strtoupper(bin2hex(random_bytes(4)));
+            // Generate unique QR code string with 16 bytes entropy (RF3.6)
+            $qrCode = 'IDSPORTS-RES-' . $reservationId . '-' . strtoupper(bin2hex(random_bytes(16)));
             $this->reservationModel->updateQrCode($reservationId, $qrCode);
 
             // Create confirmation notification
