@@ -28,6 +28,7 @@ class App {
             'auth/reset' => ['AuthController', 'reset'],
             'auth/logout' => ['AuthController', 'logout'],
             'user/profile' => ['UserController', 'profile'],
+            'user/upload-avatar' => ['UserController', 'uploadAvatar'],
             'user/settings' => ['UserController', 'settings'],
             'reservations/search' => ['ReservationController', 'search'],
             'reservations/create' => ['ReservationController', 'create'],

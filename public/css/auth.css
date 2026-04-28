@@ -82,13 +82,11 @@ body.auth-page {
         repeating-linear-gradient(90deg,  transparent, transparent 60px, rgba(255,255,255,.6) 60px, rgba(255,255,255,.6) 61px);
 }
 
-/* ── Giant "ID SPORTS" watermark in background ──────────── */
-/* Visible ghost title — imposing Jockey One with primary glow */
+/* ── Giant "ID SPORTS" watermark — breathing pulse animation ─ */
 .auth-bg-title {
     position: absolute;
     top: 42%;
     left: 50%;
-    transform: translate(-50%, -50%);
     font-family: 'Jockey One', sans-serif;
     font-size: clamp(5rem, 20vw, 13rem);
     text-transform: uppercase;
@@ -98,17 +96,124 @@ body.auth-page {
     user-select: none;
     z-index: 3;
     color: var(--primary);
-    opacity: 0.13;
     text-shadow:
         0 0 160px var(--primary),
         0 0 80px var(--primary),
         0 0 40px var(--primary-glow);
+    animation: title-breathe 6s ease-in-out infinite;
+    transform-origin: center center;
+}
+
+@keyframes title-breathe {
+    0%,  100% { opacity: 0.10; transform: translate(-50%, -50%) scale(1);    }
+    50%       { opacity: 0.18; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+/* ── Floating particles (sport icons orbiting in background) ─ */
+.auth-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.auth-particle {
+    position: absolute;
+    font-size: 1.5rem;
+    line-height: 1;
+    border-radius: 16px;
+    background: rgba(255,255,255, 0.04);
+    border: 1px solid rgba(255,255,255, 0.07);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    /* Base opacity; each particle overrides via animation */
+}
+
+/* Position each particle differently */
+.auth-particle:nth-child(1)  { top:  8%; left:  6%; animation: drift-1 18s ease-in-out infinite; }
+.auth-particle:nth-child(2)  { top: 12%; right: 8%; animation: drift-2 22s ease-in-out infinite 2s; }
+.auth-particle:nth-child(3)  { top: 30%; left:  3%; animation: drift-3 20s ease-in-out infinite 5s; }
+.auth-particle:nth-child(4)  { top: 22%; right: 5%; animation: drift-4 25s ease-in-out infinite 1s; }
+.auth-particle:nth-child(5)  { top: 58%; left:  7%; animation: drift-5 19s ease-in-out infinite 7s; }
+.auth-particle:nth-child(6)  { top: 65%; right: 6%; animation: drift-6 23s ease-in-out infinite 3s; }
+.auth-particle:nth-child(7)  { top: 45%; left: 88%; animation: drift-7 21s ease-in-out infinite 9s; }
+.auth-particle:nth-child(8)  { top:  5%; left: 45%; animation: drift-8 17s ease-in-out infinite 4s; }
+.auth-particle:nth-child(9)  { top: 75%; left: 85%; animation: drift-9 24s ease-in-out infinite 6s; }
+.auth-particle:nth-child(10) { top: 85%; left: 22%; animation: drift-10 20s ease-in-out infinite 11s; }
+
+/* Drift paths — using only transform+opacity (no layout shifts) */
+@keyframes drift-1 {
+    0%   { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+    25%  { opacity: 0.11; transform: translate(30px, -50px) rotate(12deg) scale(1.05); }
+    50%  { opacity: 0.07; transform: translate(-20px, -90px) rotate(-8deg) scale(.95); }
+    75%  { opacity: 0.10; transform: translate(15px, -45px) rotate(5deg) scale(1.02); }
+    100% { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-2 {
+    0%   { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
+    30%  { opacity: 0.05; transform: translate(-40px, 55px) rotate(-15deg) scale(.97); }
+    60%  { opacity: 0.12; transform: translate(25px, 80px) rotate(10deg) scale(1.08); }
+    100% { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-3 {
+    0%   { opacity: 0.05; transform: translate(0,0) rotate(0deg) scale(1); }
+    40%  { opacity: 0.10; transform: translate(55px, -35px) rotate(20deg) scale(1.1); }
+    70%  { opacity: 0.07; transform: translate(30px, -70px) rotate(-5deg) scale(.93); }
+    100% { opacity: 0.05; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-4 {
+    0%   { opacity: 0.09; transform: translate(0,0) rotate(0deg) scale(1); }
+    20%  { opacity: 0.06; transform: translate(-60px, 40px) rotate(-18deg) scale(.96); }
+    55%  { opacity: 0.13; transform: translate(-35px, 85px) rotate(8deg) scale(1.06); }
+    80%  { opacity: 0.08; transform: translate(-50px, 50px) rotate(-12deg) scale(1); }
+    100% { opacity: 0.09; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-5 {
+    0%   { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+    35%  { opacity: 0.12; transform: translate(45px, -65px) rotate(14deg) scale(1.07); }
+    65%  { opacity: 0.05; transform: translate(20px, -100px) rotate(-6deg) scale(.92); }
+    100% { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-6 {
+    0%   { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
+    45%  { opacity: 0.04; transform: translate(-50px, 45px) rotate(22deg) scale(.94); }
+    75%  { opacity: 0.11; transform: translate(35px, 70px) rotate(-10deg) scale(1.09); }
+    100% { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-7 {
+    0%   { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+    30%  { opacity: 0.10; transform: translate(-30px, -55px) rotate(-16deg) scale(1.04); }
+    60%  { opacity: 0.08; transform: translate(10px, -80px) rotate(9deg) scale(.96); }
+    100% { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-8 {
+    0%   { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+    50%  { opacity: 0.13; transform: translate(0px, 70px) rotate(18deg) scale(1.08); }
+    100% { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-9 {
+    0%   { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+    35%  { opacity: 0.04; transform: translate(-45px, 55px) rotate(18deg) scale(.95); }
+    70%  { opacity: 0.11; transform: translate(20px, 90px) rotate(-9deg) scale(1.06); }
+    100% { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+}
+@keyframes drift-10 {
+    0%   { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+    40%  { opacity: 0.10; transform: translate(50px, -40px) rotate(-20deg) scale(1.09); }
+    75%  { opacity: 0.05; transform: translate(25px, -75px) rotate(11deg) scale(.93); }
+    100% { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
 }
 
 /* ── Logo (fixed top) ───────────────────────────────────── */
 .auth-logo {
     position: fixed;
-    top: 22px;
+    top: 18px;
     left: 0;
     right: 0;
     z-index: 30;
@@ -116,40 +221,48 @@ body.auth-page {
     justify-content: center;
 }
 
-/* Glassmorphism pill — does NOT use primary color (accessibility rule) */
+/* Vertical glassmorphism card — image on top, name below */
 .auth-logo-icon {
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    padding: 8px 18px 8px 10px;
-    border-radius: 50px;
+    gap: 6px;
+    padding: 12px 20px 10px;
+    border-radius: 20px;
     background: rgba(255,255,255, 0.07);
     backdrop-filter: blur(16px) saturate(1.4);
     -webkit-backdrop-filter: blur(16px) saturate(1.4);
     border: 1px solid rgba(255,255,255, 0.12);
     text-decoration: none;
-    transition: background .2s, border-color .2s;
+    transition: background .2s, border-color .2s, transform .2s;
     box-shadow: 0 4px 24px rgba(0,0,0,.35);
+    min-width: 88px;
 }
 
 .auth-logo-icon:hover {
     background: rgba(255,255,255, 0.11);
     border-color: rgba(255,255,255, 0.2);
+    transform: translateY(-1px);
 }
 
+/* Logo image — circular, top of the card */
 .auth-logo-icon img {
-    height: 28px;
+    width: 44px;
+    height: 44px;
     filter: brightness(0) invert(1);
     border-radius: 50%;
     object-fit: cover;
+    display: block;
 }
 
+/* App name — below the image */
 .auth-logo-icon span {
     color: #fff;
     font-family: 'Jockey One', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 0.1em;
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    line-height: 1;
 }
 
 /* ── Bottom Sheet (Glassmorphism card) ──────────────────── */
@@ -160,7 +273,7 @@ body.auth-page {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding-top: 130px;
+    padding-top: 150px;
 }
 
 .auth-sheet-inner {

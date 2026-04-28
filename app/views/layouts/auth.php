@@ -49,7 +49,20 @@
 <!-- ── Background ─────────────────────────────────────── -->
 <div class="auth-bg" <?php if ($authBgImage): ?>style="background-image:url('<?= htmlspecialchars($authBgImage) ?>')"<?php endif; ?>>
     <?php if (!$authBgImage): ?><div class="auth-bg-default"></div><?php endif; ?>
-    <!-- Giant "ID SPORTS" watermark — Jockey One, primary color glow -->
+    <!-- Floating sport particles orbiting in background -->
+    <div class="auth-particles">
+        <span class="auth-particle">⚽</span>
+        <span class="auth-particle">🏀</span>
+        <span class="auth-particle">🎾</span>
+        <span class="auth-particle">🏊</span>
+        <span class="auth-particle">🏋️</span>
+        <span class="auth-particle">🎯</span>
+        <span class="auth-particle">🏐</span>
+        <span class="auth-particle">🥊</span>
+        <span class="auth-particle">🏆</span>
+        <span class="auth-particle">⚡</span>
+    </div>
+    <!-- Giant "ID SPORTS" watermark — Jockey One, primary color glow, breathing pulse -->
     <div class="auth-bg-title"><?= htmlspecialchars($appName) ?></div>
 </div>
 
