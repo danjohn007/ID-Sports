@@ -384,10 +384,12 @@ class ConfigController extends Controller {
             $action = $this->post('action');
 
             if ($action === 'save') {
-                $id   = (int)$this->post('id');
+                $id  = (int)$this->post('id');
+                $rawSlug = strtolower(trim($this->post('slug') ?? ''));
+                $slug = trim(preg_replace('/_+/', '_', preg_replace('/[^a-z0-9_]/', '_', $rawSlug)), '_');
                 $data = [
                     'name'       => trim($this->post('name') ?? ''),
-                    'slug'       => preg_replace('/[^a-z0-9_]/', '_', strtolower(trim($this->post('slug') ?? ''))),
+                    'slug'       => $slug ?: 'sport_' . time(),
                     'color_from' => $this->post('color_from') ?? '#10b981',
                     'color_to'   => $this->post('color_to')   ?? '#059669',
                     'sort_order' => (int)$this->post('sort_order'),
@@ -409,7 +411,7 @@ class ConfigController extends Controller {
             return;
         }
 
-        $sports = $sportModel->getAll();
+        $sports = $sportModel->getAllForAdmin();
         $this->view('config/sports', ['title' => 'Deportes del Sistema', 'sports' => $sports], 'admin');
     }
 

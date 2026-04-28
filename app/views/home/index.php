@@ -31,9 +31,9 @@ $sportAccentsFallback = [
     'football'=>['from'=>'#10b981','to'=>'#059669'],'football_sala'=>['from'=>'#16a34a','to'=>'#15803d'],
     'futbol_7'=>['from'=>'#22c55e','to'=>'#16a34a'],'futbol_rapido'=>['from'=>'#4ade80','to'=>'#22c55e'],
     'padel'=>['from'=>'#3b82f6','to'=>'#1d4ed8'],'tennis'=>['from'=>'#f59e0b','to'=>'#d97706'],
-    'basketball'=>['from'=>'#f97316','to'=>'#ea580c'],'volleyball'=>['from'=>'#8b5cf6','to'=>'var(--secondary)'],
+    'basketball'=>['from'=>'#f97316','to'=>'#ea580c'],'volleyball'=>['from'=>'#8b5cf6','to'=>'#7c3aed'],
     'swimming'=>['from'=>'#06b6d4','to'=>'#0891b2'],'baseball'=>['from'=>'#ef4444','to'=>'#dc2626'],
-    'squash'=>['from'=>'#a78bfa','to'=>'var(--secondary)'],'badminton'=>['from'=>'#fb923c','to'=>'#f97316'],
+    'squash'=>['from'=>'#a78bfa','to'=>'#7c3aed'],'badminton'=>['from'=>'#fb923c','to'=>'#f97316'],
     'gym'=>['from'=>'#64748b','to'=>'#475569'],'yoga'=>['from'=>'#ec4899','to'=>'#db2777'],
     'cycling'=>['from'=>'#0ea5e9','to'=>'#0284c7'],'other'=>['from'=>'#94a3b8','to'=>'#64748b'],
 ];

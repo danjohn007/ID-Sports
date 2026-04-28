@@ -1,9 +1,16 @@
 <?php
 class SportTypeModel extends Model {
-    /** All active sport types ordered by sort_order */
+    /** All active sport types ordered by sort_order (for user-facing views) */
     public function getAll() {
         return $this->findAll(
             "SELECT * FROM sport_types WHERE is_active = 1 ORDER BY sort_order ASC, name ASC"
+        );
+    }
+
+    /** All sport types including inactive (for admin management) */
+    public function getAllForAdmin() {
+        return $this->findAll(
+            "SELECT * FROM sport_types ORDER BY sort_order ASC, name ASC"
         );
     }
 
@@ -14,11 +21,18 @@ class SportTypeModel extends Model {
 
     /** Insert or update a sport type */
     public function save(array $data) {
+        static $allowed = ['name', 'slug', 'color_from', 'color_to', 'sort_order', 'is_active'];
+
         if (!empty($data['id'])) {
             $id = (int)$data['id'];
             unset($data['id']);
             $fields = []; $params = [];
-            foreach ($data as $k => $v) { $fields[] = "`$k` = ?"; $params[] = $v; }
+            foreach ($data as $k => $v) {
+                if (!in_array($k, $allowed, true)) continue;
+                $fields[] = "`$k` = ?";
+                $params[] = $v;
+            }
+            if (empty($fields)) return $id;
             $params[] = $id;
             $this->execute("UPDATE sport_types SET " . implode(', ', $fields) . " WHERE id = ?", $params);
             return $id;
