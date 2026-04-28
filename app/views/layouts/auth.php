@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($title ?? 'ID Sports') ?> — <?= APP_NAME ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Jockey+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jockey+One&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/auth.css">
     <?php
     $cfg = [];
@@ -15,16 +15,28 @@
     $primaryColor = $cfg['color_primary']      ?? '#0EA5E9';
     $btnColor     = $cfg['color_login_button'] ?? $primaryColor;
     $authBgImage  = $cfg['auth_bg_image']      ?? '';
+    $logoPath     = $cfg['app_logo_path']       ?? '';
+    $logoSrc      = $logoPath ? BASE_URL . htmlspecialchars($logoPath) : BASE_URL . 'public/assets/logo.svg';
+    $appName      = defined('APP_NAME') ? APP_NAME : 'ID Sports';
+
+    // Compute primary-color rgba variants for CSS variables (so gradient reacts to admin color)
+    $hex = ltrim($primaryColor, '#');
+    if (strlen($hex) === 3) { $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2]; }
+    $r = hexdec(substr($hex,0,2)); $g = hexdec(substr($hex,2,2)); $b = hexdec(substr($hex,4,2));
+    $primaryGlow  = "rgba($r,$g,$b,0.22)";
+    $primaryGlowLight = "rgba($r,$g,$b,0.09)";
     ?>
     <style>
         :root {
-            --primary:   <?= htmlspecialchars($primaryColor) ?>;
-            --btn-color: <?= htmlspecialchars($btnColor) ?>;
+            --primary:        <?= htmlspecialchars($primaryColor) ?>;
+            --btn-color:      <?= htmlspecialchars($btnColor) ?>;
+            --primary-glow:   <?= $primaryGlow ?>;
+            --primary-glow5:  <?= $primaryGlowLight ?>;
         }
     </style>
     <?php if (($currentPage ?? '') === 'login'): ?>
     <script>
-        // Redirect to onboarding if not yet seen
+        // Redirect to onboarding if not yet seen (hide flash to prevent layout flash)
         if (!localStorage.getItem('ids_onboarding_seen')) {
             document.documentElement.style.visibility = 'hidden';
             window.location.replace('<?= BASE_URL ?>auth/onboarding');
@@ -37,13 +49,15 @@
 <!-- ── Background ─────────────────────────────────────── -->
 <div class="auth-bg" <?php if ($authBgImage): ?>style="background-image:url('<?= htmlspecialchars($authBgImage) ?>')"<?php endif; ?>>
     <?php if (!$authBgImage): ?><div class="auth-bg-default"></div><?php endif; ?>
+    <!-- Giant "ID SPORTS" watermark — Jockey One, primary color glow -->
+    <div class="auth-bg-title"><?= htmlspecialchars($appName) ?></div>
 </div>
 
 <!-- ── Logo ───────────────────────────────────────────── -->
 <div class="auth-logo">
     <a href="<?= BASE_URL ?>" class="auth-logo-icon">
-        <img src="<?= BASE_URL ?>public/assets/logo.svg" alt="ID Sports">
-        <span>ID SPORTS</span>
+        <img src="<?= $logoSrc ?>" alt="<?= htmlspecialchars($appName) ?>">
+        <span><?= htmlspecialchars($appName) ?></span>
     </a>
 </div>
 
@@ -61,8 +75,8 @@
     <div class="auth-sheet-inner">
         <div class="auth-sheet-handle"></div>
         <?= $content ?>
-        <p class="text-center" style="font-size:.75rem;color:#444;margin-top:24px;">
-            © <?= date('Y') ?> <?= APP_NAME ?> v<?= APP_VERSION ?>
+        <p class="text-center" style="font-size:.7rem;color:rgba(255,255,255,.2);margin-top:28px;font-family:'Poppins',sans-serif;">
+            © <?= date('Y') ?> <?= htmlspecialchars($appName) ?> v<?= APP_VERSION ?>
         </p>
     </div>
 </div>

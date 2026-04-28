@@ -2,6 +2,32 @@
     <?php if ($success ?? false): ?>
     <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">Configuración guardada correctamente</div>
     <?php endif; ?>
+
+    <!-- Logo upload -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+        <h2 class="font-semibold text-gray-900 mb-1">🖼️ Logo de la Empresa</h2>
+        <p class="text-xs text-gray-400 mb-4">Este logo aparece en la pantalla de login y en el onboarding. Formatos: PNG, JPG, SVG o WEBP. Máx 2 MB.</p>
+        <?php
+        $logoPath = $config['app_logo_path'] ?? '';
+        $logoSrc  = $logoPath ? BASE_URL . htmlspecialchars($logoPath) . '?v=' . time() : BASE_URL . 'public/assets/logo.svg';
+        ?>
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 rounded-xl bg-gray-900 flex items-center justify-center overflow-hidden border border-gray-200">
+                <img src="<?= $logoSrc ?>" alt="Logo actual" class="max-w-full max-h-full object-contain" style="filter:brightness(0) invert(1)">
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-700">Logo actual</p>
+                <p class="text-xs text-gray-400"><?= $logoPath ? htmlspecialchars($logoPath) : 'logo.svg (por defecto)' ?></p>
+            </div>
+        </div>
+        <form method="POST" action="<?= BASE_URL ?>config/upload-logo" enctype="multipart/form-data" class="flex items-center gap-3">
+            <input type="file" name="logo_file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                class="flex-1 text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-sky-50 file:text-sky-600 file:font-medium hover:file:bg-sky-100 cursor-pointer">
+            <button type="submit" class="bg-sky-500 text-white font-semibold px-5 py-2 rounded-xl text-sm hover:bg-sky-600 transition-all whitespace-nowrap">Subir Logo</button>
+        </form>
+    </div>
+
+    <!-- General settings -->
     <div class="bg-white rounded-2xl border border-gray-100 p-6">
         <h2 class="font-semibold text-gray-900 mb-5">🌐 Configuración General</h2>
         <form method="POST" class="space-y-4">

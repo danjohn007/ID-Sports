@@ -4,7 +4,7 @@ class ConfigController extends Controller {
 
     // Allowed config keys per section (prevents arbitrary key injection)
     private static $allowedKeys = [
-        'general'    => ['app_name', 'app_tagline', 'app_description', 'timezone', 'currency', 'currency_symbol', 'contact_email', 'contact_phone', 'contact_address', 'maintenance_mode'],
+        'general'    => ['app_name', 'app_tagline', 'app_description', 'timezone', 'currency', 'currency_symbol', 'contact_email', 'contact_phone', 'contact_address', 'maintenance_mode', 'app_logo_path'],
         'email'      => ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_name', 'smtp_from_email', 'smtp_encryption'],
         'colors'     => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex', 'color_login_button', 'color_login_button_hex', 'color_login_link', 'color_login_link_hex', 'color_login_logo_bg', 'color_login_logo_bg_hex', 'auth_bg_image'],
         'onboarding' => ['onboarding_slide1_title', 'onboarding_slide1_desc', 'onboarding_slide1_image', 'onboarding_slide2_title', 'onboarding_slide2_desc', 'onboarding_slide2_image', 'onboarding_slide3_title', 'onboarding_slide3_desc', 'onboarding_slide3_image'],
@@ -176,5 +176,70 @@ class ConfigController extends Controller {
         }
         $config = $this->configModel->getAll();
         $this->view('config/onboarding', ['title' => 'Pantallas de Onboarding', 'config' => $config], 'admin');
+    }
+
+    /* ── Logo image upload ──────────────────────────────────── */
+    public function uploadLogo() {
+        if (!$this->isPost()) {
+            $this->redirect('config/general');
+            return;
+        }
+
+        if (empty($_FILES['logo_file']['name']) || $_FILES['logo_file']['error'] !== UPLOAD_ERR_OK) {
+            $this->setFlash('error', 'No se seleccionó ningún archivo o hubo un error de subida.');
+            $this->redirect('config/general');
+            return;
+        }
+
+        $file = $_FILES['logo_file'];
+
+        // Validate MIME type using finfo (not extension)
+        if (!class_exists('finfo')) {
+            $this->setFlash('error', 'La extensión PHP "fileinfo" es requerida para subir imágenes. Contacta al administrador del servidor.');
+            $this->redirect('config/general');
+            return;
+        }
+
+        $finfo    = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+        $allowed  = [
+            'image/png'     => 'png',
+            'image/jpeg'    => 'jpg',
+            'image/svg+xml' => 'svg',
+            'image/webp'    => 'webp',
+        ];
+
+        if (!array_key_exists($mimeType, $allowed)) {
+            $this->setFlash('error', 'Tipo de archivo no permitido. Usa PNG, JPG, SVG o WEBP.');
+            $this->redirect('config/general');
+            return;
+        }
+
+        // Max 2 MB
+        if ($file['size'] > 2 * 1024 * 1024) {
+            $this->setFlash('error', 'El archivo supera el límite de 2 MB.');
+            $this->redirect('config/general');
+            return;
+        }
+
+        $ext      = $allowed[$mimeType];
+        $filename = 'logo_custom.' . $ext;
+        $destDir  = ROOT . '/public/assets/';
+        $destPath = $destDir . $filename;
+
+        if (!is_dir($destDir) || !is_writable($destDir)) {
+            $this->setFlash('error', 'El directorio de destino no es escribible.');
+            $this->redirect('config/general');
+            return;
+        }
+
+        if (move_uploaded_file($file['tmp_name'], $destPath)) {
+            $this->configModel->set('app_logo_path', 'public/assets/' . $filename);
+            $this->setFlash('success', '✅ Logo actualizado correctamente.');
+        } else {
+            $this->setFlash('error', 'No se pudo guardar el archivo. Verifica los permisos.');
+        }
+
+        $this->redirect('config/general');
     }
 }

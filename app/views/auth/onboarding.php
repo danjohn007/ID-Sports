@@ -1,26 +1,27 @@
 <?php
 /* Onboarding — standalone page (no layout wrapper).
    Config values are injected by AuthController::onboarding().
-   Variables available: $slides (array), $btnColor (string), $baseUrl (string). */
+   Variables available: $slides (array), $btnColor (string), $baseUrl (string),
+                        $logoSrc (string), $appName (string), $primaryGlow (string). */
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido — ID Sports</title>
+    <title>Bienvenido — <?= htmlspecialchars($appName) ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Jockey+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jockey+One&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl) ?>public/css/onboarding.css">
     <style>:root { --primary-color: <?= htmlspecialchars($btnColor) ?>; }</style>
 </head>
 <body>
 <div class="ob-wrapper" id="obWrapper">
 
-    <!-- Logo -->
+    <!-- Logo (glassmorphism pill — custom or default) -->
     <a href="<?= htmlspecialchars($baseUrl) ?>" class="ob-logo">
-        <img src="<?= htmlspecialchars($baseUrl) ?>public/assets/logo.svg" alt="ID Sports">
-        <span>ID SPORTS</span>
+        <img src="<?= htmlspecialchars($logoSrc) ?>" alt="<?= htmlspecialchars($appName) ?>">
+        <span><?= htmlspecialchars($appName) ?></span>
     </a>
 
     <!-- Slides -->
@@ -30,6 +31,8 @@
             <div class="ob-slide-bg ob-slide-bg-<?= $i + 1 ?>"
                  <?php if (!empty($slide['image'])): ?>style="background-image:url('<?= htmlspecialchars($slide['image']) ?>')"<?php endif; ?>>
             </div>
+            <!-- Primary-color glow orb -->
+            <div class="ob-slide-bg-glow"></div>
             <div class="ob-slide-content">
                 <span class="ob-slide-icon"><?= $slide['icon'] ?></span>
                 <h2 class="ob-slide-title"><?= htmlspecialchars($slide['title']) ?></h2>
@@ -39,7 +42,7 @@
         <?php endforeach; ?>
     </div>
 
-    <!-- Controls -->
+    <!-- Controls (glassmorphism fixed panel) -->
     <div class="ob-controls">
         <div class="ob-dots" id="obDots">
             <?php for ($i = 0; $i < count($slides); $i++): ?>

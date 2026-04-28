@@ -41,10 +41,16 @@ class AuthController extends Controller {
         ];
 
         // Render standalone (no layout)
+        $logoPath = $cfg['app_logo_path'] ?? '';
+        $logoSrc  = $logoPath ? BASE_URL . $logoPath : BASE_URL . 'public/assets/logo.svg';
+        $appName  = defined('APP_NAME') ? APP_NAME : 'ID Sports';
+
         $this->view('auth/onboarding', [
             'slides'   => $slides,
             'btnColor' => $btnColor,
             'baseUrl'  => BASE_URL,
+            'logoSrc'  => $logoSrc,
+            'appName'  => $appName,
         ], false);
     }
 

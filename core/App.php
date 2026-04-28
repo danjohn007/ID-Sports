@@ -51,6 +51,7 @@ class App {
             'config/email' => ['ConfigController', 'email'],
             'config/colors' => ['ConfigController', 'colors'],
             'config/onboarding' => ['ConfigController', 'onboarding'],
+            'config/upload-logo' => ['ConfigController', 'uploadLogo'],
             'config/paypal' => ['ConfigController', 'paypal'],
             'config/qr' => ['ConfigController', 'qr'],
             'config/iot' => ['ConfigController', 'iot'],

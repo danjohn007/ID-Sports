@@ -1,9 +1,10 @@
 /* ============================================================
    ID Sports — Onboarding Carousel
-   Font: Jockey One (titles) + Inter (body)
+   Design System: Glassmorphism · Primary-Accent-Only · WCAG AA
+   Fonts: Jockey One (titles) + Poppins (body)
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Jockey+One&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jockey+One&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -12,8 +13,8 @@
 html, body {
     height: 100%;
     overflow: hidden;
-    background: #121212;
-    font-family: 'Inter', sans-serif;
+    background: #060B19;
+    font-family: 'Poppins', sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -31,7 +32,7 @@ html, body {
     width: 300%;
     height: 100%;
     will-change: transform;
-    transition: transform .5s cubic-bezier(.4,0,.2,1);
+    transition: transform .55s cubic-bezier(.4,0,.2,1);
 }
 
 .ob-slide {
@@ -50,43 +51,66 @@ html, body {
     inset: 0;
     background-size: cover;
     background-position: center;
-    background-color: #121212;
+    background-color: #060B19;
 }
 
-.ob-slide-bg-1 { background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); }
-.ob-slide-bg-2 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
-.ob-slide-bg-3 { background: linear-gradient(135deg, #0d1b2a 0%, #1b4332 50%, #081c15 100%); }
+.ob-slide-bg-1 { background: linear-gradient(160deg, #060B19 0%, #0D1117 50%, #0f2744 100%); }
+.ob-slide-bg-2 { background: linear-gradient(160deg, #060B19 0%, #0d1b2a 40%, #0f3460 100%); }
+.ob-slide-bg-3 { background: linear-gradient(160deg, #060B19 0%, #0d2014 40%, #0d3320 100%); }
 
-/* Court grid pattern overlay */
+/* Court grid pattern */
 .ob-slide-bg::before {
     content: '';
     position: absolute;
     inset: 0;
-    opacity: 0.08;
+    opacity: 0.055;
     background-image:
-        repeating-linear-gradient(0deg,   transparent, transparent 60px, rgba(255,255,255,.5) 60px, rgba(255,255,255,.5) 62px),
-        repeating-linear-gradient(90deg,  transparent, transparent 60px, rgba(255,255,255,.5) 60px, rgba(255,255,255,.5) 62px);
+        repeating-linear-gradient(0deg,   transparent, transparent 60px, rgba(255,255,255,.6) 60px, rgba(255,255,255,.6) 61px),
+        repeating-linear-gradient(90deg,  transparent, transparent 60px, rgba(255,255,255,.6) 60px, rgba(255,255,255,.6) 61px);
 }
 
+/* Bottom gradient — only covers bottom 30% to fade content into controls */
 .ob-slide-bg::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(18,18,18,1) 25%, rgba(18,18,18,.15) 100%);
+    background: linear-gradient(to top,
+        rgba(6,11,25,0.97) 0%,
+        rgba(6,11,25,0.80) 20%,
+        rgba(6,11,25,0.15) 55%,
+        transparent 100%
+    );
+}
+
+/* Primary-color radial glow (accent, injected via --primary-color) */
+.ob-slide-bg-glow {
+    position: absolute;
+    width: 70%;
+    padding-top: 70%;
+    border-radius: 50%;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, var(--primary-color), transparent 70%);
+    opacity: 0.12;
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 1;
 }
 
 /* ── Slide content ──────────────────────────────────────── */
+/* padding-bottom must clear the controls panel (~210px) */
 .ob-slide-content {
     position: relative;
     z-index: 2;
-    padding: 36px 30px 130px;
+    padding: 36px 32px 230px;   /* 230px clears the fixed controls area */
 }
 
 .ob-slide-icon {
-    font-size: 3.5rem;
+    font-size: 3.75rem;
     display: block;
-    margin-bottom: 18px;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,.4));
+    margin-bottom: 20px;
+    filter: drop-shadow(0 2px 12px rgba(0,0,0,.5));
 }
 
 .ob-slide-title {
@@ -94,26 +118,34 @@ html, body {
     font-size: clamp(2.25rem, 8vw, 3rem);
     color: #FFFFFF;
     line-height: 1.05;
-    margin-bottom: 14px;
-    text-shadow: 0 2px 12px rgba(0,0,0,.4);
+    margin-bottom: 16px;
+    text-shadow: 0 2px 16px rgba(0,0,0,.5);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .ob-slide-desc {
     font-size: 1rem;
-    color: rgba(255,255,255,.6);
-    line-height: 1.65;
-    max-width: 340px;
+    font-weight: 300;
+    color: rgba(255,255,255,.75);   /* increased from .6 → .75 for better legibility */
+    line-height: 1.7;
+    max-width: 360px;
 }
 
-/* ── Controls (fixed bottom) ────────────────────────────── */
+/* ── Controls (fixed bottom — glassmorphism panel) ──────── */
 .ob-controls {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 20;
-    padding: 20px 28px 44px;
-    background: linear-gradient(to top, rgba(18,18,18,.98) 80%, transparent);
+    padding: 24px 28px 48px;
+    /* Glassmorphism panel */
+    background: rgba(6,11,25, 0.75);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    box-shadow: 0 -8px 40px rgba(0,0,0,.45);
 }
 
 /* ── Dots ───────────────────────────────────────────────── */
@@ -121,60 +153,68 @@ html, body {
     display: flex;
     gap: 8px;
     justify-content: center;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
 }
 
 .ob-dot {
     width: 8px;
     height: 8px;
     border-radius: 4px;
-    background: rgba(255,255,255,.22);
-    transition: width .3s, background .3s;
+    background: rgba(255,255,255,.2);
+    transition: width .35s cubic-bezier(.4,0,.2,1), background .35s;
     cursor: pointer;
 }
 
 .ob-dot.active {
     width: 28px;
     background: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
 }
 
-/* ── CTA button ─────────────────────────────────────────── */
+/* ── CTA button (primary accent — always white text) ────── */
 .ob-btn {
     width: 100%;
-    padding: 16px;
+    padding: 17px;
     border: none;
     border-radius: 16px;
     background: var(--primary-color);
-    color: #FFFFFF;
+    color: #FFFFFF !important;   /* WCAG: force white regardless of accent */
     font-size: 1.0625rem;
     font-weight: 700;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     cursor: pointer;
-    transition: filter .2s, transform .1s;
-    letter-spacing: .01em;
-    max-width: 480px;
+    transition: filter .2s, transform .1s, box-shadow .2s;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    max-width: 500px;
     display: block;
     margin: 0 auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,.4);
 }
 
-.ob-btn:hover  { filter: brightness(1.1); }
-.ob-btn:active { transform: scale(.98); }
+.ob-btn:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+}
+.ob-btn:active { transform: scale(.97) translateY(0); }
 
 /* ── Skip link ──────────────────────────────────────────── */
 .ob-skip {
     display: block;
     text-align: center;
-    margin-top: 14px;
-    color: rgba(255,255,255,.35);
+    margin-top: 16px;
+    color: rgba(255,255,255,.4);
     font-size: 0.875rem;
+    font-weight: 400;
     cursor: pointer;
     text-decoration: none;
     transition: color .2s;
+    letter-spacing: .02em;
 }
 
-.ob-skip:hover { color: rgba(255,255,255,.65); }
+.ob-skip:hover { color: rgba(255,255,255,.7); }
 
-/* ── Logo (fixed top-left) ──────────────────────────────── */
+/* ── Logo (fixed top-left — glassmorphism) ──────────────── */
 .ob-logo {
     position: fixed;
     top: 22px;
@@ -182,23 +222,31 @@ html, body {
     z-index: 30;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    gap: 9px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 50px;
+    background: rgba(255,255,255, 0.07);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255,255,255, 0.12);
     text-decoration: none;
+    transition: background .2s;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
 }
 
+.ob-logo:hover { background: rgba(255,255,255, 0.11); }
+
 .ob-logo img {
-    height: 22px;
+    height: 26px;
     filter: brightness(0) invert(1);
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .ob-logo span {
     color: #fff;
-    font-weight: 700;
-    font-size: 0.875rem;
-    letter-spacing: .05em;
+    font-family: 'Jockey One', sans-serif;
+    font-size: 0.9375rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
 }
