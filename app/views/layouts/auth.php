@@ -12,12 +12,13 @@
     if (class_exists('ConfigModel')) {
         try { $cfg = (new ConfigModel())->getAll(); } catch (Exception $e) { $cfg = []; }
     }
-    $primaryColor = $cfg['color_primary']      ?? '#0EA5E9';
-    $btnColor     = $cfg['color_login_button'] ?? $primaryColor;
-    $authBgImage  = $cfg['auth_bg_image']      ?? '';
-    $logoPath     = $cfg['app_logo_path']       ?? '';
-    $logoSrc      = $logoPath ? BASE_URL . htmlspecialchars($logoPath) : BASE_URL . 'public/assets/logo.svg';
-    $appName      = defined('APP_NAME') ? APP_NAME : 'ID Sports';
+    $primaryColor      = $cfg['color_primary']       ?? '#0EA5E9';
+    $lightPrimaryColor = $cfg['color_light_primary']  ?? $primaryColor;
+    $btnColor          = $cfg['color_login_button']   ?? $primaryColor;
+    $authBgImage       = $cfg['auth_bg_image']        ?? '';
+    $logoPath          = $cfg['app_logo_path']         ?? '';
+    $logoSrc           = $logoPath ? BASE_URL . htmlspecialchars($logoPath) : BASE_URL . 'public/assets/logo.svg';
+    $appName           = defined('APP_NAME') ? APP_NAME : 'ID Sports';
 
     // Compute primary-color rgba variants for CSS variables (so gradient reacts to admin color)
     $hex = ltrim($primaryColor, '#');
@@ -25,6 +26,13 @@
     $r = hexdec(substr($hex,0,2)); $g = hexdec(substr($hex,2,2)); $b = hexdec(substr($hex,4,2));
     $primaryGlow  = "rgba($r,$g,$b,0.22)";
     $primaryGlowLight = "rgba($r,$g,$b,0.09)";
+
+    // Compute light-mode primary rgba variants
+    $lhex = ltrim($lightPrimaryColor, '#');
+    if (strlen($lhex) === 3) { $lhex = $lhex[0].$lhex[0].$lhex[1].$lhex[1].$lhex[2].$lhex[2]; }
+    $lr = hexdec(substr($lhex,0,2)); $lg = hexdec(substr($lhex,2,2)); $lb = hexdec(substr($lhex,4,2));
+    $lightPrimaryGlow  = "rgba($lr,$lg,$lb,0.20)";
+    $lightPrimaryGlow5 = "rgba($lr,$lg,$lb,0.09)";
     ?>
     <style>
         :root {
@@ -32,6 +40,13 @@
             --btn-color:      <?= htmlspecialchars($btnColor) ?>;
             --primary-glow:   <?= $primaryGlow ?>;
             --primary-glow5:  <?= $primaryGlowLight ?>;
+        }
+        /* Light mode overrides the primary accent to the admin-configured light color */
+        html[data-theme="light"] {
+            --primary:       <?= htmlspecialchars($lightPrimaryColor) ?>;
+            --btn-color:     <?= htmlspecialchars($lightPrimaryColor) ?>;
+            --primary-glow:  <?= $lightPrimaryGlow ?>;
+            --primary-glow5: <?= $lightPrimaryGlow5 ?>;
         }
     </style>
     <?php if (($currentPage ?? '') === 'login'): ?>

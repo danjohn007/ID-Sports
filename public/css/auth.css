@@ -21,6 +21,8 @@
     --border-gl: rgba(255,255,255, 0.08);
     --text-pri:  #FFFFFF;
     --text-sec:  #94a3b8;
+    /* Particle opacity multiplier: 1 = dark mode (subtle), 4.5 = light mode (visible) */
+    --dp: 1;
 }
 
 html { height: 100%; }
@@ -139,65 +141,65 @@ body.auth-page {
 
 /* Drift paths — using only transform+opacity (no layout shifts) */
 @keyframes drift-1 {
-    0%   { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
-    25%  { opacity: 0.11; transform: translate(30px, -50px) rotate(12deg) scale(1.05); }
-    50%  { opacity: 0.07; transform: translate(-20px, -90px) rotate(-8deg) scale(.95); }
-    75%  { opacity: 0.10; transform: translate(15px, -45px) rotate(5deg) scale(1.02); }
-    100% { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.06 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    25%  { opacity: calc(0.11 * var(--dp)); transform: translate(30px, -50px) rotate(12deg) scale(1.05); }
+    50%  { opacity: calc(0.07 * var(--dp)); transform: translate(-20px, -90px) rotate(-8deg) scale(.95); }
+    75%  { opacity: calc(0.10 * var(--dp)); transform: translate(15px, -45px) rotate(5deg) scale(1.02); }
+    100% { opacity: calc(0.06 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-2 {
-    0%   { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
-    30%  { opacity: 0.05; transform: translate(-40px, 55px) rotate(-15deg) scale(.97); }
-    60%  { opacity: 0.12; transform: translate(25px, 80px) rotate(10deg) scale(1.08); }
-    100% { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.08 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    30%  { opacity: calc(0.05 * var(--dp)); transform: translate(-40px, 55px) rotate(-15deg) scale(.97); }
+    60%  { opacity: calc(0.12 * var(--dp)); transform: translate(25px, 80px) rotate(10deg) scale(1.08); }
+    100% { opacity: calc(0.08 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-3 {
-    0%   { opacity: 0.05; transform: translate(0,0) rotate(0deg) scale(1); }
-    40%  { opacity: 0.10; transform: translate(55px, -35px) rotate(20deg) scale(1.1); }
-    70%  { opacity: 0.07; transform: translate(30px, -70px) rotate(-5deg) scale(.93); }
-    100% { opacity: 0.05; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.05 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    40%  { opacity: calc(0.10 * var(--dp)); transform: translate(55px, -35px) rotate(20deg) scale(1.1); }
+    70%  { opacity: calc(0.07 * var(--dp)); transform: translate(30px, -70px) rotate(-5deg) scale(.93); }
+    100% { opacity: calc(0.05 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-4 {
-    0%   { opacity: 0.09; transform: translate(0,0) rotate(0deg) scale(1); }
-    20%  { opacity: 0.06; transform: translate(-60px, 40px) rotate(-18deg) scale(.96); }
-    55%  { opacity: 0.13; transform: translate(-35px, 85px) rotate(8deg) scale(1.06); }
-    80%  { opacity: 0.08; transform: translate(-50px, 50px) rotate(-12deg) scale(1); }
-    100% { opacity: 0.09; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.09 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    20%  { opacity: calc(0.06 * var(--dp)); transform: translate(-60px, 40px) rotate(-18deg) scale(.96); }
+    55%  { opacity: calc(0.13 * var(--dp)); transform: translate(-35px, 85px) rotate(8deg) scale(1.06); }
+    80%  { opacity: calc(0.08 * var(--dp)); transform: translate(-50px, 50px) rotate(-12deg) scale(1); }
+    100% { opacity: calc(0.09 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-5 {
-    0%   { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
-    35%  { opacity: 0.12; transform: translate(45px, -65px) rotate(14deg) scale(1.07); }
-    65%  { opacity: 0.05; transform: translate(20px, -100px) rotate(-6deg) scale(.92); }
-    100% { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.07 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    35%  { opacity: calc(0.12 * var(--dp)); transform: translate(45px, -65px) rotate(14deg) scale(1.07); }
+    65%  { opacity: calc(0.05 * var(--dp)); transform: translate(20px, -100px) rotate(-6deg) scale(.92); }
+    100% { opacity: calc(0.07 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-6 {
-    0%   { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
-    45%  { opacity: 0.04; transform: translate(-50px, 45px) rotate(22deg) scale(.94); }
-    75%  { opacity: 0.11; transform: translate(35px, 70px) rotate(-10deg) scale(1.09); }
-    100% { opacity: 0.08; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.08 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    45%  { opacity: calc(0.04 * var(--dp)); transform: translate(-50px, 45px) rotate(22deg) scale(.94); }
+    75%  { opacity: calc(0.11 * var(--dp)); transform: translate(35px, 70px) rotate(-10deg) scale(1.09); }
+    100% { opacity: calc(0.08 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-7 {
-    0%   { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
-    30%  { opacity: 0.10; transform: translate(-30px, -55px) rotate(-16deg) scale(1.04); }
-    60%  { opacity: 0.08; transform: translate(10px, -80px) rotate(9deg) scale(.96); }
-    100% { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.06 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    30%  { opacity: calc(0.10 * var(--dp)); transform: translate(-30px, -55px) rotate(-16deg) scale(1.04); }
+    60%  { opacity: calc(0.08 * var(--dp)); transform: translate(10px, -80px) rotate(9deg) scale(.96); }
+    100% { opacity: calc(0.06 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-8 {
-    0%   { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
-    50%  { opacity: 0.13; transform: translate(0px, 70px) rotate(18deg) scale(1.08); }
-    100% { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.07 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    50%  { opacity: calc(0.13 * var(--dp)); transform: translate(0px, 70px) rotate(18deg) scale(1.08); }
+    100% { opacity: calc(0.07 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-9 {
-    0%   { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
-    35%  { opacity: 0.04; transform: translate(-45px, 55px) rotate(18deg) scale(.95); }
-    70%  { opacity: 0.11; transform: translate(20px, 90px) rotate(-9deg) scale(1.06); }
-    100% { opacity: 0.07; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.07 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    35%  { opacity: calc(0.04 * var(--dp)); transform: translate(-45px, 55px) rotate(18deg) scale(.95); }
+    70%  { opacity: calc(0.11 * var(--dp)); transform: translate(20px, 90px) rotate(-9deg) scale(1.06); }
+    100% { opacity: calc(0.07 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 @keyframes drift-10 {
-    0%   { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
-    40%  { opacity: 0.10; transform: translate(50px, -40px) rotate(-20deg) scale(1.09); }
-    75%  { opacity: 0.05; transform: translate(25px, -75px) rotate(11deg) scale(.93); }
-    100% { opacity: 0.06; transform: translate(0,0) rotate(0deg) scale(1); }
+    0%   { opacity: calc(0.06 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
+    40%  { opacity: calc(0.10 * var(--dp)); transform: translate(50px, -40px) rotate(-20deg) scale(1.09); }
+    75%  { opacity: calc(0.05 * var(--dp)); transform: translate(25px, -75px) rotate(11deg) scale(.93); }
+    100% { opacity: calc(0.06 * var(--dp)); transform: translate(0,0) rotate(0deg) scale(1); }
 }
 
 /* ── Logo (fixed top) ───────────────────────────────────── */
@@ -239,7 +241,6 @@ body.auth-page {
 .auth-logo-icon img {
     width: 64px;
     height: 64px;
-    filter: brightness(0) invert(1);
     border-radius: 50%;
     object-fit: cover;
     display: block;
@@ -653,8 +654,8 @@ body.auth-page {
 }
 
 @keyframes star-pulse {
-    0%, 100% { opacity: 0.07; transform: scale(1);   }
-    50%      { opacity: 0.70; transform: scale(1.7); }
+    0%, 100% { opacity: calc(0.07 * var(--dp)); transform: scale(1);   }
+    50%      { opacity: calc(0.70 * var(--dp)); transform: scale(1.7); }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -690,6 +691,9 @@ body.auth-page {
 /* ══════════════════════════════════════════════════════════
    LIGHT MODE  (html[data-theme="light"])
    ══════════════════════════════════════════════════════════ */
+html[data-theme="light"] {
+    --dp: 4.5; /* particles are 4.5× more visible on light backgrounds */
+}
 html[data-theme="light"] body.auth-page {
     --bg-deep:   #e2e8f0;
     --bg-mid:    #cbd5e1;
@@ -798,12 +802,12 @@ html[data-theme="light"] .auth-logo-icon span {
 }
 
 html[data-theme="light"] .auth-particle {
-    background: rgba(15, 23, 42, 0.04);
-    border-color: rgba(15, 23, 42, 0.08);
+    background: rgba(15, 23, 42, 0.06);
+    border-color: rgba(15, 23, 42, 0.12);
 }
 
 html[data-theme="light"] .auth-star {
-    background: rgba(15, 23, 42, 0.28) !important;
+    background: rgba(15, 23, 42, 0.40);
 }
 
 html[data-theme="light"] .otp-box {

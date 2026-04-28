@@ -6,7 +6,7 @@ class ConfigController extends Controller {
     private static $allowedKeys = [
         'general'    => ['app_name', 'app_tagline', 'app_description', 'timezone', 'currency', 'currency_symbol', 'contact_email', 'contact_phone', 'contact_address', 'maintenance_mode', 'app_logo_path'],
         'email'      => ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_name', 'smtp_from_email', 'smtp_encryption'],
-        'colors'     => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex', 'color_login_button', 'color_login_button_hex', 'color_login_link', 'color_login_link_hex', 'color_login_logo_bg', 'color_login_logo_bg_hex', 'auth_bg_image'],
+        'colors'     => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex', 'color_login_button', 'color_login_button_hex', 'color_login_link', 'color_login_link_hex', 'color_login_logo_bg', 'color_login_logo_bg_hex', 'auth_bg_image', 'color_success', 'color_danger', 'color_warning', 'color_light_primary'],
         'onboarding' => ['onboarding_slide1_title', 'onboarding_slide1_desc', 'onboarding_slide1_image', 'onboarding_slide2_title', 'onboarding_slide2_desc', 'onboarding_slide2_image', 'onboarding_slide3_title', 'onboarding_slide3_desc', 'onboarding_slide3_image'],
         'paypal'     => ['paypal_client_id', 'paypal_client_secret', 'paypal_mode'],
         'qr'         => ['qr_enabled', 'qr_expiry_minutes', 'qr_secret'],
@@ -269,7 +269,7 @@ class ConfigController extends Controller {
         $this->redirect('config/general');
     }
 
-    /* ── Upload a slide background image ──────────────────── */
+    /* ── Upload a slide background image (and save title/desc) ── */
     public function uploadSlideImage() {
         if (!$this->isPost()) {
             $this->redirect('config/onboarding');
@@ -283,8 +283,23 @@ class ConfigController extends Controller {
             return;
         }
 
-        if (empty($_FILES['slide_image']['name']) || $_FILES['slide_image']['error'] !== UPLOAD_ERR_OK) {
-            $this->setFlash('error', 'No se seleccionó ningún archivo o hubo un error de subida.');
+        // Always save title and description from this form
+        $titleKey = 'onboarding_slide' . $slideNum . '_title';
+        $descKey  = 'onboarding_slide' . $slideNum . '_desc';
+        $titleVal = $this->post($titleKey) ?? '';
+        $descVal  = $this->post($descKey)  ?? '';
+        $this->configModel->set($titleKey, $titleVal);
+        $this->configModel->set($descKey,  $descVal);
+
+        // If no file was provided, just save text and redirect
+        if (empty($_FILES['slide_image']['name']) || $_FILES['slide_image']['error'] === UPLOAD_ERR_NO_FILE) {
+            $this->setFlash('success', '✅ Slide ' . $slideNum . ' guardado.');
+            $this->redirect('config/onboarding');
+            return;
+        }
+
+        if ($_FILES['slide_image']['error'] !== UPLOAD_ERR_OK) {
+            $this->setFlash('error', 'Error al subir el archivo (código ' . $_FILES['slide_image']['error'] . ').');
             $this->redirect('config/onboarding');
             return;
         }
@@ -335,6 +350,28 @@ class ConfigController extends Controller {
             $this->setFlash('error', 'No se pudo guardar la imagen.');
         }
 
+        $this->redirect('config/onboarding');
+    }
+
+    /* ── Remove a slide background image ─────────────────── */
+    public function removeSlideImage() {
+        $slideNum = (int)($_GET['n'] ?? 0);
+        if ($slideNum >= 1 && $slideNum <= 3) {
+            $key      = 'onboarding_slide' . $slideNum . '_image';
+            $oldPath  = $this->configModel->get($key) ?? '';
+            // Remove the file if it lives inside our slides directory
+            if ($oldPath) {
+                $parsed   = parse_url($oldPath, PHP_URL_PATH);
+                $filePath = ROOT . '/' . ltrim($parsed, '/');
+                // Strip query string from path
+                $filePath = preg_replace('/\?.*$/', '', $filePath);
+                if (strpos(realpath(dirname($filePath)) ?: '', ROOT . '/public/assets/slides') === 0) {
+                    @unlink($filePath);
+                }
+            }
+            $this->configModel->set($key, '');
+            $this->setFlash('success', 'Imagen del Slide ' . $slideNum . ' eliminada.');
+        }
         $this->redirect('config/onboarding');
     }
 }

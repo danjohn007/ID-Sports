@@ -58,17 +58,6 @@ html, body {
 .ob-slide-bg-2 { background: linear-gradient(160deg, #060B19 0%, #0d1b2a 40%, #0f3460 100%); }
 .ob-slide-bg-3 { background: linear-gradient(160deg, #060B19 0%, #0d2014 40%, #0d3320 100%); }
 
-/* Court grid pattern */
-.ob-slide-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.055;
-    background-image:
-        repeating-linear-gradient(0deg,   transparent, transparent 60px, rgba(255,255,255,.6) 60px, rgba(255,255,255,.6) 61px),
-        repeating-linear-gradient(90deg,  transparent, transparent 60px, rgba(255,255,255,.6) 60px, rgba(255,255,255,.6) 61px);
-}
-
 /* Bottom gradient — only covers bottom 30% to fade content into controls */
 .ob-slide-bg::after {
     content: '';
@@ -104,13 +93,6 @@ html, body {
     position: relative;
     z-index: 2;
     padding: 36px 32px 230px;   /* 230px clears the fixed controls area */
-}
-
-.ob-slide-icon {
-    font-size: 3.75rem;
-    display: block;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 2px 12px rgba(0,0,0,.5));
 }
 
 .ob-slide-title {
@@ -238,7 +220,6 @@ html, body {
 
 .ob-logo img {
     height: 26px;
-    filter: brightness(0) invert(1);
     border-radius: 50%;
     object-fit: cover;
 }

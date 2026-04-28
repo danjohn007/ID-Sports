@@ -14,10 +14,9 @@
 
         <!-- Current logo preview -->
         <div class="flex items-center gap-4 mb-5">
-            <div class="w-20 h-20 rounded-2xl bg-gray-900 flex items-center justify-center overflow-hidden border border-gray-200 shrink-0">
+            <div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shrink-0">
                 <img src="<?= $logoSrc ?>" alt="Logo actual" id="logoPreviewImg"
-                     class="max-w-full max-h-full object-contain"
-                     style="filter:brightness(0) invert(1)">
+                     class="max-w-full max-h-full object-contain">
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-700">Logo actual</p>

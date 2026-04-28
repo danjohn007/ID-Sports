@@ -92,6 +92,25 @@ $cfgBgImage   = htmlspecialchars($config['auth_bg_image']      ?? '');
                    oninput="updateBgPreview(this.value)">
             <p class="cc-hint">Si se deja vacío se usa el gradiente oscuro por defecto. La imagen se superpone sobre el gradiente.</p>
 
+            <!-- Light mode accent -->
+            <div class="cc-section-heading" style="margin-top:24px;">☀️ Modo Claro</div>
+            <?php
+            $lightPrimaryVal = $config['color_light_primary'] ?? $config['color_primary'] ?? '#0EA5E9';
+            $lightPrimaryVal = htmlspecialchars($lightPrimaryVal);
+            ?>
+            <div class="cc-row">
+                <input type="color" name="color_light_primary" id="swatch_color_light_primary"
+                       value="<?= $lightPrimaryVal ?>" class="cc-swatch"
+                       oninput="syncHex(this,'hex_color_light_primary')">
+                <div class="cc-info">
+                    <div class="cc-label">Acento para Modo Claro</div>
+                    <input type="text" id="hex_color_light_primary" name="color_light_primary_hex"
+                           value="<?= $lightPrimaryVal ?>" class="cc-hex-input" maxlength="7"
+                           oninput="syncSwatch(this,'swatch_color_light_primary')" placeholder="#000000">
+                    <div class="cc-hint">Color primario que se aplica cuando el usuario activa el modo claro (☀️). Puede ser diferente al color del modo oscuro.</div>
+                </div>
+            </div>
+
             <button type="submit" class="cc-save-btn">💾 Guardar Cambios</button>
         </div>
 

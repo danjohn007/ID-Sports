@@ -29,12 +29,11 @@
         <?php foreach ($slides as $i => $slide): ?>
         <div class="ob-slide">
             <div class="ob-slide-bg ob-slide-bg-<?= $i + 1 ?>"
-                 <?php if (!empty($slide['image'])): ?>style="background-image:url('<?= htmlspecialchars($slide['image']) ?>')"<?php endif; ?>>
+                 <?php if (!empty($slide['image'])): ?>style="background-image:url('<?= htmlspecialchars($slide['image']) ?>');background-size:cover;background-position:center"<?php endif; ?>>
             </div>
             <!-- Primary-color glow orb -->
             <div class="ob-slide-bg-glow"></div>
             <div class="ob-slide-content">
-                <span class="ob-slide-icon"><?= $slide['icon'] ?></span>
                 <h2 class="ob-slide-title"><?= htmlspecialchars($slide['title']) ?></h2>
                 <p class="ob-slide-desc"><?= htmlspecialchars($slide['desc']) ?></p>
             </div>
