@@ -47,6 +47,17 @@
             </div>
             <?php endforeach; ?>
 
+            <hr class="border-gray-100 my-4">
+            <h3 class="font-semibold text-gray-900 mb-3">🖼️ Imagen de fondo del Login</h3>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">URL de imagen de fondo</label>
+                <input type="url" name="auth_bg_image"
+                    value="<?= htmlspecialchars($config['auth_bg_image'] ?? '') ?>"
+                    placeholder="https://ejemplo.com/fondo-cancha.jpg"
+                    class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <p class="text-xs text-gray-400 mt-1">Si se deja vacío, se usa un gradiente oscuro por defecto.</p>
+            </div>
+
             <button type="submit" class="bg-sky-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm hover:bg-sky-600 transition-all">Guardar</button>
         </form>
     </div>

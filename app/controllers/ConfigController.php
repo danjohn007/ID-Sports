@@ -4,12 +4,13 @@ class ConfigController extends Controller {
 
     // Allowed config keys per section (prevents arbitrary key injection)
     private static $allowedKeys = [
-        'general'  => ['app_name', 'app_tagline', 'app_description', 'timezone', 'currency', 'currency_symbol', 'contact_email', 'contact_phone', 'contact_address', 'maintenance_mode'],
-        'email'    => ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_name', 'smtp_from_email', 'smtp_encryption'],
-        'colors'   => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex', 'color_login_button', 'color_login_button_hex', 'color_login_link', 'color_login_link_hex', 'color_login_logo_bg', 'color_login_logo_bg_hex'],
-        'paypal'   => ['paypal_client_id', 'paypal_client_secret', 'paypal_mode'],
-        'qr'       => ['qr_enabled', 'qr_expiry_minutes', 'qr_secret'],
-        'chatbot'  => ['chatbot_enabled', 'chatbot_provider', 'chatbot_api_key', 'chatbot_welcome', 'chatbot_system_prompt'],
+        'general'    => ['app_name', 'app_tagline', 'app_description', 'timezone', 'currency', 'currency_symbol', 'contact_email', 'contact_phone', 'contact_address', 'maintenance_mode'],
+        'email'      => ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_name', 'smtp_from_email', 'smtp_encryption'],
+        'colors'     => ['color_primary', 'color_secondary', 'color_accent', 'color_primary_hex', 'color_secondary_hex', 'color_accent_hex', 'color_login_button', 'color_login_button_hex', 'color_login_link', 'color_login_link_hex', 'color_login_logo_bg', 'color_login_logo_bg_hex', 'auth_bg_image'],
+        'onboarding' => ['onboarding_slide1_title', 'onboarding_slide1_desc', 'onboarding_slide1_image', 'onboarding_slide2_title', 'onboarding_slide2_desc', 'onboarding_slide2_image', 'onboarding_slide3_title', 'onboarding_slide3_desc', 'onboarding_slide3_image'],
+        'paypal'     => ['paypal_client_id', 'paypal_client_secret', 'paypal_mode'],
+        'qr'         => ['qr_enabled', 'qr_expiry_minutes', 'qr_secret'],
+        'chatbot'    => ['chatbot_enabled', 'chatbot_provider', 'chatbot_api_key', 'chatbot_welcome', 'chatbot_system_prompt'],
     ];
 
     public function __construct() {
@@ -165,5 +166,15 @@ class ConfigController extends Controller {
         }
         $config = $this->configModel->getAll();
         $this->view('config/chatbot', ['title' => 'Chatbot WhatsApp', 'config' => $config], 'admin');
+    }
+
+    public function onboarding() {
+        if ($this->isPost()) {
+            $this->saveSection('onboarding');
+            $this->setFlash('success', 'Configuración del onboarding guardada.');
+            $this->redirect('config/onboarding');
+        }
+        $config = $this->configModel->getAll();
+        $this->view('config/onboarding', ['title' => 'Pantallas de Onboarding', 'config' => $config], 'admin');
     }
 }

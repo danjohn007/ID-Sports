@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email`        VARCHAR(180) NOT NULL,
   `password`     VARCHAR(255) NOT NULL,
   `whatsapp`     VARCHAR(20)  DEFAULT NULL,
+  `state`        VARCHAR(100) DEFAULT NULL COMMENT 'Estado/provincia del usuario (opcional)',
   `birth_date`   DATE         DEFAULT NULL,
   `role`         ENUM('user','club_admin','super_admin') NOT NULL DEFAULT 'user',
   `avatar`       VARCHAR(255) DEFAULT NULL,
