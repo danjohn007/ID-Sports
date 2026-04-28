@@ -12,7 +12,9 @@
             2 => ['icon' => '📲', 'label' => 'Slide 2 — Reserva con QR'],
             3 => ['icon' => '🤝', 'label' => 'Slide 3 — Comunidad'],
         ];
-        foreach ($slideDefs as $n => [$icon, $label]):
+        foreach ($slideDefs as $n => $def):
+            $icon  = $def['icon'];
+            $label = $def['label'];
             $title = $config["onboarding_slide{$n}_title"] ?? '';
             $desc  = $config["onboarding_slide{$n}_desc"]  ?? '';
             $img   = $config["onboarding_slide{$n}_image"] ?? '';

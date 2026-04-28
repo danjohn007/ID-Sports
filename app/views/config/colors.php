@@ -106,7 +106,7 @@ $cfgBgImage   = htmlspecialchars($config['auth_bg_image']      ?? '');
                     <div class="cc-label">Acento para Modo Claro</div>
                     <input type="text" id="hex_color_light_primary" name="color_light_primary_hex"
                            value="<?= $lightPrimaryVal ?>" class="cc-hex-input" maxlength="7"
-                           oninput="syncSwatch(this,'swatch_color_light_primary')" placeholder="#000000">
+                           oninput="syncSwatch(this,'swatch_color_light_primary')" placeholder="Ej: #10b981">
                     <div class="cc-hint">Color primario que se aplica cuando el usuario activa el modo claro (☀️). Puede ser diferente al color del modo oscuro.</div>
                 </div>
             </div>

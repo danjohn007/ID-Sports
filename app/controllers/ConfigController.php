@@ -357,15 +357,16 @@ class ConfigController extends Controller {
     public function removeSlideImage() {
         $slideNum = (int)($_GET['n'] ?? 0);
         if ($slideNum >= 1 && $slideNum <= 3) {
-            $key      = 'onboarding_slide' . $slideNum . '_image';
-            $oldPath  = $this->configModel->get($key) ?? '';
-            // Remove the file if it lives inside our slides directory
+            $key     = 'onboarding_slide' . $slideNum . '_image';
+            $oldPath = $this->configModel->get($key) ?? '';
+            // Remove the file only if it lives inside our controlled slides directory
             if ($oldPath) {
-                $parsed   = parse_url($oldPath, PHP_URL_PATH);
-                $filePath = ROOT . '/' . ltrim($parsed, '/');
-                // Strip query string from path
-                $filePath = preg_replace('/\?.*$/', '', $filePath);
-                if (strpos(realpath(dirname($filePath)) ?: '', ROOT . '/public/assets/slides') === 0) {
+                // Resolve the stored URL path component and strip any query string
+                $urlPath  = strtok(parse_url($oldPath, PHP_URL_PATH) ?? '', '?');
+                $filePath = realpath(ROOT . '/' . ltrim($urlPath, '/'));
+                $slidesDir = realpath(ROOT . '/public/assets/slides');
+                // Only delete if the resolved path is inside the slides directory
+                if ($filePath && $slidesDir && strpos($filePath, $slidesDir . DIRECTORY_SEPARATOR) === 0) {
                     @unlink($filePath);
                 }
             }
