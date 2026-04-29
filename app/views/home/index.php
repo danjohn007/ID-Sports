@@ -166,6 +166,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     min-width: 108px;
     transition: all 300ms ease;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    transform-origin: center;
 }
 .day-pill:hover {
     background: rgba(255,255,255,0.09);
@@ -241,6 +242,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     min-width: 108px;
     max-width: 128px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    transform-origin: center;
 }
 .sport-card:hover {
     background: rgba(255,255,255,0.10);
@@ -283,6 +285,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     min-width: 220px;
     max-width: 280px;
     box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+    transform-origin: center;
 }
 .club-card:hover {
     background: rgba(255,255,255,0.09);
@@ -329,6 +332,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     border: 1px solid rgba(255,255,255,0.1);
     transition: all 300ms ease;
     cursor: pointer;
+    transform-origin: center;
 }
 .res-row:hover { border-color: rgba(var(--primary-rgb), 0.5); background: rgba(255,255,255,0.09); transform: scale(1.01); box-shadow: 0 6px 20px rgba(var(--primary-rgb),0.18); }
 .res-icon {
