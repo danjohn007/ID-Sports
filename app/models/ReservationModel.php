@@ -281,6 +281,17 @@ class ReservationModel extends Model {
         return $updated;
     }
 
+    /** Bulk-complete all reservations whose date+end_time have passed (Mexico City TZ set globally) */
+    public function autoCompleteExpired(): int {
+        $stmt = $this->execute(
+            "UPDATE reservations SET status = 'completed'
+             WHERE status IN ('confirmed', 'active', 'in_progress', 'pending')
+               AND (date < CURDATE() OR (date = CURDATE() AND end_time <= CURTIME()))",
+            []
+        );
+        return (int)$stmt->rowCount();
+    }
+
     public function countByClub($clubId) {
         $row = $this->findOne("SELECT COUNT(*) as cnt FROM reservations r JOIN spaces s ON r.space_id = s.id WHERE s.club_id = ?", [$clubId]);
         return $row['cnt'] ?? 0;

@@ -45,6 +45,7 @@ class App {
             'reservations/pay' => ['ReservationController', 'pay'],
             'reservations/cancel' => ['ReservationController', 'cancel'],
             'reservations/complete' => ['ReservationController', 'complete'],
+            'reservations/autoComplete' => ['ReservationController', 'autoComplete'],
             'reservations/scan-qr' => ['ReservationController', 'scanQr'],
             'clubs' => ['ClubController', 'index'],
             'clubs/detail' => ['ClubController', 'detail'],

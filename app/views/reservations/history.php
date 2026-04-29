@@ -41,7 +41,7 @@ function sportSvgHist(string $type): string {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    align-items: start;
+    height: 75vh;
 }
 .hist-box {
     background: var(--bg-card);
@@ -50,8 +50,9 @@ function sportSvgHist(string $type): string {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 270px);
+    height: 100%;
     min-height: 200px;
+    padding-bottom: 1.5rem;
 }
 .hist-box-active {
     border-color: rgba(var(--primary-rgb), 0.3);
@@ -82,8 +83,8 @@ function sportSvgHist(string $type): string {
 .hist-box-scroll::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb),0.3); border-radius: 4px; }
 /* Mobile: stack vertically, remove fixed height */
 @media (max-width: 767px) {
-    .hist-boxes-grid { grid-template-columns: 1fr; gap: 0.875rem; }
-    .hist-box { max-height: none; }
+    .hist-boxes-grid { grid-template-columns: 1fr; gap: 0.875rem; height: auto; }
+    .hist-box { height: auto; max-height: none; }
     .hist-box-scroll { max-height: 70vh; }
 }
 /* Filter row inside each box */
@@ -379,7 +380,26 @@ function sportSvgHist(string $type): string {
     /* Helper to render a single history card */
     function renderHistCard(array $r, array $statusLabels): void {
         $status    = $r['status'] ?? 'pending';
-        $badge     = $statusLabels[$status] ?? ['label'=>ucfirst($status),'class'=>'hist-badge-completed'];
+
+        // Compute visual display status based on actual date/time
+        $today     = date('Y-m-d');
+        $nowTime   = date('H:i:s');
+        $d         = $r['date'] ?? '';
+        $startTime = $r['start_time'] ?? '00:00:00';
+        $endTime   = $r['end_time']   ?? '00:00:00';
+
+        $visualStatus = $status;
+        if (in_array($status, ['confirmed', 'active', 'pending', 'in_progress'])) {
+            if ($d > $today) {
+                $visualStatus = 'confirmed';      // future → Confirmada
+            } elseif ($d === $today && $nowTime >= $startTime && $nowTime < $endTime) {
+                $visualStatus = 'in_progress';    // currently happening → En curso
+            } elseif ($d < $today || ($d === $today && $endTime <= $nowTime)) {
+                $visualStatus = 'completed';      // already over → Completada
+            }
+        }
+
+        $badge     = $statusLabels[$visualStatus] ?? $statusLabels[$status] ?? ['label'=>ucfirst($status),'class'=>'hist-badge-completed'];
         $rid       = (int)$r['id'];
         $spaceCost = (float)($r['subtotal'] ?? 0);
         $iva       = (float)($r['service_fee'] ?? 0);
@@ -710,4 +730,17 @@ function filterBox(box) {
         card.style.opacity = (matchQ && matchD && matchS) ? '1' : '0';
     });
 }
+
+/* ── Auto-complete polling (every 60 s) ──────────────── */
+function autoCompletePolling() {
+    fetch('<?= BASE_URL ?>reservations/autoComplete')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data && data.success && data.completed > 0) {
+                location.reload();
+            }
+        })
+        .catch(function() {});
+}
+setInterval(autoCompletePolling, 60000);
 </script>
