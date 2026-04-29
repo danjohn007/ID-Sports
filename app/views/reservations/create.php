@@ -813,7 +813,13 @@ function applyCoupon() {
     couponCode = document.getElementById('couponInput').value.trim();
     if (!couponCode) return;
     // Optimistic UI — actual validation happens server-side on pay
-    alert('El cupón "' + couponCode + '" será validado al procesar el pago.');
+    var msg = document.createElement('p');
+    msg.style.cssText = 'font-size:0.75rem;color:var(--primary);margin-top:0.375rem;text-align:center';
+    msg.textContent = 'El cupón será validado al procesar el pago.';
+    var existing = document.getElementById('couponFeedback');
+    if (existing) existing.remove();
+    msg.id = 'couponFeedback';
+    document.getElementById('couponInput').parentNode.after(msg);
 }
 
 /* ── Payment Modal ─────────────────────────────────────── */
@@ -956,17 +962,17 @@ function shareTicket() {
 /* ── Init ──────────────────────────────────────────────── */
 // Pre-select date if passed from search/home
 (function() {
-    const preDate = '<?= htmlspecialchars($preDate) ?>';
-    const today = new Date(); today.setHours(0,0,0,0);
+    var preDate = <?= json_encode($preDate) ?>;
+    var today = new Date(); today.setHours(0,0,0,0);
     if (preDate) {
-        const pd = new Date(preDate + 'T12:00:00');
+        var pd = new Date(preDate + 'T12:00:00');
         calYear  = pd.getFullYear();
         calMonth = pd.getMonth();
     }
     renderCalendar();
     if (preDate) {
-        const pd = new Date(preDate + 'T12:00:00');
-        if (pd >= today && !CLOSED_DAYS.includes(pd.getDay())) {
+        var pd2 = new Date(preDate + 'T12:00:00');
+        if (pd2 >= today && !CLOSED_DAYS.includes(pd2.getDay())) {
             selectDate(preDate);
         }
     }

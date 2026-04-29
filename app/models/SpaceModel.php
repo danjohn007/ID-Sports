@@ -116,8 +116,9 @@ class SpaceModel extends Model {
     }
 
     private function timeToMinutes($time) {
-        list($h, $m) = explode(':', $time);
-        return (int)$h * 60 + (int)$m;
+        if (!is_string($time) || strpos($time, ':') === false) return 0;
+        list($h, $m) = array_map('intval', explode(':', $time));
+        return $h * 60 + $m;
     }
 
     private function minutesToTime($minutes) {

@@ -179,6 +179,7 @@ class ReservationModel extends Model {
         }
     }
 
+    public function countByClub($clubId) {
         $row = $this->findOne("SELECT COUNT(*) as cnt FROM reservations r JOIN spaces s ON r.space_id = s.id WHERE s.club_id = ?", [$clubId]);
         return $row['cnt'] ?? 0;
     }
