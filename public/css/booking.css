@@ -304,6 +304,12 @@
 .ticket-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.8125rem; margin-bottom: 0.5rem; }
 .ticket-row-label { color: var(--text-muted); }
 .ticket-row-value { font-weight: 600; color: var(--text-pri); }
+/* Receipt-style breakdown elements */
+.ticket-dashed { border: none; border-top: 1px dashed rgba(255,255,255,0.15); margin: 0.625rem 0; }
+.ticket-breakdown-title { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 0 0 0.5rem; }
+.ticket-total-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 0.25rem; }
+.ticket-total-label { font-size: 0.875rem; font-weight: 700; color: var(--text-pri); }
+.ticket-total-value { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
 .ticket-punch { position: relative; margin: 0.75rem -1.375rem; border-top: 1.5px dashed rgba(255,255,255,0.1); }
 .ticket-punch::before { content:''; position:absolute; left:-0.75rem; top:50%; transform:translateY(-50%); width:1.25rem; height:1.25rem; border-radius:50%; background:var(--bg-mid); }
 .ticket-punch::after  { content:''; position:absolute; right:-0.75rem; top:50%; transform:translateY(-50%); width:1.25rem; height:1.25rem; border-radius:50%; background:var(--bg-mid); }

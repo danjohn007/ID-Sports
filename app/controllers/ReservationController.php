@@ -123,8 +123,7 @@ class ReservationController extends Controller {
         $startTs   = strtotime("2000-01-01 $startTime");
         $endTs     = strtotime("2000-01-01 $endTime");
         $hours     = max(0.5, ($endTs - $startTs) / 3600);
-        $subtotal  = round($space['price_per_hour'] * $hours, 2);
-        $serviceFee = round($subtotal * 0.05, 2);
+        $spaceCost = round($space['price_per_hour'] * $hours, 2);
 
         $amenitiesTotal = 0;
         $amenityRows    = [];
@@ -148,10 +147,14 @@ class ReservationController extends Controller {
         $discount = 0;
         if ($coupon) {
             $promo = $this->promotionModel->verifyCoupon($coupon);
-            if ($promo) $discount = round($subtotal * $promo['discount_percent'] / 100, 2);
+            if ($promo) $discount = round($spaceCost * $promo['discount_percent'] / 100, 2);
         }
 
-        $total = $subtotal + $serviceFee + $amenitiesTotal - $discount;
+        // IVA 16% applied to cancha + amenidades
+        $preIva   = $spaceCost + $amenitiesTotal;
+        $iva      = round($preIva * 0.16, 2);
+        $subtotal = $spaceCost; // for DB compatibility (subtotal column = cancha cost)
+        $total    = $preIva + $iva - $discount;
 
         // Create reservation
         $reservationId = $this->reservationModel->create([
@@ -160,8 +163,8 @@ class ReservationController extends Controller {
             'date'            => $date,
             'start_time'      => $startTime,
             'end_time'        => $endTime,
-            'subtotal'        => $subtotal,
-            'service_fee'     => $serviceFee,
+            'subtotal'        => $spaceCost,
+            'service_fee'     => $iva,
             'amenities_total' => $amenitiesTotal,
             'discount'        => $discount,
             'total'           => $total,
@@ -195,6 +198,9 @@ class ReservationController extends Controller {
         } catch (Exception $e) {}
 
         $reservation = $this->reservationModel->findById($reservationId);
+        // Augment with computed breakdown fields for the inline ticket
+        $reservation['space_cost'] = (float)$reservation['subtotal'];
+        $reservation['iva']        = (float)$reservation['service_fee'];
         $reservedAmenities = $this->reservationModel->getAmenities($reservationId);
 
         echo json_encode([

@@ -153,7 +153,7 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
                 <span class="summary-value" id="sumAmenities">$0.00</span>
             </div>
             <div class="summary-row" id="sumFeeRow">
-                <span class="summary-label">Cargo de servicio (5%)</span>
+                <span class="summary-label">IVA (16%)</span>
                 <span class="summary-value" id="sumFee">$0.00</span>
             </div>
             <div class="summary-row" id="sumDiscRow" style="display:none">
@@ -230,8 +230,33 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
             <div class="ticket-body">
                 <div class="ticket-row"><span class="ticket-row-label">Fecha</span><span class="ticket-row-value" id="ticketDate"></span></div>
                 <div class="ticket-row"><span class="ticket-row-label">Horario</span><span class="ticket-row-value" id="ticketTime"></span></div>
-                <div class="ticket-row"><span class="ticket-row-label">Total pagado</span><span class="ticket-row-value" id="ticketTotal" style="color:var(--primary);font-size:1.0625rem"></span></div>
-                <div id="ticketAmenRows"></div>
+                <hr class="ticket-dashed">
+                <p class="ticket-breakdown-title">Desglose de Pago</p>
+                <div class="ticket-row">
+                    <span class="ticket-row-label">Cancha</span>
+                    <span class="ticket-row-value" id="ticketSpaceCost"></span>
+                </div>
+                <div class="ticket-row" id="ticketAmenRow">
+                    <span class="ticket-row-label">Amenidades extra</span>
+                    <span class="ticket-row-value" id="ticketAmenCost"></span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-row-label" style="font-weight:600;color:var(--text-pri)">Subtotal</span>
+                    <span class="ticket-row-value" id="ticketSubtotal"></span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-row-label">IVA (16%)</span>
+                    <span class="ticket-row-value" id="ticketIva"></span>
+                </div>
+                <div class="ticket-row" id="ticketDiscRow" style="display:none">
+                    <span class="ticket-row-label">Descuento</span>
+                    <span class="ticket-row-value" id="ticketDisc" style="color:#34d399"></span>
+                </div>
+                <hr class="ticket-dashed">
+                <div class="ticket-total-row">
+                    <span class="ticket-total-label">Total Pagado</span>
+                    <span class="ticket-total-value" id="ticketTotal"></span>
+                </div>
             </div>
             <div class="ticket-punch"></div>
             <div class="ticket-qr">
@@ -550,8 +575,8 @@ function updateSummary() {
     document.getElementById('sumTime').textContent     = (hasStart && hasEnd) ? (startTime + ' – ' + endTime) : (hasStart ? (startTime + ' – ?') : '—');
     document.getElementById('sumDuration').textContent = hours > 0 ? (hours % 1 === 0 ? hours + (hours === 1 ? ' hora' : ' horas') : hours.toFixed(1) + ' horas') : '—';
 
-    var subtotal = Math.round(PRICE_PER_HR * hours * 100) / 100;
-    var fee      = Math.round(subtotal * 0.05 * 100) / 100;
+    var spaceCost = Math.round(PRICE_PER_HR * hours * 100) / 100;
+    var fee      = Math.round((spaceCost + amenTotal) * 0.16 * 100) / 100;
 
     var amenTotal = 0;
     Object.entries(amenityQtys).forEach(function(pair) {
@@ -563,9 +588,12 @@ function updateSummary() {
     });
     amenTotal = Math.round(amenTotal * 100) / 100;
 
-    var total = subtotal + fee + amenTotal - discount;
+    // Recalculate fee now that amenTotal is known
+    fee = Math.round((spaceCost + amenTotal) * 0.16 * 100) / 100;
 
-    document.getElementById('sumSubtotal').textContent  = '$' + subtotal.toFixed(2);
+    var total = spaceCost + amenTotal + fee - discount;
+
+    document.getElementById('sumSubtotal').textContent  = '$' + spaceCost.toFixed(2);
     document.getElementById('sumFee').textContent       = '$' + fee.toFixed(2);
     document.getElementById('sumAmenities').textContent = '$' + amenTotal.toFixed(2);
     document.getElementById('sumAmenRow').style.display = amenTotal > 0 ? '' : 'none';
@@ -707,21 +735,47 @@ function setSuccess(res, qrCode, amenities) {
 }
 
 function populateTicket(res, qrCode, amenities) {
+    var fmt = function(v) {
+        return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(v);
+    };
+
     document.getElementById('ticketSpaceName').textContent = res.space_name || '<?= htmlspecialchars($space['name']) ?>';
     document.getElementById('ticketClubName').textContent  = res.club_name  || '<?= htmlspecialchars($space['club_name'] ?? '') ?>';
 
     var dt = new Date((res.date || '') + 'T12:00:00');
-    document.getElementById('ticketDate').textContent  = dt.toLocaleDateString('es-MX', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    document.getElementById('ticketTime').textContent  = (res.start_time||'').substring(0,5) + ' – ' + (res.end_time||'').substring(0,5);
-    document.getElementById('ticketTotal').textContent = '$' + parseFloat(res.total).toFixed(2);
+    document.getElementById('ticketDate').textContent = dt.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    document.getElementById('ticketTime').textContent = (res.start_time||'').substring(0,5) + ' – ' + (res.end_time||'').substring(0,5);
 
-    if (amenities && amenities.length > 0) {
-        var html = '<hr style="border-color:rgba(255,255,255,0.07);margin:0.5rem 0">';
-        amenities.forEach(function(a) {
-            html += '<div class="ticket-row"><span class="ticket-row-label">' + a.name + ' ×' + a.quantity + '</span><span class="ticket-row-value">$' + parseFloat(a.price).toFixed(2) + '</span></div>';
-        });
-        document.getElementById('ticketAmenRows').innerHTML = html;
+    // Payment breakdown
+    var spaceCost = parseFloat(res.space_cost    || res.subtotal  || 0);
+    var amenCost  = parseFloat(res.amenities_total               || 0);
+    var subtotal  = spaceCost + amenCost;
+    var iva       = parseFloat(res.iva           || res.service_fee || (subtotal * 0.16));
+    var discount  = parseFloat(res.discount                      || 0);
+    var total     = parseFloat(res.total         || (subtotal + iva - discount));
+
+    document.getElementById('ticketSpaceCost').textContent = fmt(spaceCost);
+
+    var amenRow = document.getElementById('ticketAmenRow');
+    if (amenCost > 0) {
+        document.getElementById('ticketAmenCost').textContent = fmt(amenCost);
+        amenRow.style.display = '';
+    } else {
+        amenRow.style.display = 'none';
     }
+
+    document.getElementById('ticketSubtotal').textContent = fmt(subtotal);
+    document.getElementById('ticketIva').textContent      = fmt(iva);
+
+    var discRow = document.getElementById('ticketDiscRow');
+    if (discount > 0) {
+        document.getElementById('ticketDisc').textContent = '−' + fmt(discount);
+        discRow.style.display = '';
+    } else {
+        discRow.style.display = 'none';
+    }
+
+    document.getElementById('ticketTotal').textContent = fmt(total);
 
     // QR
     document.getElementById('ticketQrCodeText').textContent = qrCode;
