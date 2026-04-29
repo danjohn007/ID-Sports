@@ -698,7 +698,7 @@ function setSuccess(res, qrCode, amenities) {
         // Populate and show ticket
         populateTicket(res, qrCode, amenities);
         var sec = document.getElementById('ticketSection');
-        sec.style.display = '';
+        sec.style.display = 'block';
         sec.style.opacity = '0';
         sec.style.transition = 'opacity 400ms';
         setTimeout(function() { sec.style.opacity = '1'; }, 30);

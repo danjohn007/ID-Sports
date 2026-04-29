@@ -15,10 +15,6 @@ CREATE TABLE IF NOT EXISTS `space_amenities` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   COMMENT='Pivot: which amenities are available for each space';
 
--- Back-fill: link every existing amenity to every space that shares the same club
--- (safe default — admins can prune via admin UI later)
-INSERT IGNORE INTO `space_amenities` (`space_id`, `amenity_id`)
-SELECT s.id, a.id
-FROM spaces s
-JOIN amenities a ON a.club_id = s.club_id
-WHERE a.status = 'active';
+-- NOTE: No automatic back-fill. Admins assign amenities to specific spaces
+-- via the admin panel (Admin > Canchas > Gestionar Amenidades).
+-- Running the v8 migration will clear any previously back-filled rows.
