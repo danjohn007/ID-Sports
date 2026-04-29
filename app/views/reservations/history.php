@@ -145,6 +145,7 @@ function sportSvgHist(string $type): string {
     overflow: hidden;
     transition: all 180ms ease;
     margin-bottom: 0.75rem;
+    flex-shrink: 0;  /* prevent flex from squishing cards when many are present */
 }
 .hist-card:hover {
     background: var(--bg-card-hover);
