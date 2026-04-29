@@ -13,32 +13,55 @@ class UserController extends Controller {
         $success = '';
 
         if ($this->isPost()) {
-            $name = $this->post('name');
-            $whatsapp = $this->post('whatsapp');
+            $name       = $this->post('name');
+            $whatsapp   = $this->post('whatsapp');
             $birth_date = $this->post('birth_date');
-            $new_password = $this->post('new_password');
-            $current_password = $this->post('current_password');
+            $state      = $this->post('state');
 
-            $data = ['name' => $name, 'whatsapp' => $whatsapp, 'birth_date' => $birth_date ?: null];
-
-            if (!empty($new_password)) {
-                $user = $this->userModel->findById($userId);
-                if (!password_verify($current_password, $user['password'])) {
-                    $error = 'La contraseña actual es incorrecta.';
-                } else {
-                    $data['password'] = password_hash($new_password, PASSWORD_DEFAULT);
-                }
-            }
-
-            if (!$error) {
+            if (empty($name)) {
+                $error = 'El nombre es obligatorio.';
+            } else {
+                $data = [
+                    'name'       => $name,
+                    'whatsapp'   => $whatsapp ?: null,
+                    'birth_date' => $birth_date ?: null,
+                    'state'      => $state ?: null,
+                ];
                 $this->userModel->update($userId, $data);
                 $_SESSION['user_name'] = $name;
-                $success = 'Perfil actualizado correctamente.';
+                $success = '✅ Perfil actualizado correctamente.';
             }
         }
 
         $user = $this->userModel->findById($userId);
         $this->view('user/profile', ['title' => 'Mi Perfil', 'user' => $user, 'error' => $error, 'success' => $success]);
+    }
+
+    /* ── Remove avatar ──────────────────────────────────────── */
+    public function removeAvatar() {
+        $this->requireAuth();
+
+        if (!$this->isPost()) {
+            $this->redirect('user/profile');
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $user   = $this->userModel->findById($userId);
+        $prev   = $user['avatar'] ?? '';
+
+        if ($prev && strpos($prev, 'public/assets/avatars/') === 0) {
+            $prevPath = ROOT . '/' . $prev;
+            if (file_exists($prevPath)) {
+                @unlink($prevPath);
+            }
+        }
+
+        $this->userModel->update($userId, ['avatar' => null]);
+        $_SESSION['user_avatar'] = null;
+
+        $this->setFlash('success', '🗑 Foto de perfil eliminada.');
+        $this->redirect('user/profile');
     }
 
     public function settings() {
@@ -118,6 +141,7 @@ class UserController extends Controller {
                 if (file_exists($prevPath)) { @unlink($prevPath); }
             }
             $this->userModel->update($userId, ['avatar' => 'public/assets/avatars/' . $filename]);
+            $_SESSION['user_avatar'] = 'public/assets/avatars/' . $filename;
             $this->setFlash('success', '✅ Foto de perfil actualizada correctamente.');
         } else {
             $this->setFlash('error', 'No se pudo guardar la imagen. Verifica los permisos del servidor.');
