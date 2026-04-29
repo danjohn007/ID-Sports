@@ -435,14 +435,14 @@ function openHistTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost
     document.getElementById('hShareBtn').onclick = function() {
         var text = '¡Reserva confirmada!\n' + spaceName + ' (' + clubName + ')\n' + dateLabel + ' ' + timeLabel + '\nTotal: ' + _fmt.format(total);
         if (navigator.share) { navigator.share({title:'Ticket ID Sports', text:text}); }
-        else {
+        else if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() { alert('Información copiada al portapapeles'); });
+        } else {
             var el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
+            el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
+            document.body.appendChild(el); el.focus(); el.select();
+            try { document.execCommand('copy'); alert('Información copiada al portapapeles'); } catch(e) {}
             document.body.removeChild(el);
-            alert('Información copiada al portapapeles');
         }
     };
 
