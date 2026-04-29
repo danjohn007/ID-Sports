@@ -742,18 +742,45 @@ function populateTicket(res, qrCode, amenities) {
     document.getElementById('ticketSpaceName').textContent = res.space_name || '<?= htmlspecialchars($space['name']) ?>';
     document.getElementById('ticketClubName').textContent  = res.club_name  || '<?= htmlspecialchars($space['club_name'] ?? '') ?>';
 
-    var dt = new Date((res.date || '') + 'T12:00:00');
+    var dt = new Date((res.date || selectedDate || '') + 'T12:00:00');
     document.getElementById('ticketDate').textContent = dt.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-    document.getElementById('ticketTime').textContent = (res.start_time||'').substring(0,5) + ' – ' + (res.end_time||'').substring(0,5);
+    document.getElementById('ticketTime').textContent = (startTime || (res.start_time||'').substring(0,5)) + ' – ' + (endTime || (res.end_time||'').substring(0,5));
 
-    // Payment breakdown
-    var spaceCost = parseFloat(res.space_cost    || res.subtotal  || 0);
-    var amenCost  = parseFloat(res.amenities_total               || 0);
-    var subtotal  = spaceCost + amenCost;
-    var iva       = parseFloat(res.iva           || res.service_fee || (subtotal * 0.16));
-    var discount  = parseFloat(res.discount                      || 0);
-    var total     = parseFloat(res.total         || (subtotal + iva - discount));
+    // ── Payment breakdown ────────────────────────────────────────
+    // Primary source: re-compute from frontend state (same logic as updateSummary)
+    // so the ticket always matches what the user saw before paying.
+    var hours = 0;
+    if (startTime && endTime) {
+        hours = Math.max(0, (timeToMin(endTime) - timeToMin(startTime)) / 60);
+    }
+    var spaceCost = Math.round(PRICE_PER_HR * hours * 100) / 100;
 
+    var amenCost = 0;
+    Object.entries(amenityQtys).forEach(function(pair) {
+        var id = pair[0], qty = parseInt(pair[1], 10);
+        if (qty > 0) {
+            var row = document.querySelector('[data-amenity-id="' + id + '"]');
+            if (row) amenCost += parseFloat(row.dataset.price || 0) * qty;
+        }
+    });
+    amenCost = Math.round(amenCost * 100) / 100;
+
+    // Fall back to API values when frontend state is unavailable
+    if (!spaceCost) spaceCost = parseFloat(res.space_cost || res.subtotal || 0);
+    if (!amenCost)  amenCost  = parseFloat(res.amenities_total || 0);
+
+    var subtotal = Math.round((spaceCost + amenCost) * 100) / 100;
+    var iva      = Math.round(subtotal * 0.16 * 100) / 100;
+    // Prefer IVA from API when it's non-zero (means it was saved in the DB correctly)
+    if (res.iva && parseFloat(res.iva) > 0) iva = parseFloat(res.iva);
+    else if (res.service_fee && parseFloat(res.service_fee) > 0) iva = parseFloat(res.service_fee);
+
+    var disc  = parseFloat(res.discount || discount || 0);
+    var total = Math.round((subtotal + iva - disc) * 100) / 100;
+    // Prefer total from API (authoritative value confirmed by backend)
+    if (res.total && parseFloat(res.total) > 0) total = parseFloat(res.total);
+
+    // ── Inject into ticket DOM ───────────────────────────────────
     document.getElementById('ticket-cancha-cost').textContent = fmt(spaceCost);
 
     var amenRow = document.getElementById('ticket-amenities-row');
@@ -768,8 +795,8 @@ function populateTicket(res, qrCode, amenities) {
     document.getElementById('ticket-iva').textContent      = fmt(iva);
 
     var discRow = document.getElementById('ticketDiscRow');
-    if (discount > 0) {
-        document.getElementById('ticketDisc').textContent = '−' + fmt(discount);
+    if (disc > 0) {
+        document.getElementById('ticketDisc').textContent = '−' + fmt(disc);
         discRow.style.display = '';
     } else {
         discRow.style.display = 'none';

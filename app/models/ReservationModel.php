@@ -44,11 +44,13 @@ class ReservationModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO reservations (user_id, space_id, date, start_time, end_time, subtotal, discount, total, coupon_code, notes, status, payment_ref) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO reservations (user_id, space_id, date, start_time, end_time, subtotal, service_fee, amenities_total, discount, total, coupon_code, notes, status, payment_ref) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->execute($sql, [
             $data['user_id'], $data['space_id'], $data['date'],
             $data['start_time'], $data['end_time'],
             $data['subtotal'] ?? $data['total'] ?? 0,
+            $data['service_fee'] ?? 0,
+            $data['amenities_total'] ?? 0,
             $data['discount'] ?? 0,
             $data['total'], $data['coupon_code'] ?? null,
             $data['notes'] ?? '', $data['status'] ?? 'pending',
