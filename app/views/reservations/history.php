@@ -25,16 +25,20 @@
                     </div>
                     <?php
                     $statusColors = [
-                        'pending' => 'bg-amber-100 text-amber-700',
-                        'confirmed' => 'bg-green-100 text-green-700',
-                        'cancelled' => 'bg-red-100 text-red-700',
-                        'completed' => 'bg-gray-100 text-gray-600',
+                        'pending'     => 'bg-amber-100 text-amber-700',
+                        'confirmed'   => 'bg-green-100 text-green-700',
+                        'in_progress' => 'bg-sky-100 text-sky-700',
+                        'cancelled'   => 'bg-red-100 text-red-700',
+                        'completed'   => 'bg-gray-100 text-gray-600',
+                        'active'      => 'bg-green-100 text-green-700',
                     ];
                     $statusLabels = [
-                        'pending' => 'Pendiente',
-                        'confirmed' => 'Confirmada',
-                        'cancelled' => 'Cancelada',
-                        'completed' => 'Completada',
+                        'pending'     => 'Pendiente',
+                        'confirmed'   => 'Confirmada',
+                        'in_progress' => 'En Progreso',
+                        'cancelled'   => 'Cancelada',
+                        'completed'   => 'Completada',
+                        'active'      => 'Activa',
                     ];
                     $status = $r['status'] ?? 'pending';
                     ?>
@@ -50,11 +54,15 @@
             <div class="text-right flex-shrink-0">
                 <p class="font-bold text-gray-900">$<?= number_format($r['total'], 2) ?></p>
                 <?php if ($status === 'confirmed' || $status === 'pending'): ?>
-                <form method="POST" action="<?= BASE_URL ?>reservations/cancel" class="mt-1.5"
-                    onsubmit="return confirm('¿Cancelar esta reservación?')">
-                    <input type="hidden" name="id" value="<?= $r['id'] ?>">
-                    <button type="submit" class="text-xs text-red-500 hover:underline">Cancelar</button>
-                </form>
+                <div style="display:flex;gap:0.5rem;margin-top:0.375rem">
+                    <a href="<?= BASE_URL ?>reservations/confirm?id=<?= (int)$r['id'] ?>"
+                       class="text-xs text-sky-500 hover:underline">Ver ticket</a>
+                    <form method="POST" action="<?= BASE_URL ?>reservations/cancel"
+                        onsubmit="return confirm('¿Cancelar esta reservación?')">
+                        <input type="hidden" name="id" value="<?= $r['id'] ?>">
+                        <button type="submit" class="text-xs text-red-500 hover:underline">Cancelar</button>
+                    </form>
+                </div>
                 <?php endif; ?>
             </div>
         </div>

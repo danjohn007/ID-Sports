@@ -24,7 +24,17 @@ class AmenityModel extends Model {
         return $this->execute("UPDATE amenities SET " . implode(', ', $fields) . " WHERE id = ?", $params);
     }
 
-    public function delete($id) {
-        return $this->execute("UPDATE amenities SET status = 'inactive' WHERE id = ?", [$id]);
+    public function decrementStock($id, $qty = 1) {
+        return $this->execute(
+            "UPDATE amenities SET stock = GREATEST(0, stock - ?) WHERE id = ?",
+            [(int)$qty, $id]
+        );
+    }
+
+    public function incrementStock($id, $qty = 1) {
+        return $this->execute(
+            "UPDATE amenities SET stock = stock + ? WHERE id = ?",
+            [(int)$qty, $id]
+        );
     }
 }

@@ -720,19 +720,20 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
                 $endTs   = strtotime($resDate . ' ' . $res['end_time']);
                 $isNow   = $nowTs >= $startTs && $nowTs < $endTs;
                 $isSoon  = !$isNow && $startTs > $nowTs && ($startTs - $nowTs) < 7200;
-                if ($isNow)        { $badgeClass = 'res-badge-now';  $badgeText = 'En curso'; }
+                if ($res['status'] === 'in_progress' || $isNow)
+                                   { $badgeClass = 'res-badge-now';  $badgeText = 'En curso'; }
                 elseif ($isSoon)   { $badgeClass = 'res-badge-soon'; $badgeText = 'Próxima'; }
                 elseif ($res['status'] === 'pending') { $badgeClass = 'res-badge-pend'; $badgeText = 'Pendiente'; }
                 else               { $badgeClass = 'res-badge-soon'; $badgeText = 'Confirmada'; }
-                $qrData = htmlspecialchars($res['qr_code'] ?? ('RES-' . $res['id']), ENT_QUOTES);
+                $resId     = (int)$res['id'];
+                $qrData    = htmlspecialchars($res['qr_code'] ?? ('RES-' . $res['id']), ENT_QUOTES);
                 $spaceName = htmlspecialchars($res['space_name'], ENT_QUOTES);
                 $clubName  = htmlspecialchars($res['club_name'] ?? '', ENT_QUOTES);
                 $dateLabel = htmlspecialchars(date('d/m/Y', strtotime($resDate)), ENT_QUOTES);
                 $timeLabel = htmlspecialchars(substr($res['start_time'],0,5).' – '.substr($res['end_time'],0,5), ENT_QUOTES);
                 $total     = htmlspecialchars('$'.number_format($res['total'],0), ENT_QUOTES);
             ?>
-            <div class="res-row"
-                 onclick="openResModal('<?= $qrData ?>','<?= $spaceName ?>','<?= $clubName ?>','<?= $dateLabel ?>','<?= $timeLabel ?>','<?= $total ?>')">
+            <a class="res-row" href="<?= BASE_URL ?>reservations/confirm?id=<?= $resId ?>" style="text-decoration:none">
                 <div class="res-icon">
                     <?= sportSvg($res['sport_type'] ?? 'football') ?>
                 </div>
@@ -746,7 +747,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
                     <p style="font-size:0.68rem;color:var(--text-muted);margin:2px 0 0"><?= date('d/m', strtotime($res['date'])) ?> · <?= substr($res['start_time'],0,5) ?></p>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="margin-top:4px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                 </div>
-            </div>
+            </a>
             <?php endforeach; ?>
         </div>
     </div>

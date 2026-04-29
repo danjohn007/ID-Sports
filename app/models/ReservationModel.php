@@ -89,7 +89,7 @@ class ReservationModel extends Model {
              LEFT JOIN spaces s ON r.space_id = s.id
              LEFT JOIN clubs c ON s.club_id = c.id
              WHERE r.user_id = ?
-               AND r.status IN ('confirmed','active','pending')
+               AND r.status IN ('confirmed','active','pending','in_progress')
                AND (r.date > CURDATE()
                     OR (r.date = CURDATE() AND r.end_time >= CURTIME()))
              ORDER BY r.date ASC, r.start_time ASC",
@@ -132,7 +132,53 @@ class ReservationModel extends Model {
         ];
     }
 
-    public function countByClub($clubId) {
+    public function saveAmenities($reservationId, array $amenities) {
+        // $amenities = [ ['id' => X, 'qty' => Y, 'price' => Z], ... ]
+        foreach ($amenities as $a) {
+            $this->execute(
+                "INSERT INTO reservation_amenities (reservation_id, amenity_id, quantity, price) VALUES (?, ?, ?, ?)",
+                [(int)$reservationId, (int)$a['id'], (int)$a['qty'], (float)$a['price']]
+            );
+        }
+    }
+
+    public function getAmenities($reservationId) {
+        return $this->findAll(
+            "SELECT ra.*, a.name, a.photo FROM reservation_amenities ra
+             JOIN amenities a ON ra.amenity_id = a.id
+             WHERE ra.reservation_id = ?",
+            [(int)$reservationId]
+        );
+    }
+
+    public function checkIn($reservationId) {
+        return $this->execute(
+            "UPDATE reservations SET status = 'in_progress' WHERE id = ? AND status = 'confirmed'",
+            [(int)$reservationId]
+        );
+    }
+
+    public function findByQrCode($qrCode) {
+        return $this->findOne(
+            "SELECT r.*, s.name as space_name, s.sport_type, c.name as club_name, u.name as user_name
+             FROM reservations r
+             LEFT JOIN spaces s ON r.space_id = s.id
+             LEFT JOIN clubs c ON s.club_id = c.id
+             LEFT JOIN users u ON r.user_id = u.id
+             WHERE r.qr_code = ?",
+            [$qrCode]
+        );
+    }
+
+    public function restoreAmenityStock($reservationId) {
+        $amenities = $this->getAmenities($reservationId);
+        if (empty($amenities)) return;
+        $amenityModel = new AmenityModel();
+        foreach ($amenities as $a) {
+            $amenityModel->incrementStock($a['amenity_id'], $a['quantity']);
+        }
+    }
+
         $row = $this->findOne("SELECT COUNT(*) as cnt FROM reservations r JOIN spaces s ON r.space_id = s.id WHERE s.club_id = ?", [$clubId]);
         return $row['cnt'] ?? 0;
     }
