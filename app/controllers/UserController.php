@@ -51,9 +51,13 @@ class UserController extends Controller {
         $prev   = $user['avatar'] ?? '';
 
         if ($prev && strpos($prev, 'public/assets/avatars/') === 0) {
-            $prevPath = ROOT . '/' . $prev;
-            if (file_exists($prevPath)) {
-                @unlink($prevPath);
+            $prevPath    = ROOT . '/' . $prev;
+            $resolvedDir = realpath(ROOT . '/public/assets/avatars');
+            $resolvedFile = realpath($prevPath);
+            if ($resolvedDir && $resolvedFile && strpos($resolvedFile, $resolvedDir . DIRECTORY_SEPARATOR) === 0) {
+                if (!unlink($resolvedFile)) {
+                    error_log('removeAvatar: could not delete file ' . $resolvedFile);
+                }
             }
         }
 

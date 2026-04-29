@@ -240,7 +240,7 @@ $userInitial = strtoupper(substr($user['name'] ?? 'U', 0, 1));
                     <label class="profile-field-label block mb-1">WhatsApp</label>
                     <input type="tel" name="whatsapp"
                            value="<?= htmlspecialchars($user['whatsapp'] ?? '') ?>"
-                           placeholder="+52 442 000 0000"
+                           placeholder="+52 1 234 567 8900"
                            class="profile-input">
                 </div>
 
@@ -320,7 +320,11 @@ function previewAvatar(event) {
 switchTab('edit');
 <?php endif; ?>
 // Auto-switch to edit tab when coming from the "Editar" button on the view tab
-<?php if (!empty($_GET['tab']) && $_GET['tab'] === 'edit'): ?>
+<?php
+$allowedTabs = ['view', 'edit'];
+$requestedTab = isset($_GET['tab']) ? $_GET['tab'] : '';
+if (in_array($requestedTab, $allowedTabs, true) && $requestedTab === 'edit'):
+?>
 switchTab('edit');
 <?php endif; ?>
 </script>
