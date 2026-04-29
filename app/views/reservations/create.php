@@ -426,7 +426,8 @@ function pickStartTime(time) {
 function formatDuration(minutes) {
     if (minutes < 60) return minutes + ' min';
     var h = minutes / 60;
-    return h % 1 === 0 ? h + (h === 1 ? ' hora' : ' horas') : h.toFixed(1) + ' horas';
+    if (h % 1 !== 0) return h.toFixed(1) + ' horas'; // e.g. 1.5 horas
+    return h + (h === 1 ? ' hora' : ' horas');        // 1 hora / 2 horas
 }
 
 /**
