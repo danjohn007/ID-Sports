@@ -295,8 +295,14 @@
         <a href="<?= BASE_URL ?>user/profile"
            class="flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
            style="hover:background:var(--bg-card)">
-            <?php if (!empty($_SESSION['user_avatar'])): ?>
-            <img src="<?= htmlspecialchars($_SESSION['user_avatar']) ?>" class="w-8 h-8 rounded-full object-cover ring-1 ring-white/10" alt="Avatar">
+            <?php
+            $__avatarRaw = $_SESSION['user_avatar'] ?? '';
+            $__avatarSrc = (!empty($__avatarRaw) && !preg_match('#^https?://#', $__avatarRaw))
+                           ? BASE_URL . ltrim($__avatarRaw, '/')
+                           : $__avatarRaw;
+            ?>
+            <?php if (!empty($__avatarSrc)): ?>
+            <img src="<?= htmlspecialchars($__avatarSrc) ?>" class="w-8 h-8 rounded-full object-cover ring-1 ring-white/10" alt="Avatar">
             <?php else: ?>
             <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                  style="background:var(--primary)">

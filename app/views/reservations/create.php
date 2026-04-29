@@ -234,19 +234,19 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
                 <p class="ticket-breakdown-title">Desglose de Pago</p>
                 <div class="ticket-row">
                     <span class="ticket-row-label">Cancha</span>
-                    <span class="ticket-row-value" id="ticketSpaceCost"></span>
+                    <span class="ticket-row-value" id="ticket-cancha-cost"></span>
                 </div>
-                <div class="ticket-row" id="ticketAmenRow">
+                <div class="ticket-row" id="ticket-amenities-row">
                     <span class="ticket-row-label">Amenidades extra</span>
-                    <span class="ticket-row-value" id="ticketAmenCost"></span>
+                    <span class="ticket-row-value" id="ticket-amenities-cost"></span>
                 </div>
                 <div class="ticket-row">
                     <span class="ticket-row-label" style="font-weight:600;color:var(--text-pri)">Subtotal</span>
-                    <span class="ticket-row-value" id="ticketSubtotal"></span>
+                    <span class="ticket-row-value" id="ticket-subtotal"></span>
                 </div>
                 <div class="ticket-row">
                     <span class="ticket-row-label">IVA (16%)</span>
-                    <span class="ticket-row-value" id="ticketIva"></span>
+                    <span class="ticket-row-value" id="ticket-iva"></span>
                 </div>
                 <div class="ticket-row" id="ticketDiscRow" style="display:none">
                     <span class="ticket-row-label">Descuento</span>
@@ -255,7 +255,7 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
                 <hr class="ticket-dashed">
                 <div class="ticket-total-row">
                     <span class="ticket-total-label">Total Pagado</span>
-                    <span class="ticket-total-value" id="ticketTotal"></span>
+                    <span class="ticket-total-value" id="ticket-total" style="font-size:1.375rem;font-weight:800;color:#10b981"></span>
                 </div>
             </div>
             <div class="ticket-punch"></div>
@@ -754,18 +754,18 @@ function populateTicket(res, qrCode, amenities) {
     var discount  = parseFloat(res.discount                      || 0);
     var total     = parseFloat(res.total         || (subtotal + iva - discount));
 
-    document.getElementById('ticketSpaceCost').textContent = fmt(spaceCost);
+    document.getElementById('ticket-cancha-cost').textContent = fmt(spaceCost);
 
-    var amenRow = document.getElementById('ticketAmenRow');
+    var amenRow = document.getElementById('ticket-amenities-row');
     if (amenCost > 0) {
-        document.getElementById('ticketAmenCost').textContent = fmt(amenCost);
+        document.getElementById('ticket-amenities-cost').textContent = fmt(amenCost);
         amenRow.style.display = '';
     } else {
         amenRow.style.display = 'none';
     }
 
-    document.getElementById('ticketSubtotal').textContent = fmt(subtotal);
-    document.getElementById('ticketIva').textContent      = fmt(iva);
+    document.getElementById('ticket-subtotal').textContent = fmt(subtotal);
+    document.getElementById('ticket-iva').textContent      = fmt(iva);
 
     var discRow = document.getElementById('ticketDiscRow');
     if (discount > 0) {
@@ -775,7 +775,7 @@ function populateTicket(res, qrCode, amenities) {
         discRow.style.display = 'none';
     }
 
-    document.getElementById('ticketTotal').textContent = fmt(total);
+    document.getElementById('ticket-total').textContent = fmt(total);
 
     // QR
     document.getElementById('ticketQrCodeText').textContent = qrCode;

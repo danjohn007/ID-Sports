@@ -419,8 +419,14 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     <!-- RF2.1 – Header: Avatar + Greeting + Bell -->
     <div class="home-section" style="display:flex;align-items:center;gap:0.875rem;padding-top:0.25rem;padding-bottom:0.25rem;">
         <a href="<?= BASE_URL ?>user/profile" style="flex-shrink:0">
-            <?php if (!empty($_SESSION['user_avatar'])): ?>
-            <img src="<?= htmlspecialchars($_SESSION['user_avatar']) ?>"
+            <?php
+            $__homeAvatarRaw = $_SESSION['user_avatar'] ?? '';
+            $__homeAvatarSrc = (!empty($__homeAvatarRaw) && !preg_match('#^https?://#', $__homeAvatarRaw))
+                               ? BASE_URL . ltrim($__homeAvatarRaw, '/')
+                               : $__homeAvatarRaw;
+            ?>
+            <?php if (!empty($__homeAvatarSrc)): ?>
+            <img src="<?= htmlspecialchars($__homeAvatarSrc) ?>"
                  style="width:3rem;height:3rem;border-radius:50%;object-fit:cover;border:2px solid var(--primary)" alt="Avatar">
             <?php else: ?>
             <div style="width:3rem;height:3rem;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Jockey One',sans-serif;font-size:1.25rem;border:2px solid rgba(var(--primary-rgb),0.4)">
