@@ -36,7 +36,85 @@ function sportSvgHist(string $type): string {
     margin: 0;
 }
 
-/* Status badge */
+/* ── Two-box side-by-side grid ───────────────────────── */
+.hist-boxes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+.hist-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-gl);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 270px);
+    min-height: 200px;
+}
+.hist-box-active {
+    border-color: rgba(var(--primary-rgb), 0.3);
+}
+.hist-box-header {
+    padding: 1rem 1rem 0;
+    flex-shrink: 0;
+}
+.hist-box-filters {
+    padding: 0 1rem 0.75rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.hist-box-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.875rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--primary-rgb),0.25) transparent;
+}
+.hist-box-scroll::-webkit-scrollbar { width: 4px; }
+.hist-box-scroll::-webkit-scrollbar-track { background: transparent; }
+.hist-box-scroll::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb),0.3); border-radius: 4px; }
+/* Mobile: stack vertically, remove fixed height */
+@media (max-width: 767px) {
+    .hist-boxes-grid { grid-template-columns: 1fr; gap: 0.875rem; }
+    .hist-box { max-height: none; }
+    .hist-box-scroll { max-height: 70vh; }
+}
+/* Filter row inside each box */
+.hist-box-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.625rem;
+}
+.hist-box-filter-input {
+    background: var(--bg-mid);
+    border: 1px solid var(--border-gl);
+    border-radius: 0.75rem;
+    padding: 0.45rem 0.7rem 0.45rem 2rem;
+    font-size: 0.78rem;
+    color: var(--text-pri);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+.hist-box-filter-date,
+.hist-box-filter-select {
+    background: var(--bg-mid);
+    border: 1px solid var(--border-gl);
+    border-radius: 0.75rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+    color: var(--text-pri);
+    outline: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
 .hist-badge {
     display: inline-flex;
     align-items: center;
@@ -340,74 +418,73 @@ function sportSvgHist(string $type): string {
     }
     ?>
 
-    <!-- ── BOX A: Reservas Activas ─────────────────────── -->
-    <div style="background:var(--bg-card);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:1.25rem;padding:1.125rem 1rem;margin-bottom:1.25rem">
-        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
-            <span style="width:0.5rem;height:0.5rem;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981"></span>
-            <h3 style="font-family:'Jockey One',sans-serif;font-size:1rem;color:var(--text-pri);margin:0">Reservas Activas</h3>
-            <span style="font-size:0.7rem;font-weight:700;background:rgba(16,185,129,0.15);color:#10b981;padding:0.15rem 0.5rem;border-radius:20px;margin-left:auto"><?= count($resActive) ?></span>
-        </div>
-        <!-- Filters A -->
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.875rem">
-            <div style="flex:1;min-width:150px;position:relative">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" id="searchBoxA" placeholder="Buscar cancha..."
-                       oninput="filterBox('A')"
-                       style="width:100%;box-sizing:border-box;background:var(--bg-mid);border:1px solid var(--border-gl);border-radius:0.75rem;padding:0.5rem 0.75rem 0.5rem 2.2rem;font-size:0.8rem;color:var(--text-pri);outline:none">
+    <!-- ── Side-by-side grid wrapper ───────────────────── -->
+    <div class="hist-boxes-grid">
+
+    <!-- BOX A: Reservas Activas -->
+    <div class="hist-box hist-box-active">
+        <div class="hist-box-header">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+                <span style="width:0.5rem;height:0.5rem;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981"></span>
+                <h3 style="font-family:'Jockey One',sans-serif;font-size:0.9375rem;color:var(--text-pri);margin:0">Reservas Activas</h3>
+                <span style="font-size:0.68rem;font-weight:700;background:rgba(16,185,129,0.15);color:#10b981;padding:0.12rem 0.45rem;border-radius:20px;margin-left:auto"><?= count($resActive) ?></span>
             </div>
-            <input type="date" id="dateBoxA" onchange="filterBox('A')"
-                   style="background:var(--bg-mid);border:1px solid var(--border-gl);border-radius:0.75rem;padding:0.5rem 0.75rem;font-size:0.8rem;color:var(--text-pri);outline:none;cursor:pointer">
-            <select id="statusBoxA" onchange="filterBox('A')"
-                    style="background:var(--bg-mid);border:1px solid var(--border-gl);border-radius:0.75rem;padding:0.5rem 0.75rem;font-size:0.8rem;color:var(--text-pri);outline:none;cursor:pointer">
-                <option value="">Todos los estados</option>
-                <option value="confirmed">Confirmada</option>
-                <option value="pending">Pendiente</option>
-                <option value="in_progress">En curso</option>
-                <option value="active">Activa</option>
-            </select>
         </div>
-        <?php if (empty($resActive)): ?>
-        <p style="font-size:0.8125rem;color:var(--text-muted);text-align:center;padding:1rem 0">No hay reservas activas</p>
-        <?php else: ?>
-        <div id="gridBoxA" style="display:flex;flex-direction:column;gap:0.75rem">
-            <?php foreach ($resActive as $r): renderHistCard($r, $statusLabels); endforeach; ?>
+        <div class="hist-box-filters">
+            <div class="hist-box-filter-row">
+                <div style="flex:1;min-width:0;position:relative">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:0.625rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchBoxA" placeholder="Buscar cancha…" oninput="filterBox('A')" class="hist-box-filter-input">
+                </div>
+                <input type="date" id="dateBoxA" onchange="filterBox('A')" class="hist-box-filter-date">
+                <select id="statusBoxA" onchange="filterBox('A')" class="hist-box-filter-select">
+                    <option value="">Estado</option>
+                    <option value="confirmed">Confirmada</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="in_progress">En curso</option>
+                    <option value="active">Activa</option>
+                </select>
+            </div>
         </div>
-        <?php endif; ?>
+        <div class="hist-box-scroll" id="gridBoxA">
+            <?php if (empty($resActive)): ?>
+            <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:2rem 0">No hay reservas activas</p>
+            <?php else: foreach ($resActive as $r): renderHistCard($r, $statusLabels); endforeach; endif; ?>
+        </div>
     </div>
 
-    <!-- ── BOX B: Finalizadas / Canceladas ─────────────── -->
-    <div style="background:var(--bg-card);border:1px solid var(--border-gl);border-radius:1.25rem;padding:1.125rem 1rem">
-        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
-            <span style="width:0.5rem;height:0.5rem;border-radius:50%;background:#94a3b8;display:inline-block"></span>
-            <h3 style="font-family:'Jockey One',sans-serif;font-size:1rem;color:var(--text-pri);margin:0">Finalizadas / Canceladas</h3>
-            <span style="font-size:0.7rem;font-weight:700;background:rgba(148,163,184,0.15);color:#94a3b8;padding:0.15rem 0.5rem;border-radius:20px;margin-left:auto"><?= count($resFinished) ?></span>
-        </div>
-        <!-- Filters B -->
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.875rem">
-            <div style="flex:1;min-width:150px;position:relative">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" id="searchBoxB" placeholder="Buscar cancha..."
-                       oninput="filterBox('B')"
-                       style="width:100%;box-sizing:border-box;background:var(--bg-mid);border:1px solid var(--border-gl);border-radius:0.75rem;padding:0.5rem 0.75rem 0.5rem 2.2rem;font-size:0.8rem;color:var(--text-pri);outline:none">
+    <!-- BOX B: Finalizadas / Canceladas -->
+    <div class="hist-box">
+        <div class="hist-box-header">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+                <span style="width:0.5rem;height:0.5rem;border-radius:50%;background:#94a3b8;display:inline-block"></span>
+                <h3 style="font-family:'Jockey One',sans-serif;font-size:0.9375rem;color:var(--text-pri);margin:0">Finalizadas / Canceladas</h3>
+                <span style="font-size:0.68rem;font-weight:700;background:rgba(148,163,184,0.15);color:#94a3b8;padding:0.12rem 0.45rem;border-radius:20px;margin-left:auto"><?= count($resFinished) ?></span>
             </div>
-            <input type="date" id="dateBoxB" onchange="filterBox('B')"
-                   style="background:var(--bg-mid);border:1px solid var(--border-gl);border-radius:0.75rem;padding:0.5rem 0.75rem;font-size:0.8rem;color:var(--text-pri);outline:none;cursor:pointer">
-            <select id="statusBoxB" onchange="filterBox('B')"
-                    style="background:var(--bg-mid);border:1px solid var(--border-gl);border-radius:0.75rem;padding:0.5rem 0.75rem;font-size:0.8rem;color:var(--text-pri);outline:none;cursor:pointer">
-                <option value="">Todos los estados</option>
-                <option value="completed">Completada</option>
-                <option value="cancelled">Cancelada</option>
-                <option value="refund_pending">Reembolso pendiente</option>
-            </select>
         </div>
-        <?php if (empty($resFinished)): ?>
-        <p style="font-size:0.8125rem;color:var(--text-muted);text-align:center;padding:1rem 0">Sin reservas finalizadas</p>
-        <?php else: ?>
-        <div id="gridBoxB" style="display:flex;flex-direction:column;gap:0.75rem">
-            <?php foreach ($resFinished as $r): renderHistCard($r, $statusLabels); endforeach; ?>
+        <div class="hist-box-filters">
+            <div class="hist-box-filter-row">
+                <div style="flex:1;min-width:0;position:relative">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:0.625rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchBoxB" placeholder="Buscar cancha…" oninput="filterBox('B')" class="hist-box-filter-input">
+                </div>
+                <input type="date" id="dateBoxB" onchange="filterBox('B')" class="hist-box-filter-date">
+                <select id="statusBoxB" onchange="filterBox('B')" class="hist-box-filter-select">
+                    <option value="">Estado</option>
+                    <option value="completed">Completada</option>
+                    <option value="cancelled">Cancelada</option>
+                    <option value="refund_pending">Reembolso pend.</option>
+                </select>
+            </div>
         </div>
-        <?php endif; ?>
+        <div class="hist-box-scroll" id="gridBoxB">
+            <?php if (empty($resFinished)): ?>
+            <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:2rem 0">Sin reservas finalizadas</p>
+            <?php else: foreach ($resFinished as $r): renderHistCard($r, $statusLabels); endforeach; endif; ?>
+        </div>
     </div>
+
+    </div><!-- /.hist-boxes-grid -->
 
     <?php endif; ?>
 </div>
