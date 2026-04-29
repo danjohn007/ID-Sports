@@ -78,10 +78,48 @@ class ClubModel extends Model {
     public function getActiveClubs($search = '') {
         if ($search) {
             return parent::findAll(
-                "SELECT * FROM clubs WHERE status = 'active' AND (name LIKE ? OR address LIKE ?) ORDER BY name",
+                "SELECT c.*, COUNT(s.id) as space_count FROM clubs c LEFT JOIN spaces s ON s.club_id = c.id AND s.status = 'active' WHERE c.status = 'active' AND (c.name LIKE ? OR c.address LIKE ?) GROUP BY c.id ORDER BY c.name",
                 ["%$search%", "%$search%"]
             );
         }
-        return parent::findAll("SELECT * FROM clubs WHERE status = 'active' ORDER BY name");
+        return parent::findAll("SELECT c.*, COUNT(s.id) as space_count FROM clubs c LEFT JOIN spaces s ON s.club_id = c.id AND s.status = 'active' WHERE c.status = 'active' GROUP BY c.id ORDER BY c.name");
+    }
+
+    public function discoverClubs($search = '', $state = '', $city = '') {
+        $conditions = ["c.status = 'active'"];
+        $params = [];
+        if ($search) {
+            $conditions[] = "(c.name LIKE ? OR c.address LIKE ? OR c.city LIKE ?)";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+        }
+        if ($state) {
+            $conditions[] = "c.state = ?";
+            $params[] = $state;
+        }
+        if ($city) {
+            $conditions[] = "c.city = ?";
+            $params[] = $city;
+        }
+        $where = implode(' AND ', $conditions);
+        return parent::findAll(
+            "SELECT c.*, COUNT(s.id) as space_count FROM clubs c LEFT JOIN spaces s ON s.club_id = c.id AND s.status = 'active' WHERE $where GROUP BY c.id ORDER BY c.name",
+            $params
+        );
+    }
+
+    public function getDistinctStates() {
+        $rows = parent::findAll("SELECT DISTINCT state FROM clubs WHERE status = 'active' AND state IS NOT NULL AND state != '' ORDER BY state");
+        return array_column($rows, 'state');
+    }
+
+    public function getDistinctCities($state = '') {
+        if ($state) {
+            $rows = parent::findAll("SELECT DISTINCT city FROM clubs WHERE status = 'active' AND state = ? AND city IS NOT NULL AND city != '' ORDER BY city", [$state]);
+        } else {
+            $rows = parent::findAll("SELECT DISTINCT city FROM clubs WHERE status = 'active' AND city IS NOT NULL AND city != '' ORDER BY city");
+        }
+        return array_column($rows, 'city');
     }
 }

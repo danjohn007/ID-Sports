@@ -228,8 +228,8 @@
             Historial
         </a>
         <a href="<?= BASE_URL ?>clubs" class="sidebar-link <?= $isClubs ? 'active' : '' ?>">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Solicitudes
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            Descubrir
         </a>
 
         <?php if (in_array($_SESSION['user_role'] ?? '', ['club_admin', 'super_admin'])): ?>
@@ -442,9 +442,9 @@
         </a>
         <a href="<?= BASE_URL ?>clubs" class="bottom-nav-link <?= $isClubs2 ? 'active' : '' ?>">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
             </svg>
-            <span>Solicitudes</span>
+            <span>Descubrir</span>
         </a>
         <a href="<?= BASE_URL ?>user/profile" class="bottom-nav-link <?= $isProfile2 ? 'active' : '' ?>">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

@@ -19,6 +19,16 @@ class ReviewModel extends Model {
         );
     }
 
+    public function findByReservation($reservationId, $userId = null) {
+        if ($userId) {
+            return $this->findOne(
+                "SELECT id FROM reviews WHERE reservation_id = ? AND user_id = ?",
+                [$reservationId, $userId]
+            );
+        }
+        return $this->findOne("SELECT id FROM reviews WHERE reservation_id = ?", [$reservationId]);
+    }
+
     public function create($data) {
         $sql = "INSERT INTO reviews (user_id, reservation_id, space_id, rating, comment) VALUES (?, ?, ?, ?, ?)";
         $this->execute($sql, [$data['user_id'], $data['reservation_id'], $data['space_id'], $data['rating'], $data['comment']]);
