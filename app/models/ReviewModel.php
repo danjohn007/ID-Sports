@@ -7,6 +7,18 @@ class ReviewModel extends Model {
         );
     }
 
+    public function findByClub($clubId) {
+        return $this->findAll(
+            "SELECT r.*, u.name as user_name, s.name as space_name
+             FROM reviews r
+             LEFT JOIN users u ON r.user_id = u.id
+             LEFT JOIN spaces s ON r.space_id = s.id
+             WHERE s.club_id = ?
+             ORDER BY r.created_at DESC",
+            [$clubId]
+        );
+    }
+
     public function create($data) {
         $sql = "INSERT INTO reviews (user_id, reservation_id, space_id, rating, comment) VALUES (?, ?, ?, ?, ?)";
         $this->execute($sql, [$data['user_id'], $data['reservation_id'], $data['space_id'], $data['rating'], $data['comment']]);

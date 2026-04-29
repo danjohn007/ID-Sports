@@ -27,17 +27,34 @@ class ClubController extends Controller {
         }
         $spaces = $this->spaceModel->findByClub($clubId);
         $amenities = $this->amenityModel->findByClub($clubId);
-
-        if ($this->isPost() && isset($_POST['join_request'])) {
-            $this->setFlash('success', 'Solicitud enviada. Te notificaremos cuando sea aprobada.');
-            $this->redirect('clubs/detail/' . $clubId);
-        }
+        $membershipModel = new ClubMembershipModel();
+        $reviewModel = new ReviewModel();
+        $isFollowing = $membershipModel->isMember($_SESSION['user_id'], $clubId);
+        $reviews = $reviewModel->findByClub($clubId);
 
         $this->view('clubs/detail', [
-            'title' => $club['name'],
-            'club' => $club,
-            'spaces' => $spaces,
-            'amenities' => $amenities,
+            'title'       => $club['name'],
+            'club'        => $club,
+            'spaces'      => $spaces,
+            'amenities'   => $amenities,
+            'isFollowing' => $isFollowing,
+            'reviews'     => $reviews,
         ]);
+    }
+
+    public function toggleFollow($clubId = null) {
+        $this->requireAuth();
+        if (!$clubId) $clubId = $this->get('id');
+        header('Content-Type: application/json');
+        $membershipModel = new ClubMembershipModel();
+        $userId = $_SESSION['user_id'];
+        if ($membershipModel->isMember($userId, $clubId)) {
+            $membershipModel->leave($userId, $clubId);
+            echo json_encode(['following' => false]);
+        } else {
+            $membershipModel->join($userId, $clubId);
+            echo json_encode(['following' => true]);
+        }
+        exit;
     }
 }

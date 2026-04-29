@@ -52,6 +52,29 @@ class ClubModel extends Model {
         return $row['cnt'] ?? 0;
     }
 
+    public function getNearby($lat = null, $lng = null, $limit = 6) {
+        $limit = max(1, min(50, (int)$limit));
+        if ($lat && $lng) {
+            // Distance formula compatible with MySQL 5.7
+            return parent::findAll(
+                "SELECT c.*,
+                    ( 6371 * ACOS(
+                        COS(RADIANS(?)) * COS(RADIANS(c.latitude)) *
+                        COS(RADIANS(c.longitude) - RADIANS(?)) +
+                        SIN(RADIANS(?)) * SIN(RADIANS(c.latitude))
+                    )) AS distance_km
+                 FROM clubs c
+                 WHERE c.status = 'active'
+                   AND c.latitude IS NOT NULL
+                 HAVING distance_km < 50
+                 ORDER BY distance_km ASC
+                 LIMIT $limit",
+                [$lat, $lng, $lat]
+            );
+        }
+        return $this->getActiveClubs();
+    }
+
     public function getActiveClubs($search = '') {
         if ($search) {
             return parent::findAll(

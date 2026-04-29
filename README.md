@@ -125,3 +125,109 @@ Los Super Admins pueden subir el logo de la empresa desde **Config → General**
 | `config/general` | Configuración general + **subida de logo** |
 | `config/colors` | Colores + URL imagen de fondo del login |
 | `config/onboarding` | Editar títulos, descripciones e imágenes de cada slide |
+
+---
+
+### v1.2 — Módulos 2 y 3: Dashboard de Usuario, Búsqueda, Detalle de Cancha y Club
+
+#### 📱 Módulo 2 — Dashboard / Inicio (Home)
+
+| Sección | Descripción |
+|---------|-------------|
+| **RF2.1 Cabecera** | Avatar circular, saludo "Hola, [Nombre]" en Jockey One, campana de notificaciones con drawer |
+| **RF2.2 Reserva de Hoy** | Solo aparece si hay reserva activa para **hoy** (status `confirmed`/`active`, end_time > NOW()). Botón "Ver QR de Acceso" abre un modal con el código QR generado al confirmar la reserva |
+| **RF2.3 Reservar por Día** | 5 píldoras (hoy + 4 días) más grandes y llamativas; muestra espacios disponibles cruzando `spaces` y `schedules`; redirige a búsqueda filtrando por fecha |
+| **RF2.4 Deportes** | Grid 6 columnas con iconos SVG por deporte; clic filtra búsqueda por `?sport=<tipo>` |
+| **RF2.5 Clubes Seguidos** | Sustituye sección de ofertas; muestra clubes que el usuario sigue via `club_memberships`; estado vacío con CTA "Explorar clubes" |
+| **RF2.6 Cerca de ti** | Glassmorphism cards; GPS via Web API → coordenadas al backend; orden por distancia |
+| **Mis Reservaciones** | Solo muestra reservaciones activas/futuras (date >= hoy, status != cancelado); click en una fila abre modal QR con detalle completo; badges diferenciados: **En curso** (verde), **Próxima** (azul), **Pendiente** (amarillo) |
+
+#### 🔍 Módulo 3 — Búsqueda de Canchas
+
+- Cards sin botón "Reservar" — solo **"Ver detalle"** para flujo correcto
+- Nombre del club es enlace directo al detalle del club
+- Filtros: texto libre, tipo de deporte (chips), fecha
+- Sin emojis; colores completamente via CSS variables
+
+#### 🏟️ Detalle de Cancha (`/spaces/detail/{id}`)
+
+- Hero con gradiente por deporte o foto de cancha
+- Calendario de 5 días + slots de hora generados dinámicamente según horarios del club
+- Selector de duración (1-3 h) con cálculo de precio en tiempo real
+- Amenidades con selector de cantidad
+- Botón **Seguir / Siguiendo** el club (AJAX `POST /clubs/toggle-follow/{id}`)
+- Enlace al panel del club
+
+#### 🏟️ Detalle de Club (`/clubs/detail/{id}`)
+
+- Canchas agrupadas por deporte con cabecera de color por tipo
+- Carrusel de fotos por cancha (hasta 5)
+- Botón **Seguir / Siguiendo** (AJAX); estado guardado en `club_memberships`
+- Reseñas de usuarios
+- Botones de contacto: WhatsApp y Google Maps
+
+#### 🔧 Backend
+
+| Archivo | Cambio |
+|---------|--------|
+| `ClubController` | `toggleFollow` — AJAX endpoint `POST clubs/toggle-follow/{id}` |
+| `ReservationModel` | `getActiveForUser()` — solo reservas activas/futuras (MySQL 5.7 compatible) |
+| `ClubMembershipModel` | **Bug fix**: `isMember()` ahora compara `!== false` (PDO `fetch()` devuelve `false`, no `null`) |
+| `SpaceModel` | `getAvailableSlots()` — cruza horarios y reservas existentes |
+| `ReviewModel` | `findByClub()` — reseñas agrupadas por club |
+
+#### 🗃️ Base de datos (MySQL 5.7 compatible)
+
+Migración: `database/migration_v3_mysql57.sql`
+
+- Usa `INFORMATION_SCHEMA` para verificar si columna ya existe antes de agregarla (MySQL 5.7 no soporta `ADD COLUMN IF NOT EXISTS`)
+- Agrega: `clubs.latitude`, `clubs.longitude`, `promotions.club_id`, `users.last_lat`, `users.last_lng`
+- Crea: tabla `notifications`, tabla `club_memberships` (si no existen)
+- Segura para ejecutar múltiples veces
+
+```bash
+mysql -u root -p id_sports < database/migration_v3_mysql57.sql
+```
+
+---
+
+### v1.3 — Carruseles de Días/Deportes, Variable `--secondary`, Gestión de Deportes
+
+#### 🎠 Carruseles en el Home
+
+| Sección | Cambio |
+|---------|--------|
+| **Reservar por Día** | Convertido a carrusel horizontal con flechas prev/next; píldoras ampliadas (`min-width: 96px`, número en `2rem`) |
+| **Deportes** | Convertido a carrusel; tarjetas más compactas (`78–88 px`), centradas; cada deporte tiene su color distintivo; soporte para imagen PNG subida por Super Admin |
+
+#### 🎨 Variable CSS `--secondary`
+
+- `main.php` ahora expone `--secondary` y `--secondary-rgb` calculados desde `config.color_secondary`
+- Todos los degradados que antes usaban `#6366f1` hardcodeado ahora usan `var(--secondary)`, incluyendo: tarjeta "Reserva de Hoy", placeholder de cobertura de clubs, degradados de canchas en `/spaces/detail`, `/reservations/search`, `/clubs/detail`
+- El Super Admin puede cambiar el color secundario desde **Config → Colores** y el cambio se refleja en toda la aplicación al instante
+
+#### ⚽ Gestión de Tipos de Deporte (`/config/sports`)
+
+Nueva sección en el panel Super Admin:
+
+- **Lista maestra** de 20 deportes pre-cargada: Fútbol, Fútbol Sala, Fútbol 7, Fútbol Rápido, Pádel, Tenis, Basketball, Voleibol, Natación, Béisbol, Softbol, Squash, Badminton, Rugby, Handball, Gimnasio, Yoga/Pilates, CrossFit, Ciclismo Indoor, Otro
+- **Icono PNG**: cada deporte puede tener una imagen PNG/JPG/WEBP subida (≤ 1 MB) almacenada en `public/assets/sports/`; si no hay imagen se usa el SVG inline correspondiente
+- **Degradado editable**: color de inicio y fin del degradado de la tarjeta de cada deporte
+- **Activar/desactivar** deportes (ocultar del Home y buscador)
+- **Crear nuevos deportes** con validación de slug único
+
+#### 🗃️ Base de datos (MySQL 5.7 compatible)
+
+Migración: `database/migration_v4_sports.sql`
+
+- Crea tabla `sport_types` con: `id`, `slug`, `name`, `color_from`, `color_to`, `image_path`, `sort_order`, `is_active`
+- Pre-carga los 20 deportes usando `INSERT IGNORE` (idempotente)
+- No requiere `ADD COLUMN IF NOT EXISTS` — 100% MySQL 5.7 compatible
+
+```bash
+mysql -u root -p id_sports < database/migration_v4_sports.sql
+```
+
+#### 📋 Dropdown de deporte en admin de canchas
+
+El select de `sport_type` en la pantalla de administración de canchas ahora carga dinámicamente desde `sport_types`, con fallback estático si la migración aún no se ha ejecutado.

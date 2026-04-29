@@ -375,4 +375,104 @@ class ConfigController extends Controller {
         }
         $this->redirect('config/onboarding');
     }
+
+    /* ── Sport Types management ──────────────────────────── */
+    public function sports() {
+        $sportModel = new SportTypeModel();
+
+        if ($this->isPost()) {
+            $action = $this->post('action');
+
+            if ($action === 'save') {
+                $id  = (int)$this->post('id');
+                $rawSlug = strtolower(trim($this->post('slug') ?? ''));
+                $slug = trim(preg_replace('/_+/', '_', preg_replace('/[^a-z0-9_]/', '_', $rawSlug)), '_');
+                $data = [
+                    'name'       => trim($this->post('name') ?? ''),
+                    'slug'       => $slug ?: 'sport_' . time(),
+                    'color_from' => $this->post('color_from') ?? '#10b981',
+                    'color_to'   => $this->post('color_to')   ?? '#059669',
+                    'sort_order' => (int)$this->post('sort_order'),
+                ];
+                if ($id) $data['id'] = $id;
+                $sportModel->save($data);
+                $this->setFlash('success', 'Deporte guardado.');
+
+            } elseif ($action === 'toggle') {
+                $sportModel->toggle((int)$this->post('id'));
+                $this->setFlash('success', 'Estado actualizado.');
+
+            } elseif ($action === 'delete') {
+                $sportModel->delete((int)$this->post('id'));
+                $this->setFlash('success', 'Deporte eliminado.');
+            }
+
+            $this->redirect('config/sports');
+            return;
+        }
+
+        $sports = $sportModel->getAllForAdmin();
+        $this->view('config/sports', ['title' => 'Deportes del Sistema', 'sports' => $sports], 'admin');
+    }
+
+    /* ── Upload sport icon PNG ──────────────────────────── */
+    public function uploadSportImage() {
+        if (!$this->isPost()) {
+            $this->redirect('config/sports');
+            return;
+        }
+
+        $sportId = (int)$this->post('sport_id');
+        if (!$sportId) {
+            $this->setFlash('error', 'Deporte no especificado.');
+            $this->redirect('config/sports');
+            return;
+        }
+
+        if (empty($_FILES['sport_image']['name']) || $_FILES['sport_image']['error'] !== UPLOAD_ERR_OK) {
+            $this->setFlash('error', 'No se seleccionó ningún archivo o hubo un error.');
+            $this->redirect('config/sports');
+            return;
+        }
+
+        $file = $_FILES['sport_image'];
+        $allowed = ['image/png' => 'png', 'image/jpeg' => 'jpg', 'image/webp' => 'webp'];
+        $mimeType = $this->detectMimeType($file['tmp_name']);
+
+        if (!$mimeType || !array_key_exists($mimeType, $allowed)) {
+            $this->setFlash('error', 'Solo se permiten imágenes PNG, JPG o WEBP.');
+            $this->redirect('config/sports');
+            return;
+        }
+
+        if ($file['size'] > 1 * 1024 * 1024) {
+            $this->setFlash('error', 'La imagen supera el límite de 1 MB.');
+            $this->redirect('config/sports');
+            return;
+        }
+
+        $destDir = ROOT . '/public/assets/sports/';
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0755, true);
+        }
+
+        if (!is_writable($destDir)) {
+            $this->setFlash('error', 'El directorio public/assets/sports/ no es escribible.');
+            $this->redirect('config/sports');
+            return;
+        }
+
+        $ext      = $allowed[$mimeType];
+        $filename = 'sport_' . $sportId . '.' . $ext;
+        $destPath = $destDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $destPath)) {
+            (new SportTypeModel())->setImage($sportId, 'public/assets/sports/' . $filename);
+            $this->setFlash('success', 'Imagen del deporte actualizada.');
+        } else {
+            $this->setFlash('error', 'No se pudo guardar la imagen.');
+        }
+
+        $this->redirect('config/sports');
+    }
 }
