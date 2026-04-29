@@ -211,6 +211,8 @@ class ReservationController extends Controller {
         $this->requireAuth(['club_admin', 'super_admin']);
         header('Content-Type: application/json');
 
+        $earlyWindowSec = 900; // 15-minute early check-in window
+
         $qrCode = $this->isPost() ? $this->post('qr_code') : $this->get('qr_code');
         if (!$qrCode) {
             echo json_encode(['error' => 'QR code requerido.']);
@@ -228,7 +230,7 @@ class ReservationController extends Controller {
             // Validate that current time is within the reservation window
             $now        = time();
             $resDate    = $reservation['date'];
-            $windowStart = strtotime($resDate . ' ' . $reservation['start_time']) - 900; // 15-min early window
+            $windowStart = strtotime($resDate . ' ' . $reservation['start_time']) - $earlyWindowSec;
             $windowEnd   = strtotime($resDate . ' ' . $reservation['end_time']);
 
             if ($now < $windowStart) {
