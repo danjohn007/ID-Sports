@@ -67,6 +67,7 @@ function sportSvgHist(string $type): string {
 }
 .hist-box-scroll {
     flex: 1;
+    min-height: 0;      /* critical: lets flex child shrink so overflow-y activates */
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.875rem 1rem;
@@ -360,8 +361,18 @@ function sportSvgHist(string $type): string {
     ];
     $activeStatuses   = ['confirmed','pending','in_progress','active'];
     $finishedStatuses = ['completed','cancelled','refund_pending'];
-    $resActive   = array_values(array_filter($reservations, fn($r) => in_array($r['status'] ?? '', $activeStatuses)));
-    $resFinished = array_values(array_filter($reservations, fn($r) => in_array($r['status'] ?? '', $finishedStatuses)));
+    $today   = date('Y-m-d');
+    $nowTime = date('H:i:s');
+    // Box A: active status AND (future date OR today with time still remaining)
+    $resActive = array_values(array_filter($reservations, function($r) use ($activeStatuses, $today, $nowTime) {
+        if (!in_array($r['status'] ?? '', $activeStatuses)) return false;
+        $d = $r['date'] ?? '';
+        return $d > $today || ($d === $today && ($r['end_time'] ?? '00:00:00') > $nowTime);
+    }));
+    // Box B: everything else (finished statuses + past-dated "active" ones)
+    $activeIds   = array_map('intval', array_column($resActive, 'id'));
+    $resFinished = array_values(array_filter($reservations, fn($r) => !in_array((int)$r['id'], $activeIds)));
+
     ?>
 
     <?php

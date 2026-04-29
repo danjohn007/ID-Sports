@@ -567,7 +567,8 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
             $status = $res['status'] ?? 'confirmed';
             $amenDetailsJs = htmlspecialchars(json_encode($res['amenities_details'] ?? [], JSON_UNESCAPED_UNICODE), ENT_QUOTES);
         ?>
-        <div class="today-mini-card" style="flex-shrink:0;<?= count($todayReservations) > 1 ? 'min-width:min(80vw,300px)' : 'width:100%' ?>">
+        <div class="today-mini-card" data-endtime="<?= htmlspecialchars($res['end_time'], ENT_QUOTES) ?>"
+             style="flex-shrink:0;<?= count($todayReservations) > 1 ? 'min-width:min(80vw,300px)' : 'width:100%' ?>">
             <!-- Gradient head -->
             <div class="today-mini-head">
                 <div style="flex-shrink:0;width:2.625rem;height:2.625rem;border-radius:0.75rem;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:#fff">
@@ -827,7 +828,17 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     </div><!-- /.clubs-nearby-grid -->
 
     <!-- Historial Reciente: last 3 reservations (Glassmorphism cards) -->
-    <?php $displayReservations = !empty($recentReservations) ? $recentReservations : (!empty($activeReservations) ? array_slice($activeReservations, 0, 3) : []); ?>
+    <?php
+    if (!empty($recentReservations)) {
+        $displayReservations = $recentReservations;
+    } elseif (!empty($activeReservations)) {
+        $tmp = $activeReservations;
+        usort($tmp, fn($a,$b) => strcmp($b['date'].$b['start_time'], $a['date'].$a['start_time']));
+        $displayReservations = array_slice($tmp, 0, 3);
+    } else {
+        $displayReservations = [];
+    }
+    ?>
     <?php if (!empty($displayReservations)): ?>
     <div class="home-section">
         <div class="home-section-header">
@@ -1091,4 +1102,28 @@ function scrollCarousel(trackId, dir) {
     var itemW = track.firstElementChild ? track.firstElementChild.offsetWidth + 8 : 100;
     track.scrollBy({ left: dir * itemW, behavior: 'smooth' });
 }
+
+/* ── Real-time today ticket expiry ───────────────────── */
+(function tickExpiry() {
+    var now  = new Date();
+    var hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':00';
+    document.querySelectorAll('.today-mini-card[data-endtime]').forEach(function(card) {
+        var et = card.getAttribute('data-endtime') || '';
+        if (et && et <= hhmm) {
+            card.style.transition = 'opacity 500ms, transform 500ms';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.88)';
+            setTimeout(function() {
+                card.remove();
+                var section = document.getElementById('todayTicketsSection');
+                if (section && !section.querySelector('.today-mini-card')) {
+                    section.style.transition = 'opacity 400ms';
+                    section.style.opacity = '0';
+                    setTimeout(function() { section.style.display = 'none'; }, 400);
+                }
+            }, 500);
+        }
+    });
+    setTimeout(tickExpiry, 30000);
+})();
 </script>
