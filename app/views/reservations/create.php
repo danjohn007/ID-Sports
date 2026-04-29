@@ -589,11 +589,11 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
 
 <script>
 /* ── State ─────────────────────────────────────────────── */
-const SPACE_ID      = <?= (int)$space['id'] ?>;
-const PRICE_PER_HR  = <?= (float)$space['price_per_hour'] ?>;
-const CLOSED_DAYS   = <?= json_encode(array_map('intval', $closedDays)) ?>;
-const BASE_URL      = '<?= BASE_URL ?>';
-const MAX_DURATION_SLOTS = 8; // 8 × 30 min = 4 hours max; adjust per club if needed
+const SPACE_ID           = <?= (int)$space['id'] ?>;
+const PRICE_PER_HR       = <?= (float)$space['price_per_hour'] ?>;
+const CLOSED_DAYS        = <?= json_encode(array_map('intval', $closedDays)) ?>;
+const BASE_URL           = '<?= BASE_URL ?>';
+const MAX_DURATION_SLOTS = <?= (int)(($space['max_booking_hours'] ?? 4) * 2) ?>; // × 30 min slots
 
 let calYear  = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-indexed
@@ -750,6 +750,12 @@ function pickStartTime(time) {
     renderEndSlots();
 }
 
+function formatDuration(minutes) {
+    if (minutes < 60) return minutes + 'min';
+    var h = minutes / 60;
+    return h % 1 === 0 ? h + 'h' : h.toFixed(1) + 'h';
+}
+
 /** Compute which end-time slots are valid from the current startTime */
 function getValidEndSlots() {
     if (!startTime || !allSlots.length) return [];
@@ -793,7 +799,7 @@ function renderEndSlots() {
     grid.className = 'slot-grid';
     validEnds.forEach(function(eTime, idx) {
         var durationMins = (idx + 1) * 30;
-        var durLabel = durationMins < 60 ? durationMins + 'min' : (durationMins / 60 % 1 === 0 ? (durationMins / 60) + 'h' : (durationMins / 60).toFixed(1) + 'h');
+        var durLabel = formatDuration(durationMins);
         var btn = document.createElement('button');
         btn.className = 'slot-btn' + (eTime === endTime ? ' slot-selected' : '');
         btn.innerHTML = '<span style="display:block;font-size:0.8rem">' + eTime + '</span><span style="display:block;font-size:0.6rem;color:' + (eTime === endTime ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)') + ';margin-top:1px">+' + durLabel + '</span>';
@@ -1043,11 +1049,25 @@ function shareTicket() {
     if (navigator.share) {
         navigator.share({ title: '¡Reserva en ID Sports!', text: 'Mi reserva: ' + qr, url: window.location.href });
     } else {
-        var el = document.createElement('textarea');
-        el.value = window.location.href;
-        document.body.appendChild(el); el.select();
-        document.execCommand('copy'); document.body.removeChild(el);
-        alert('Enlace copiado al portapapeles');
+        var url = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function() {
+                alert('Enlace copiado al portapapeles');
+            }).catch(function() {
+                fallbackCopy(url);
+            });
+        } else {
+            fallbackCopy(url);
+        }
+    }
+}
+
+function fallbackCopy(text) {
+    var el = document.createElement('textarea');
+    el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
+    document.body.appendChild(el); el.focus(); el.select();
+    try { document.execCommand('copy'); alert('Enlace copiado al portapapeles'); } catch(e) {}
+    document.body.removeChild(el);
     }
 }
 
