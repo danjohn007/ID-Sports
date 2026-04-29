@@ -89,7 +89,7 @@ $cities      = $cities      ?? [];
     background: var(--bg-card);
     border: 1px solid var(--border-gl);
     border-radius: 1.375rem;
-    overflow: hidden;
+    overflow: visible;
     transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms;
     position: relative;
     display: flex;
@@ -106,6 +106,7 @@ $cities      = $cities      ?? [];
     position: relative;
     flex-shrink: 0;
     overflow: hidden;
+    border-radius: 1.375rem 1.375rem 0 0;
 }
 .disc-cover img {
     width: 100%;
@@ -123,7 +124,7 @@ $cities      = $cities      ?? [];
 }
 .disc-logo-wrap {
     position: absolute;
-    bottom: -1.375rem;
+    top: calc(140px - 1.4375rem);   /* cover height minus half logo height */
     left: 1rem;
     width: 2.875rem;
     height: 2.875rem;
@@ -137,7 +138,7 @@ $cities      = $cities      ?? [];
     font-size: 1.125rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     flex-shrink: 0;
-    z-index: 2;
+    z-index: 3;
 }
 .disc-logo-wrap img {
     width: 100%;
@@ -260,15 +261,15 @@ $cities      = $cities      ?? [];
                 <?php else: ?>
                 <div class="disc-cover-placeholder">🏟️</div>
                 <?php endif; ?>
-                <!-- Floating logo -->
-                <div class="disc-logo-wrap">
-                    <?php if (!empty($club['logo'])): ?>
-                    <img src="<?= htmlspecialchars($club['logo']) ?>" alt="Logo">
-                    <?php else: ?>
-                    <span style="font-weight:800;font-size:1rem;color:var(--primary)"><?= strtoupper(substr($club['name'],0,1)) ?></span>
-                    <?php endif; ?>
-                </div>
             </a>
+            <!-- Floating logo (outside cover so overflow:hidden doesn't clip it) -->
+            <div class="disc-logo-wrap">
+                <?php if (!empty($club['logo'])): ?>
+                <img src="<?= htmlspecialchars($club['logo']) ?>" alt="Logo">
+                <?php else: ?>
+                <span style="font-weight:800;font-size:1rem;color:var(--primary)"><?= strtoupper(substr($club['name'],0,1)) ?></span>
+                <?php endif; ?>
+            </div>
             <!-- Body -->
             <div class="disc-body">
                 <a href="<?= BASE_URL ?>clubs/detail/<?= $clubId ?>" style="text-decoration:none">
