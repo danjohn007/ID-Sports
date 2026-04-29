@@ -144,30 +144,33 @@ function sportSvgHist(string $type): string {
 }
 .hist-btn-cancel:hover { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.4); }
 
-/* ── Ticket Modal ────────────────────────────────────── */
+/* ── Ticket Modal (centered) ─────────────────────────── */
 .hist-modal-backdrop {
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 9000;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
+    padding: 1rem;
 }
 .hist-modal-sheet {
     background: var(--bg-mid);
-    border-radius: 1.5rem 1.5rem 0 0;
+    border-radius: 1.5rem;
     padding: 1.375rem 1.25rem 2rem;
     width: 100%;
-    max-width: 480px;
-    max-height: 90vh;
+    max-width: 420px;
+    max-height: 92vh;
     overflow-y: auto;
     position: relative;
-    animation: slideUp 220ms ease;
+    animation: popIn 220ms ease;
 }
-@keyframes slideUp {
-    from { transform: translateY(60px); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
+@keyframes popIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
 }
 .hist-ticket-card {
     background: var(--bg-card);
@@ -210,6 +213,10 @@ function sportSvgHist(string $type): string {
     border-radius: 1.25rem;
     padding: 3rem 1.5rem;
     text-align: center;
+}
+/* 2-col grid on medium+ screens */
+@media (min-width: 768px) {
+    .hist-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 </style>
 
@@ -273,19 +280,21 @@ function sportSvgHist(string $type): string {
         'completed'   => ['label'=>'Completada',  'class'=>'hist-badge-completed'],
         'active'      => ['label'=>'Activa',      'class'=>'hist-badge-active'],
     ];
-    foreach ($reservations as $r):
+    ?>
+    <div class="hist-grid" style="display:grid;grid-template-columns:repeat(1,1fr);gap:1rem">
+    <?php foreach ($reservations as $r):
         $status = $r['status'] ?? 'pending';
         $badge  = $statusLabels[$status] ?? ['label'=>ucfirst($status),'class'=>'hist-badge-completed'];
         $rid    = (int)$r['id'];
         $spaceCost = (float)($r['subtotal'] ?? 0);
         $amenCost  = (float)($r['amenities_total'] ?? 0);
-        $subT      = $spaceCost + $amenCost;
         $iva       = (float)($r['service_fee'] ?? 0);
         $total     = (float)($r['total'] ?? 0);
         $qrData    = htmlspecialchars($r['qr_code'] ?? ('RES-'.$rid), ENT_QUOTES);
         $hasQr     = in_array($status, ['confirmed','active','in_progress','pending']);
+        $amenDetails = json_encode($r['amenities_details'] ?? [], JSON_UNESCAPED_UNICODE);
     ?>
-    <div class="hist-card">
+    <div class="hist-card" style="margin-bottom:0">
         <div class="hist-card-body">
             <div class="hist-icon">
                 <?= sportSvgHist($r['sport_type'] ?? 'football') ?>
@@ -308,7 +317,7 @@ function sportSvgHist(string $type): string {
         <!-- Action bar -->
         <div class="hist-action-bar">
             <?php if ($hasQr): ?>
-            <button class="hist-btn" onclick="openHistTicket(<?= $rid ?>, '<?= htmlspecialchars($r['space_name'],ENT_QUOTES) ?>', '<?= htmlspecialchars($r['club_name']??'',ENT_QUOTES) ?>', '<?= date('d/m/Y',strtotime($r['date'])) ?>', '<?= substr($r['start_time'],0,5).' – '.substr($r['end_time'],0,5) ?>', <?= $spaceCost ?>, <?= $amenCost ?>, <?= $iva ?>, <?= $total ?>, '<?= $qrData ?>')">
+            <button class="hist-btn" onclick="openHistTicket(<?= $rid ?>, '<?= htmlspecialchars($r['space_name'],ENT_QUOTES) ?>', '<?= htmlspecialchars($r['club_name']??'',ENT_QUOTES) ?>', '<?= date('d/m/Y',strtotime($r['date'])) ?>', '<?= substr($r['start_time'],0,5).' – '.substr($r['end_time'],0,5) ?>', <?= $spaceCost ?>, <?= $iva ?>, <?= $total ?>, '<?= $qrData ?>', <?= htmlspecialchars($amenDetails, ENT_QUOTES) ?>)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                 Ver ticket
             </button>
@@ -325,6 +334,7 @@ function sportSvgHist(string $type): string {
         </div>
     </div>
     <?php endforeach; ?>
+    </div>
     <?php endif; ?>
 </div>
 
@@ -360,10 +370,8 @@ function sportSvgHist(string $type): string {
                     <span class="hist-ticket-label">Cancha</span>
                     <span class="hist-ticket-value" id="hTicketCancha"></span>
                 </div>
-                <div class="hist-ticket-row" id="hTicketAmenRow">
-                    <span class="hist-ticket-label">Amenidades extra</span>
-                    <span class="hist-ticket-value" id="hTicketAmen"></span>
-                </div>
+                <!-- Per-amenity rows rendered by JS -->
+                <div id="hTicketAmenContainer"></div>
                 <div class="hist-ticket-row">
                     <span class="hist-ticket-label" style="font-weight:600;color:var(--text-pri)">Subtotal</span>
                     <span class="hist-ticket-value" id="hTicketSubtotal"></span>
@@ -406,19 +414,31 @@ function sportSvgHist(string $type): string {
 <script>
 var _fmt = new Intl.NumberFormat('es-MX', {style:'currency', currency:'MXN'});
 
-function openHistTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost, amenCost, iva, total, qrCode) {
-    document.getElementById('hTicketSpace').textContent    = spaceName;
-    document.getElementById('hTicketClub').textContent     = clubName;
-    document.getElementById('hTicketDate').textContent     = dateLabel;
-    document.getElementById('hTicketTime').textContent     = timeLabel;
-    document.getElementById('hTicketCancha').textContent   = _fmt.format(spaceCost);
-    var subT = spaceCost + amenCost;
-    if (amenCost > 0) {
-        document.getElementById('hTicketAmenRow').style.display = '';
-        document.getElementById('hTicketAmen').textContent = _fmt.format(amenCost);
-    } else {
-        document.getElementById('hTicketAmenRow').style.display = 'none';
+function openHistTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost, iva, total, qrCode, amenitiesDetails) {
+    document.getElementById('hTicketSpace').textContent = spaceName;
+    document.getElementById('hTicketClub').textContent  = clubName;
+    document.getElementById('hTicketDate').textContent  = dateLabel;
+    document.getElementById('hTicketTime').textContent  = timeLabel;
+    document.getElementById('hTicketCancha').textContent = _fmt.format(spaceCost);
+
+    // Render per-amenity rows
+    var amenContainer = document.getElementById('hTicketAmenContainer');
+    amenContainer.innerHTML = '';
+    var amenTotal = 0;
+    if (amenitiesDetails && amenitiesDetails.length > 0) {
+        amenitiesDetails.forEach(function(a) {
+            var sub = parseFloat(a.subtotal) || (parseFloat(a.quantity) * parseFloat(a.price));
+            amenTotal += sub;
+            var row = document.createElement('div');
+            row.className = 'hist-ticket-row';
+            row.innerHTML = '<span class="hist-ticket-label" style="padding-left:0.75rem;color:var(--text-sec)">'
+                + a.name + ' &times;' + a.quantity
+                + '</span><span class="hist-ticket-value">' + _fmt.format(sub) + '</span>';
+            amenContainer.appendChild(row);
+        });
     }
+
+    var subT = spaceCost + amenTotal;
     document.getElementById('hTicketSubtotal').textContent = _fmt.format(subT);
     document.getElementById('hTicketIva').textContent      = _fmt.format(iva);
     document.getElementById('hTicketTotal').textContent    = _fmt.format(total);

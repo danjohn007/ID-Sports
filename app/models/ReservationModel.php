@@ -25,7 +25,37 @@ class ReservationModel extends Model {
             $params[] = $status;
         }
         $sql .= " ORDER BY r.date DESC, r.start_time DESC";
-        return $this->findAll($sql, $params);
+        $rows = $this->findAll($sql, $params);
+        $this->loadAmenitiesForReservations($rows);
+        return $rows;
+    }
+
+    /** Attach amenities_details (name, quantity, price, subtotal) to each row */
+    private function loadAmenitiesForReservations(array &$rows): void {
+        if (empty($rows)) return;
+        $ids = array_map('intval', array_column($rows, 'id'));
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        try {
+            $amenRows = $this->findAll(
+                "SELECT ra.reservation_id, a.name, ra.quantity, ra.price,
+                        (ra.quantity * ra.price) AS subtotal
+                 FROM reservation_amenities ra
+                 JOIN amenities a ON ra.amenity_id = a.id
+                 WHERE ra.reservation_id IN ($placeholders)
+                 ORDER BY ra.reservation_id, a.name",
+                $ids
+            );
+        } catch (\PDOException $e) {
+            $amenRows = [];
+        }
+        $grouped = [];
+        foreach ($amenRows as $ar) {
+            $grouped[(int)$ar['reservation_id']][] = $ar;
+        }
+        foreach ($rows as &$row) {
+            $row['amenities_details'] = $grouped[(int)$row['id']] ?? [];
+        }
+        unset($row);
     }
 
     public function findByClub($clubId, $date = null, $status = null, $page = 1, $perPage = 20) {
@@ -114,7 +144,7 @@ class ReservationModel extends Model {
     }
 
     public function getTodayAllForUser($userId) {
-        return $this->findAll(
+        $rows = $this->findAll(
             "SELECT r.*, s.name as space_name, s.sport_type, c.name as club_name
              FROM reservations r
              LEFT JOIN spaces s ON r.space_id = s.id
@@ -124,6 +154,8 @@ class ReservationModel extends Model {
              ORDER BY r.start_time ASC",
             [$userId]
         );
+        $this->loadAmenitiesForReservations($rows);
+        return $rows;
     }
 
     public function getTodayForClub($clubId) {

@@ -335,6 +335,15 @@ class ReservationController extends Controller {
         $this->requireAuth();
         $userId = $_SESSION['user_id'];
         $reservations = $this->reservationModel->findByUser($userId);
+        // Sort: active statuses first, cancelled/completed at the end
+        usort($reservations, function($a, $b) {
+            $activeStatuses = ['confirmed', 'pending', 'in_progress', 'active'];
+            $aWeight = in_array($a['status'], $activeStatuses) ? 0 : 1;
+            $bWeight = in_array($b['status'], $activeStatuses) ? 0 : 1;
+            if ($aWeight !== $bWeight) return $aWeight - $bWeight;
+            // Within same priority group: most recent first
+            return strcmp($b['date'] . $b['start_time'], $a['date'] . $a['start_time']);
+        });
         $monthlyStats = $this->reservationModel->getMonthlyStats($userId);
         $this->view('reservations/history', [
             'title'        => 'Mi Historial',
