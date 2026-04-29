@@ -354,9 +354,12 @@
                 </svg>
             </button>
             <div class="flex-1">
+                <?php if (!$isHome): ?>
                 <h2 class="text-sm font-semibold" style="color:var(--text-pri)"><?= htmlspecialchars($title ?? '') ?></h2>
+                <?php endif; ?>
             </div>
-            <!-- Bell -->
+            <!-- Bell — hidden on home page (home view has its own header with bell) -->
+            <?php if (!$isHome): ?>
             <button onclick="openNotifications()"
                     class="relative p-2 rounded-xl transition-all"
                     style="color:var(--text-sec)"
@@ -370,6 +373,7 @@
                       style="background:var(--primary)"></span>
                 <?php endif; ?>
             </button>
+            <?php endif; ?>
         </div>
     </header>
 

@@ -123,18 +123,31 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     pointer-events: none;
 }
 
+/* ── Side-by-side grid: Reservar por Día + Deportes ─────── */
+.days-sports-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1.75rem;
+}
+.days-sports-grid > .home-section { margin-bottom: 0; }
+@media (max-width: 767px) {
+    .days-sports-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Day pills ─────────────────────────────────────────── */
 .day-pill {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1rem 1.25rem;
+    padding: 1.125rem 1rem;
     border-radius: 1.125rem;
     border: 1px solid var(--border-gl);
     background: var(--bg-card);
     text-decoration: none;
-    min-width: 96px;
+    min-width: 90px;
     transition: all 140ms;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
@@ -198,15 +211,15 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.625rem 0.5rem;
+    gap: 0.45rem;
+    padding: 0.75rem 0.5rem;
     border-radius: 0.875rem;
     text-decoration: none;
     border: 1px solid var(--border-gl);
     background: var(--bg-card);
     transition: all 150ms ease;
-    min-width: 78px;
-    max-width: 88px;
+    min-width: 88px;
+    max-width: 104px;
 }
 .sport-card:hover {
     border-color: rgba(var(--primary-rgb), 0.45);
@@ -214,8 +227,8 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.18);
 }
 .sport-icon-wrap {
-    width: 2.375rem; height: 2.375rem;
-    border-radius: 0.625rem;
+    width: 2.75rem; height: 2.75rem;
+    border-radius: 0.75rem;
     display: flex; align-items: center; justify-content: center;
     transition: transform 150ms;
     overflow: hidden;
@@ -224,12 +237,12 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
 .sport-card:hover .sport-icon-wrap { transform: scale(1.08); }
 .sport-card span {
     font-family: 'Jockey One', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     text-align: center;
     color: var(--text-sec);
     line-height: 1.2;
     word-break: break-word;
-    max-width: 80px;
+    max-width: 90px;
 }
 
 /* ── Club cards ─────────────────────────────────────────── */
@@ -443,67 +456,72 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     </div>
     <?php endif; ?>
 
-    <!-- RF2.3 – 5-Day Quick Booking (Carousel) -->
-    <div class="home-section">
-        <div class="home-section-header">
-            <h2 class="home-section-title">Reservar por Día</h2>
-            <a href="<?= BASE_URL ?>reservations/search" class="home-section-link">Ver todo &rarr;</a>
-        </div>
-        <div class="carousel-wrap">
-            <button class="carousel-btn left" onclick="scrollCarousel('dayTrack',-1)" aria-label="Anterior">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <div class="carousel-track" id="dayTrack">
-                <?php foreach ($upcomingDays as $idx => $day): ?>
-                <a href="<?= BASE_URL ?>reservations/search?date=<?= $day['date'] ?>"
-                   class="day-pill <?= $idx === 0 ? 'active' : '' ?>">
-                    <span class="day-label"><?= $day['label'] ?></span>
-                    <span class="day-num"><?= $day['day_num'] ?></span>
-                    <span class="day-avail"><?= $day['available'] ?> libre<?= $day['available'] != 1 ? 's' : '' ?></span>
-                </a>
-                <?php endforeach; ?>
-            </div>
-            <button class="carousel-btn right" onclick="scrollCarousel('dayTrack',1)" aria-label="Siguiente">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-        </div>
-    </div>
+    <!-- RF2.3 + RF2.4 – Side-by-side: Reservar por Día | Deportes -->
+    <div class="days-sports-grid">
 
-    <!-- RF2.4 – Sport Categories (Carousel) -->
-    <div class="home-section">
-        <div class="home-section-header">
-            <h2 class="home-section-title">Deportes</h2>
-            <a href="<?= BASE_URL ?>reservations/search" class="home-section-link">Ver todos &rarr;</a>
-        </div>
-        <div class="carousel-wrap">
-            <button class="carousel-btn left" onclick="scrollCarousel('sportTrack',-1)" aria-label="Anterior">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <div class="carousel-track" id="sportTrack">
-                <?php foreach ($homeSports as $sport):
-                    $from = htmlspecialchars($sport['color_from'] ?? 'var(--primary)');
-                    $to   = htmlspecialchars($sport['color_to']   ?? 'var(--secondary)');
-                    $slug = htmlspecialchars($sport['slug']);
-                    $name = htmlspecialchars($sport['name']);
-                ?>
-                <a href="<?= BASE_URL ?>reservations/search?sport=<?= $slug ?>" class="sport-card">
-                    <div class="sport-icon-wrap"
-                         style="background:linear-gradient(135deg,<?= $from ?>,<?= $to ?>);color:#fff">
-                        <?php if (!empty($sport['image_path'])): ?>
-                        <img src="<?= BASE_URL . htmlspecialchars($sport['image_path']) ?>" alt="<?= $name ?>">
-                        <?php else: ?>
-                        <?= sportSvg($sport['slug']) ?>
-                        <?php endif; ?>
-                    </div>
-                    <span><?= $name ?></span>
-                </a>
-                <?php endforeach; ?>
+        <!-- RF2.3 – 5-Day Quick Booking (Carousel) -->
+        <div class="home-section">
+            <div class="home-section-header">
+                <h2 class="home-section-title">Reservar por Día</h2>
+                <a href="<?= BASE_URL ?>reservations/search" class="home-section-link">Ver todo &rarr;</a>
             </div>
-            <button class="carousel-btn right" onclick="scrollCarousel('sportTrack',1)" aria-label="Siguiente">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
+            <div class="carousel-wrap">
+                <button class="carousel-btn left" onclick="scrollCarousel('dayTrack',-1)" aria-label="Anterior">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="carousel-track" id="dayTrack">
+                    <?php foreach ($upcomingDays as $idx => $day): ?>
+                    <a href="<?= BASE_URL ?>reservations/search?date=<?= $day['date'] ?>"
+                       class="day-pill <?= $idx === 0 ? 'active' : '' ?>">
+                        <span class="day-label"><?= $day['label'] ?></span>
+                        <span class="day-num"><?= $day['day_num'] ?></span>
+                        <span class="day-avail"><?= $day['available'] ?> libre<?= $day['available'] != 1 ? 's' : '' ?></span>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+                <button class="carousel-btn right" onclick="scrollCarousel('dayTrack',1)" aria-label="Siguiente">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
         </div>
-    </div>
+
+        <!-- RF2.4 – Sport Categories (Carousel) -->
+        <div class="home-section">
+            <div class="home-section-header">
+                <h2 class="home-section-title">Deportes</h2>
+                <a href="<?= BASE_URL ?>reservations/search" class="home-section-link">Ver todos &rarr;</a>
+            </div>
+            <div class="carousel-wrap">
+                <button class="carousel-btn left" onclick="scrollCarousel('sportTrack',-1)" aria-label="Anterior">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="carousel-track" id="sportTrack">
+                    <?php foreach ($homeSports as $sport):
+                        $from = htmlspecialchars($sport['color_from'] ?? 'var(--primary)');
+                        $to   = htmlspecialchars($sport['color_to']   ?? 'var(--secondary)');
+                        $slug = htmlspecialchars($sport['slug']);
+                        $name = htmlspecialchars($sport['name']);
+                    ?>
+                    <a href="<?= BASE_URL ?>reservations/search?sport=<?= $slug ?>" class="sport-card">
+                        <div class="sport-icon-wrap"
+                             style="background:linear-gradient(135deg,<?= $from ?>,<?= $to ?>);color:#fff">
+                            <?php if (!empty($sport['image_path'])): ?>
+                            <img src="<?= BASE_URL . htmlspecialchars($sport['image_path']) ?>" alt="<?= $name ?>">
+                            <?php else: ?>
+                            <?= sportSvg($sport['slug']) ?>
+                            <?php endif; ?>
+                        </div>
+                        <span><?= $name ?></span>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+                <button class="carousel-btn right" onclick="scrollCarousel('sportTrack',1)" aria-label="Siguiente">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /.days-sports-grid -->
     <!-- RF2.5 – Clubes Seguidos -->
     <div class="home-section">
         <div class="home-section-header">
@@ -769,7 +787,7 @@ function closeQrModal() {
 function scrollCarousel(trackId, dir) {
     var track = document.getElementById(trackId);
     if (!track) return;
-    var itemW = track.firstElementChild ? track.firstElementChild.offsetWidth + 8 : 110;
-    track.scrollBy({ left: dir * itemW * 2, behavior: 'smooth' });
+    var itemW = track.firstElementChild ? track.firstElementChild.offsetWidth + 8 : 100;
+    track.scrollBy({ left: dir * itemW, behavior: 'smooth' });
 }
 </script>
