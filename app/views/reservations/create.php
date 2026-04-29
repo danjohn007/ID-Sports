@@ -755,7 +755,6 @@ function fallbackCopy(text) {
     document.body.appendChild(el); el.focus(); el.select();
     try { document.execCommand('copy'); alert('Enlace copiado al portapapeles'); } catch(e) {}
     document.body.removeChild(el);
-    }
 }
 
 /* ── Init ──────────────────────────────────────────────── */
