@@ -212,6 +212,15 @@ class ReservationController extends Controller {
         exit;
     }
 
+    /** AJAX: auto-complete all expired reservations and return count */
+    public function autoComplete() {
+        $this->requireAuth();
+        header('Content-Type: application/json');
+        $count = $this->reservationModel->autoCompleteExpired();
+        echo json_encode(['success' => true, 'completed' => $count]);
+        exit;
+    }
+
     /** Admin endpoint: scan QR → set status to in_progress */
     public function scanQr() {
         $this->requireAuth(['club_admin', 'super_admin']);

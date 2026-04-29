@@ -1,4 +1,7 @@
 <?php
+// Timezone
+date_default_timezone_set('America/Mexico_City');
+
 // Database
 define('DB_HOST', 'localhost');
 define('DB_USER', 'idactivo_sportsadmin');

@@ -545,11 +545,23 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
         <?php foreach ($todayReservations as $res):
             $nowTs   = time();
             $startTs = strtotime(date('Y-m-d') . ' ' . $res['start_time']);
+            $endTs   = strtotime(date('Y-m-d') . ' ' . $res['end_time']);
             $diffH   = ($startTs - $nowTs) / 3600;
-            if ($diffH <= 0)       $diffMsg = 'Ahora mismo';
-            elseif ($diffH < 1)    $diffMsg = 'En ' . round($diffH * 60) . ' min';
-            elseif ($diffH < 2)    $diffMsg = 'En 1 hora';
-            else                   $diffMsg = 'En ' . round($diffH) . ' horas';
+
+            // Visual status based on current time vs reservation window
+            if ($nowTs >= $startTs && $nowTs < $endTs) {
+                $visualStatusLabel = 'En curso';
+                $diffMsg           = 'Ahora mismo';
+            } elseif ($nowTs < $startTs && $diffH < 1) {
+                $visualStatusLabel = 'Confirmada';
+                $diffMsg           = 'En ' . round($diffH * 60) . ' min';
+            } elseif ($nowTs < $startTs && $diffH < 2) {
+                $visualStatusLabel = 'Confirmada';
+                $diffMsg           = 'En 1 hora';
+            } else {
+                $visualStatusLabel = 'Confirmada';
+                $diffMsg           = 'En ' . round($diffH) . ' horas';
+            }
 
             $qrData    = $res['qr_code'] ?? ('RES-' . $res['id']);
             $spaceCost = (float)($res['subtotal'] ?? 0);
@@ -593,7 +605,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
             <!-- Footer -->
             <div class="today-mini-foot">
                 <span style="font-size:0.7rem;font-weight:700;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.2);padding:0.18rem 0.55rem;border-radius:20px">
-                    <?= $statusLabels[$status] ?? ucfirst($status) ?> &middot; <?= $diffMsg ?>
+                    <?= $visualStatusLabel ?> &middot; <?= $diffMsg ?>
                 </span>
                 <button class="today-mini-btn"
                     onclick="openHomeTicket(<?= (int)$res['id'] ?>, '<?= htmlspecialchars($res['space_name'],ENT_QUOTES) ?>', '<?= htmlspecialchars($res['club_name']??'',ENT_QUOTES) ?>', '<?= date('d/m/Y') ?>', '<?= substr($res['start_time'],0,5).' – '.substr($res['end_time'],0,5) ?>', <?= $spaceCost ?>, <?= $iva ?>, <?= $total ?>, '<?= htmlspecialchars($qrData,ENT_QUOTES) ?>', <?= $amenDetailsJs ?>)">
@@ -1126,4 +1138,17 @@ function scrollCarousel(trackId, dir) {
     });
     setTimeout(tickExpiry, 30000);
 })();
+
+/* ── Auto-complete polling (every 60 s) ──────────────── */
+function autoCompletePolling() {
+    fetch('<?= BASE_URL ?>reservations/autoComplete')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data && data.success && data.completed > 0) {
+                location.reload();
+            }
+        })
+        .catch(function() {});
+}
+setInterval(autoCompletePolling, 60000);
 </script>
