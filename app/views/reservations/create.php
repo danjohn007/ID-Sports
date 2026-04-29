@@ -370,13 +370,19 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
         </div>
     </div>
 
-    <!-- Cell 2: Time Slots -->
+    <!-- Cell 2: Time Slots — 2-step start / end flow -->
     <div class="b-cell">
         <div class="b-cell-header">
             <div class="b-cell-icon">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <span class="b-cell-title">Horarios Disponibles</span>
+            <span class="b-cell-title" id="slotsCellTitle">Horarios Disponibles</span>
+        </div>
+        <!-- step pill indicator -->
+        <div style="padding:0.5rem 1rem 0;display:flex;gap:0.375rem;align-items:center" id="stepPills">
+            <span id="stepPill1" style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:rgba(var(--primary-rgb),0.12);color:var(--primary);border:1px solid rgba(var(--primary-rgb),0.25)">1 Inicio</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            <span id="stepPill2" style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:transparent;color:var(--text-muted);border:1px solid var(--border-gl2)">2 Fin</span>
         </div>
         <div class="b-cell-body" id="slotsBody">
             <div class="slot-empty">
@@ -498,7 +504,7 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 Proceder al Pago
             </button>
-            <p class="validation-hint" id="validHint">Selecciona fecha y al menos un horario</p>
+            <p class="validation-hint" id="validHint">Selecciona fecha, hora de inicio y hora de fin</p>
         </div>
     </div>
 
@@ -573,6 +579,7 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
             </button>
         </div>
         <a href="<?= BASE_URL ?>home" class="ticket-home-btn">← Volver al Inicio</a>
+        <a href="<?= BASE_URL ?>reservations/history" class="ticket-home-btn" style="margin-top:0.5rem;background:rgba(var(--primary-rgb),0.12);color:var(--primary);border:1px solid rgba(var(--primary-rgb),0.25);display:block;text-align:center">📋 Ver mis reservas</a>
     </div>
 </div>
 
@@ -586,64 +593,63 @@ const SPACE_ID      = <?= (int)$space['id'] ?>;
 const PRICE_PER_HR  = <?= (float)$space['price_per_hour'] ?>;
 const CLOSED_DAYS   = <?= json_encode(array_map('intval', $closedDays)) ?>;
 const BASE_URL      = '<?= BASE_URL ?>';
+const MAX_DURATION_SLOTS = 8; // 8 × 30 min = 4 hours max; adjust per club if needed
 
 let calYear  = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-indexed
-let selectedDate  = null;
-let selectedSlots = []; // ['09:00','09:30', ...]
-let amenityQtys   = {}; // { amenityId: qty }
-let discount      = 0;
-let couponCode    = '';
+let selectedDate = null;
+let allSlots     = [];   // [{time, available}, ...]  — raw from API
+let startTime    = null; // 'HH:MM'
+let endTime      = null; // 'HH:MM'
+let amenityQtys  = {};   // { amenityId: qty }
+let discount     = 0;
+let couponCode   = '';
+let isSuccess    = false;
 
 /* ── Calendar ─────────────────────────────────────────── */
-const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MONTHS_ES  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DAYS_SHORT = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
 
 function renderCalendar() {
-    const grid   = document.getElementById('calGrid');
-    const label  = document.getElementById('calMonthLabel');
+    var grid  = document.getElementById('calGrid');
+    var label = document.getElementById('calMonthLabel');
     label.textContent = MONTHS_ES[calMonth] + ' ' + calYear;
 
-    const today  = new Date(); today.setHours(0,0,0,0);
-    const first  = new Date(calYear, calMonth, 1);
-    const last   = new Date(calYear, calMonth + 1, 0);
-    const startDow = first.getDay(); // 0=Sun
+    var today = new Date(); today.setHours(0,0,0,0);
+    var first = new Date(calYear, calMonth, 1);
+    var last  = new Date(calYear, calMonth + 1, 0);
+    var startDow = first.getDay();
 
-    // Transition
     grid.classList.add('transitioning');
-    setTimeout(() => {
+    setTimeout(function() {
         grid.innerHTML = '';
-        // Day names
-        DAYS_SHORT.forEach(d => {
-            const el = document.createElement('div');
-            el.className = 'cal-day-name';
-            el.textContent = d;
-            grid.appendChild(el);
+        DAYS_SHORT.forEach(function(d) {
+            var el = document.createElement('div');
+            el.className = 'cal-day-name'; el.textContent = d; grid.appendChild(el);
         });
-        // Empty cells
-        for (let i = 0; i < startDow; i++) {
-            const el = document.createElement('div'); el.className = 'cal-day empty'; grid.appendChild(el);
+        for (var i = 0; i < startDow; i++) {
+            var el = document.createElement('div'); el.className = 'cal-day empty'; grid.appendChild(el);
         }
-        // Day cells
-        for (let d = 1; d <= last.getDate(); d++) {
-            const dt   = new Date(calYear, calMonth, d);
-            const dow  = dt.getDay();
-            const dateStr = formatDate(calYear, calMonth, d);
-            const el   = document.createElement('div');
-            el.className = 'cal-day';
-            el.textContent = d;
-            const isPast    = dt < today;
-            const isClosed  = CLOSED_DAYS.includes(dow);
-            const isToday   = dt.toDateString() === today.toDateString();
-            const isSelected = dateStr === selectedDate;
-            if (isPast)    el.classList.add('past');
-            else if (isClosed) el.classList.add('disabled');
-            else {
-                el.addEventListener('click', () => selectDate(dateStr));
-                if (isToday)    el.classList.add('today');
-                if (isSelected) el.classList.add('selected');
-            }
-            grid.appendChild(el);
+        for (var d = 1; d <= last.getDate(); d++) {
+            (function(day) {
+                var dt  = new Date(calYear, calMonth, day);
+                var dow = dt.getDay();
+                var dateStr = formatDate(calYear, calMonth, day);
+                var el = document.createElement('div');
+                el.className = 'cal-day'; el.textContent = day;
+                var isPast   = dt < today;
+                var isClosed = CLOSED_DAYS.includes(dow);
+                var isToday  = dt.toDateString() === today.toDateString();
+                var isSel    = dateStr === selectedDate;
+                if (isPast)       el.classList.add('past');
+                else if (isClosed) el.classList.add('disabled');
+                else {
+                    el.addEventListener('click', function() { selectDate(dateStr); });
+                    if (isToday) el.classList.add('today');
+                    if (isSel)   el.classList.add('selected');
+                }
+                grid.appendChild(el);
+            })(d);
         }
         grid.classList.remove('transitioning');
     }, 180);
@@ -663,77 +669,167 @@ function calNext() {
 }
 
 function selectDate(dateStr) {
-    selectedDate  = dateStr;
-    selectedSlots = [];
+    selectedDate = dateStr;
+    startTime    = null;
+    endTime      = null;
+    allSlots     = [];
     renderCalendar();
     loadSlots(dateStr);
     updateSummary();
+    setStepPill(1);
 }
 
-/* ── Slots ─────────────────────────────────────────────── */
+/* ── Slots — 2-step start/end ──────────────────────────── */
+function setStepPill(step) {
+    var p1 = document.getElementById('stepPill1');
+    var p2 = document.getElementById('stepPill2');
+    if (!p1) return;
+    if (step === 1) {
+        p1.style.background = 'rgba(var(--primary-rgb),0.12)';
+        p1.style.color = 'var(--primary)';
+        p1.style.borderColor = 'rgba(var(--primary-rgb),0.25)';
+        p2.style.background = 'transparent';
+        p2.style.color = 'var(--text-muted)';
+        p2.style.borderColor = 'var(--border-gl2)';
+    } else {
+        p1.style.background = 'rgba(16,185,129,0.12)';
+        p1.style.color = '#10b981';
+        p1.style.borderColor = 'rgba(16,185,129,0.25)';
+        p2.style.background = 'rgba(var(--primary-rgb),0.12)';
+        p2.style.color = 'var(--primary)';
+        p2.style.borderColor = 'rgba(var(--primary-rgb),0.25)';
+    }
+}
+
 function loadSlots(date) {
-    const body = document.getElementById('slotsBody');
+    var body = document.getElementById('slotsBody');
     body.innerHTML = '<div class="slot-loading"><div style="display:inline-block;width:1.5rem;height:1.5rem;border-radius:50%;border:2px solid rgba(var(--primary-rgb),0.2);border-top-color:var(--primary);animation:spin 700ms linear infinite"></div><br>Cargando…</div>';
 
     fetch(BASE_URL + 'reservations/slots?space_id=' + SPACE_ID + '&date=' + date)
-        .then(r => r.json())
-        .then(slots => renderSlots(slots))
-        .catch(() => { body.innerHTML = '<div class="slot-empty">Error al cargar horarios</div>'; });
+        .then(function(r) { return r.json(); })
+        .then(function(slots) { allSlots = slots; renderStartSlots(); })
+        .catch(function() { body.innerHTML = '<div class="slot-empty">Error al cargar horarios</div>'; });
 }
 
-function renderSlots(slots) {
-    const body = document.getElementById('slotsBody');
-    if (!slots || slots.length === 0) {
+/** STEP 1: show all available slots for start-time selection */
+function renderStartSlots() {
+    var body = document.getElementById('slotsBody');
+    if (!allSlots || allSlots.length === 0) {
         body.innerHTML = '<div class="slot-empty">Sin horarios disponibles para este día</div>';
         return;
     }
-    const grid = document.createElement('div');
+
+    var heading = document.createElement('p');
+    heading.style.cssText = 'font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin:0 0 0.5rem';
+    heading.textContent = 'Selecciona hora de inicio';
+
+    var grid = document.createElement('div');
     grid.className = 'slot-grid';
-    slots.forEach(slot => {
-        const btn = document.createElement('button');
+    allSlots.forEach(function(slot) {
+        var btn = document.createElement('button');
         btn.className = 'slot-btn' + (!slot.available ? ' slot-busy' : '');
         btn.textContent = slot.time;
         btn.dataset.time = slot.time;
-        if (!slot.available) btn.disabled = true;
+        if (!slot.available) { btn.disabled = true; }
         else {
-            btn.addEventListener('click', () => toggleSlot(btn, slot.time));
+            btn.addEventListener('click', function() { pickStartTime(slot.time); });
         }
         grid.appendChild(btn);
     });
     body.innerHTML = '';
+    body.appendChild(heading);
     body.appendChild(grid);
 }
 
-function toggleSlot(btn, time) {
-    const idx = selectedSlots.indexOf(time);
-    if (idx > -1) {
-        selectedSlots.splice(idx, 1);
-        btn.classList.remove('slot-selected');
-    } else {
-        // Allow contiguous multi-slot selection
-        selectedSlots.push(time);
-        selectedSlots.sort();
-        btn.classList.add('slot-selected');
-    }
+/** STEP 2: user picked startTime → show end-time options */
+function pickStartTime(time) {
+    startTime = time;
+    endTime   = null;
     updateSummary();
+    setStepPill(2);
+    renderEndSlots();
+}
+
+/** Compute which end-time slots are valid from the current startTime */
+function getValidEndSlots() {
+    if (!startTime || !allSlots.length) return [];
+    var startIdx = allSlots.findIndex(function(s) { return s.time === startTime; });
+    if (startIdx < 0) return [];
+    // Scan forward from startIdx:
+    //  - stop when we hit a BUSY slot (cannot jump over reserved blocks)
+    //  - stop after MAX_DURATION_SLOTS consecutive slots
+    var valid = [];
+    for (var i = startIdx + 1; i < allSlots.length && i <= startIdx + MAX_DURATION_SLOTS; i++) {
+        if (!allSlots[i].available) break; // stop at first busy slot
+        // end time = allSlots[i].time
+        valid.push(allSlots[i].time);
+    }
+    return valid;
+}
+
+function renderEndSlots() {
+    var body = document.getElementById('slotsBody');
+    var validEnds = getValidEndSlots();
+
+    var backBtn = document.createElement('button');
+    backBtn.style.cssText = 'display:flex;align-items:center;gap:0.25rem;background:none;border:none;color:var(--text-sec);font-size:0.75rem;cursor:pointer;padding:0;margin-bottom:0.5rem';
+    backBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> Inicio: <strong style="color:var(--primary);margin-left:3px">' + startTime + '</strong>';
+    backBtn.addEventListener('click', function() { startTime = null; endTime = null; renderStartSlots(); setStepPill(1); updateSummary(); });
+
+    var heading = document.createElement('p');
+    heading.style.cssText = 'font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin:0 0 0.5rem';
+    heading.textContent = 'Selecciona hora de fin';
+
+    if (validEnds.length === 0) {
+        body.innerHTML = '';
+        body.appendChild(backBtn);
+        var msg = document.createElement('div');
+        msg.className = 'slot-empty'; msg.textContent = 'No hay duración disponible desde este horario';
+        body.appendChild(msg);
+        return;
+    }
+
+    var grid = document.createElement('div');
+    grid.className = 'slot-grid';
+    validEnds.forEach(function(eTime, idx) {
+        var durationMins = (idx + 1) * 30;
+        var durLabel = durationMins < 60 ? durationMins + 'min' : (durationMins / 60 % 1 === 0 ? (durationMins / 60) + 'h' : (durationMins / 60).toFixed(1) + 'h');
+        var btn = document.createElement('button');
+        btn.className = 'slot-btn' + (eTime === endTime ? ' slot-selected' : '');
+        btn.innerHTML = '<span style="display:block;font-size:0.8rem">' + eTime + '</span><span style="display:block;font-size:0.6rem;color:' + (eTime === endTime ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)') + ';margin-top:1px">+' + durLabel + '</span>';
+        btn.dataset.time = eTime;
+        btn.addEventListener('click', function() { pickEndTime(eTime); });
+        grid.appendChild(btn);
+    });
+
+    body.innerHTML = '';
+    body.appendChild(backBtn);
+    body.appendChild(heading);
+    body.appendChild(grid);
+}
+
+function pickEndTime(time) {
+    endTime = time;
+    updateSummary();
+    renderEndSlots(); // re-render to highlight selection
 }
 
 /* ── Amenities ─────────────────────────────────────────── */
 function filterAmenities(q) {
-    document.querySelectorAll('#amenityList .amenity-row').forEach(row => {
-        const name = row.dataset.amenityName || '';
+    document.querySelectorAll('#amenityList .amenity-row').forEach(function(row) {
+        var name = row.dataset.amenityName || '';
         row.classList.toggle('hidden-item', q.length > 0 && !name.includes(q.toLowerCase()));
     });
 }
 
 function changeQty(btn, delta) {
-    const row  = btn.closest('.amenity-row');
-    const id   = parseInt(row.dataset.amenityId);
-    const stock= parseInt(row.dataset.stock);
-    const qtyEl= row.querySelector('.qty-val');
-    const decBtn = row.querySelector('.qty-dec');
-    const incBtn = row.querySelector('.qty-inc');
-    let qty = parseInt(row.dataset.qty) || 0;
+    var row   = btn.closest('.amenity-row');
+    var id    = parseInt(row.dataset.amenityId);
+    var stock = parseInt(row.dataset.stock);
+    var qtyEl = row.querySelector('.qty-val');
+    var decBtn = row.querySelector('.qty-dec');
+    var incBtn = row.querySelector('.qty-inc');
+    var qty = parseInt(row.dataset.qty) || 0;
     qty = Math.max(0, Math.min(stock, qty + delta));
     row.dataset.qty = qty;
     qtyEl.textContent = qty;
@@ -745,41 +841,36 @@ function changeQty(btn, delta) {
 
 /* ── Summary ───────────────────────────────────────────── */
 function updateSummary() {
-    const hasDate  = !!selectedDate;
-    const hasSlots = selectedSlots.length > 0;
-    const valid    = hasDate && hasSlots;
+    var hasDate  = !!selectedDate;
+    var hasStart = !!startTime;
+    var hasEnd   = !!endTime;
+    var valid    = hasDate && hasStart && hasEnd;
 
-    // Calculate times
-    let startTime = null, endTime = null, hours = 0;
-    if (hasSlots) {
-        const sorted = [...selectedSlots].sort();
-        startTime = sorted[0];
-        // endTime = last slot + 30 min
-        const lastSlot = sorted[sorted.length - 1];
-        const [lh, lm] = lastSlot.split(':').map(Number);
-        const endMin = lh * 60 + lm + 30;
-        endTime = String(Math.floor(endMin / 60)).padStart(2,'0') + ':' + String(endMin % 60).padStart(2,'0');
-        hours = selectedSlots.length * 0.5;
+    // Calculate hours
+    var hours = 0;
+    if (hasStart && hasEnd) {
+        var sm = timeToMin(startTime), em = timeToMin(endTime);
+        hours = Math.max(0, (em - sm) / 60);
     }
 
-    // Update display
-    document.getElementById('sumDate').textContent     = hasDate ? formatDisplayDate(selectedDate) : '—';
-    document.getElementById('sumTime').textContent     = (startTime && endTime) ? (startTime + ' – ' + endTime) : '—';
-    document.getElementById('sumDuration').textContent = hours > 0 ? (hours + (hours === 1 ? ' hora' : ' horas')) : '—';
+    document.getElementById('sumDate').textContent     = hasDate  ? formatDisplayDate(selectedDate) : '—';
+    document.getElementById('sumTime').textContent     = (hasStart && hasEnd) ? (startTime + ' – ' + endTime) : (hasStart ? (startTime + ' – ?') : '—');
+    document.getElementById('sumDuration').textContent = hours > 0 ? (hours % 1 === 0 ? hours + (hours === 1 ? ' hora' : ' horas') : hours.toFixed(1) + ' horas') : '—';
 
-    const subtotal = Math.round(PRICE_PER_HR * hours * 100) / 100;
-    const fee      = Math.round(subtotal * 0.05 * 100) / 100;
+    var subtotal = Math.round(PRICE_PER_HR * hours * 100) / 100;
+    var fee      = Math.round(subtotal * 0.05 * 100) / 100;
 
-    let amenTotal = 0;
-    Object.entries(amenityQtys).forEach(([id, qty]) => {
+    var amenTotal = 0;
+    Object.entries(amenityQtys).forEach(function(pair) {
+        var id = pair[0], qty = pair[1];
         if (qty > 0) {
-            const row = document.querySelector('[data-amenity-id="' + id + '"]');
+            var row = document.querySelector('[data-amenity-id="' + id + '"]');
             if (row) amenTotal += parseFloat(row.dataset.price) * qty;
         }
     });
     amenTotal = Math.round(amenTotal * 100) / 100;
 
-    const total = subtotal + fee + amenTotal - discount;
+    var total = subtotal + fee + amenTotal - discount;
 
     document.getElementById('sumSubtotal').textContent  = '$' + subtotal.toFixed(2);
     document.getElementById('sumFee').textContent       = '$' + fee.toFixed(2);
@@ -794,17 +885,23 @@ function updateSummary() {
         document.getElementById('sumDiscRow').style.display = 'none';
     }
 
-    const btn  = document.getElementById('proceedBtn');
-    const hint = document.getElementById('validHint');
+    var btn  = document.getElementById('proceedBtn');
+    var hint = document.getElementById('validHint');
     btn.disabled = !valid;
-    if (!hasDate)       hint.textContent = 'Selecciona una fecha';
-    else if (!hasSlots) hint.textContent = 'Selecciona al menos un horario';
-    else                hint.textContent = '';
+    if (!hasDate)        hint.textContent = 'Selecciona una fecha';
+    else if (!hasStart)  hint.textContent = 'Selecciona la hora de inicio';
+    else if (!hasEnd)    hint.textContent = 'Selecciona la hora de fin';
+    else                 hint.textContent = '';
+}
+
+function timeToMin(t) {
+    var parts = t.split(':');
+    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
 }
 
 function formatDisplayDate(ds) {
-    const [y,m,d] = ds.split('-').map(Number);
-    const dt = new Date(y, m - 1, d);
+    var parts = ds.split('-').map(Number);
+    var dt = new Date(parts[0], parts[1] - 1, parts[2]);
     return dt.toLocaleDateString('es-MX', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
 }
 
@@ -812,30 +909,21 @@ function formatDisplayDate(ds) {
 function applyCoupon() {
     couponCode = document.getElementById('couponInput').value.trim();
     if (!couponCode) return;
-    // Optimistic UI — actual validation happens server-side on pay
-    var msg = document.createElement('p');
-    msg.style.cssText = 'font-size:0.75rem;color:var(--primary);margin-top:0.375rem;text-align:center';
-    msg.textContent = 'El cupón será validado al procesar el pago.';
     var existing = document.getElementById('couponFeedback');
     if (existing) existing.remove();
+    var msg = document.createElement('p');
     msg.id = 'couponFeedback';
+    msg.style.cssText = 'font-size:0.75rem;color:var(--primary);margin-top:0.375rem;text-align:center';
+    msg.textContent = 'El cupón será validado al procesar el pago.';
     document.getElementById('couponInput').parentNode.after(msg);
 }
 
 /* ── Payment Modal ─────────────────────────────────────── */
 function openPayModal() {
-    if (selectedSlots.length === 0 || !selectedDate) return;
-    const total  = parseFloat(document.getElementById('sumTotal').textContent.replace('$',''));
+    if (!startTime || !endTime || !selectedDate) return;
+    var total = parseFloat(document.getElementById('sumTotal').textContent.replace('$',''));
     document.getElementById('payAmount').textContent = '$' + total.toFixed(2);
-    document.getElementById('payDesc').textContent   = '<?= htmlspecialchars($space['name']) ?> · ' + selectedSlots.length + ' bloque(s)';
-
-    // Build details
-    const startTime = [...selectedSlots].sort()[0];
-    const sorted    = [...selectedSlots].sort();
-    const last      = sorted[sorted.length - 1];
-    const [lh,lm]   = last.split(':').map(Number);
-    const em        = lh*60+lm+30;
-    const endTime   = String(Math.floor(em/60)).padStart(2,'0')+':'+String(em%60).padStart(2,'0');
+    document.getElementById('payDesc').textContent   = '<?= htmlspecialchars($space['name']) ?> · ' + startTime + '–' + endTime;
 
     document.getElementById('payDetails').innerHTML =
         '<div style="font-size:0.78rem;color:var(--text-muted);line-height:1.8">' +
@@ -855,23 +943,15 @@ function closePayModal() {
 /* ── Payment simulation ────────────────────────────────── */
 function simulatePayment() {
     document.getElementById('payActions').style.display = 'none';
-    const loader = document.getElementById('payLoader');
-    loader.style.display = 'flex';
+    document.getElementById('payLoader').style.display  = 'flex';
 
-    // Build amenities payload
-    const amenitiesPayload = [];
-    Object.entries(amenityQtys).forEach(([id, qty]) => {
+    var amenitiesPayload = [];
+    Object.entries(amenityQtys).forEach(function(pair) {
+        var id = pair[0], qty = pair[1];
         if (qty > 0) amenitiesPayload.push({id: parseInt(id), qty: qty});
     });
 
-    const sorted    = [...selectedSlots].sort();
-    const startTime = sorted[0];
-    const last      = sorted[sorted.length - 1];
-    const [lh,lm]   = last.split(':').map(Number);
-    const em        = lh*60+lm+30;
-    const endTime   = String(Math.floor(em/60)).padStart(2,'0')+':'+String(em%60).padStart(2,'0');
-
-    const body = new URLSearchParams({
+    var body = new URLSearchParams({
         space_id:   SPACE_ID,
         date:       selectedDate,
         start_time: startTime,
@@ -880,62 +960,71 @@ function simulatePayment() {
         amenities:  JSON.stringify(amenitiesPayload),
     });
 
-    setTimeout(() => {
+    setTimeout(function() {
         document.getElementById('payLoaderText').textContent = 'Confirmando reserva…';
         fetch(BASE_URL + 'reservations/pay', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: body.toString()
         })
-        .then(r => r.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
             if (data.success) {
                 closePayModal();
-                launchConfetti();
-                showTicket(data.reservation, data.qr_code, data.amenities);
+                setSuccess(data.reservation, data.qr_code, data.amenities);
             } else {
                 closePayModal();
-                alert('Error: ' + (data.error || 'Ocurrió un problema. Intenta de nuevo.'));
+                var errMsg = document.createElement('p');
+                errMsg.style.cssText = 'color:#ef4444;font-size:0.8rem;text-align:center;margin-top:0.5rem';
+                errMsg.textContent = data.error || 'Ocurrió un problema. Intenta de nuevo.';
+                document.getElementById('payActions').parentNode.appendChild(errMsg);
+                document.getElementById('payActions').style.display = '';
+                document.getElementById('payLoader').style.display  = 'none';
+                document.getElementById('payBackdrop').classList.add('open');
             }
         })
-        .catch(() => {
+        .catch(function() {
             closePayModal();
             alert('Error de conexión. Intenta de nuevo.');
         });
     }, 1500);
 }
 
-/* ── Confetti ──────────────────────────────────────────── */
-function launchConfetti() {
-    const colors = ['#0EA5E9','#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6'];
-    const duration = 4000;
-    const end      = Date.now() + duration;
-    (function frame() {
-        confetti({ particleCount: 6, angle: 60, spread: 55, origin: {x: 0}, colors });
-        confetti({ particleCount: 6, angle: 120, spread: 55, origin: {x: 1}, colors });
-        if (Date.now() < end) requestAnimationFrame(frame);
-    })();
+/* ── isSuccess state ───────────────────────────────────── */
+function setSuccess(res, qrCode, amenities) {
+    isSuccess = true;
+    // Phase 4: Single elegant confetti burst
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    // Hide booking grid & header
+    document.getElementById('bookingGrid').style.transition = 'opacity 300ms';
+    document.getElementById('bookingGrid').style.opacity = '0';
+    setTimeout(function() {
+        document.getElementById('bookingGrid').style.display = 'none';
+        var header = document.querySelector('.booking-header');
+        if (header) header.style.display = 'none';
+        // Populate and show ticket
+        populateTicket(res, qrCode, amenities);
+        var sec = document.getElementById('ticketSection');
+        sec.style.display = '';
+        sec.style.opacity = '0';
+        sec.style.transition = 'opacity 400ms';
+        setTimeout(function() { sec.style.opacity = '1'; }, 30);
+        sec.scrollIntoView({behavior: 'smooth'});
+    }, 320);
 }
 
-/* ── Ticket ────────────────────────────────────────────── */
-function showTicket(res, qrCode, amenities) {
-    document.getElementById('bookingGrid').style.display = 'none';
-    document.querySelector('.booking-header').style.display = 'none';
-    const sec = document.getElementById('ticketSection');
-    sec.style.display = '';
-
+function populateTicket(res, qrCode, amenities) {
     document.getElementById('ticketSpaceName').textContent = res.space_name || '<?= htmlspecialchars($space['name']) ?>';
     document.getElementById('ticketClubName').textContent  = res.club_name  || '<?= htmlspecialchars($space['club_name'] ?? '') ?>';
 
-    const dt = new Date(res.date + 'T12:00:00');
+    var dt = new Date((res.date || '') + 'T12:00:00');
     document.getElementById('ticketDate').textContent  = dt.toLocaleDateString('es-MX', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
     document.getElementById('ticketTime').textContent  = (res.start_time||'').substring(0,5) + ' – ' + (res.end_time||'').substring(0,5);
     document.getElementById('ticketTotal').textContent = '$' + parseFloat(res.total).toFixed(2);
 
-    // Amenities in ticket
     if (amenities && amenities.length > 0) {
-        let html = '<hr style="border-color:rgba(255,255,255,0.07);margin:0.5rem 0">';
-        amenities.forEach(a => {
+        var html = '<hr style="border-color:rgba(255,255,255,0.07);margin:0.5rem 0">';
+        amenities.forEach(function(a) {
             html += '<div class="ticket-row"><span class="ticket-row-label">' + a.name + ' ×' + a.quantity + '</span><span class="ticket-row-value">$' + parseFloat(a.price).toFixed(2) + '</span></div>';
         });
         document.getElementById('ticketAmenRows').innerHTML = html;
@@ -943,24 +1032,26 @@ function showTicket(res, qrCode, amenities) {
 
     // QR
     document.getElementById('ticketQrCodeText').textContent = qrCode;
-    const canvas = document.createElement('canvas');
+    var canvas = document.createElement('canvas');
+    document.getElementById('ticketQrCanvas').innerHTML = '';
     document.getElementById('ticketQrCanvas').appendChild(canvas);
     QRCode.toCanvas(canvas, qrCode, {width: 180, margin: 1}, function(){});
-
-    sec.scrollIntoView({behavior:'smooth'});
 }
 
 function shareTicket() {
-    const qr = document.getElementById('ticketQrCodeText').textContent;
+    var qr = document.getElementById('ticketQrCodeText').textContent;
     if (navigator.share) {
         navigator.share({ title: '¡Reserva en ID Sports!', text: 'Mi reserva: ' + qr, url: window.location.href });
     } else {
-        alert('Comparte este enlace: ' + window.location.href);
+        var el = document.createElement('textarea');
+        el.value = window.location.href;
+        document.body.appendChild(el); el.select();
+        document.execCommand('copy'); document.body.removeChild(el);
+        alert('Enlace copiado al portapapeles');
     }
 }
 
 /* ── Init ──────────────────────────────────────────────── */
-// Pre-select date if passed from search/home
 (function() {
     var preDate = <?= json_encode($preDate) ?>;
     var today = new Date(); today.setHours(0,0,0,0);

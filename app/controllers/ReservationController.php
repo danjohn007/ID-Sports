@@ -44,7 +44,7 @@ class ReservationController extends Controller {
             $this->setFlash('error', 'Espacio no encontrado.');
             $this->redirect('reservations/search');
         }
-        $amenities  = $this->amenityModel->findByClub($space['club_id'] ?? 0);
+        $amenities  = $this->amenityModel->findBySpace($spaceId);
         $schedules  = $this->spaceModel->getSchedules($spaceId);
         $closedDays = $this->spaceModel->getClosedDays($spaceId);
         $preDate    = $this->get('date', date('Y-m-d'));

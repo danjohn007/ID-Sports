@@ -1,5 +1,23 @@
 <?php
 class AmenityModel extends Model {
+    public function findBySpace($spaceId) {
+        // Returns amenities assigned to this specific space via the pivot table.
+        // Falls back to club-level amenities if none are assigned yet.
+        $rows = $this->findAll(
+            "SELECT a.* FROM amenities a
+             INNER JOIN space_amenities sa ON sa.amenity_id = a.id
+             WHERE sa.space_id = ? AND a.status = 'active'
+             ORDER BY a.name",
+            [(int)$spaceId]
+        );
+        if (!empty($rows)) return $rows;
+
+        // Fallback: use club-level amenities (e.g. before migration or backfill runs)
+        $space = $this->findOne("SELECT club_id FROM spaces WHERE id = ?", [(int)$spaceId]);
+        if (!$space) return [];
+        return $this->findByClub($space['club_id']);
+    }
+
     public function findByClub($clubId) {
         return $this->findAll("SELECT * FROM amenities WHERE club_id = ? AND status = 'active' ORDER BY name", [$clubId]);
     }
