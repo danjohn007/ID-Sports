@@ -122,14 +122,6 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     border-radius: 1.125rem;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    text-decoration: none;
-    transition: all 180ms ease;
-}
-.recent-res-card:hover {
-    background: var(--bg-card-hover);
-    border-color: rgba(var(--primary-rgb), 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 .recent-res-icon {
     flex-shrink: 0;
@@ -580,12 +572,12 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
                     <span style="color:var(--text-muted)">Cancha</span>
                     <span style="color:var(--text-pri);font-weight:600">$<?= number_format($spaceCost,2) ?></span>
                 </div>
-                <?php if ($amenCost > 0): ?>
+                <?php foreach (($res['amenities_details'] ?? []) as $ad): ?>
                 <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
-                    <span style="color:var(--text-muted)">Amenidades</span>
-                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($amenCost,2) ?></span>
+                    <span style="color:var(--text-sec);padding-left:0.75rem"><?= htmlspecialchars($ad['name']) ?> &times;<?= (int)$ad['quantity'] ?></span>
+                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format((float)$ad['subtotal'],2) ?></span>
                 </div>
-                <?php endif; ?>
+                <?php endforeach; ?>
                 <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
                     <span style="color:var(--text-muted);font-weight:600">Subtotal</span>
                     <span style="color:var(--text-pri);font-weight:600">$<?= number_format($subT,2) ?></span>
@@ -859,7 +851,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
                 $badge = $statusBadges[$status] ?? $statusBadges['pending'];
                 $resId = (int)$res['id'];
             ?>
-            <a class="recent-res-card" href="<?= BASE_URL ?>reservations/confirm?id=<?= $resId ?>">
+            <div class="recent-res-card" role="article">
                 <div class="recent-res-icon">
                     <?= sportSvg($res['sport_type'] ?? 'football') ?>
                 </div>
@@ -874,7 +866,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
                     <span style="font-size:0.7rem;font-weight:700;background:<?= $badge['bg'] ?>;color:<?= $badge['color'] ?>;padding:0.2rem 0.55rem;border-radius:20px;display:inline-block;margin-bottom:0.375rem"><?= $badge['label'] ?></span>
                     <p style="font-weight:700;font-size:0.9375rem;color:var(--text-pri);margin:0">$<?= number_format($res['total'],0) ?></p>
                 </div>
-            </a>
+            </div>
             <?php endforeach; ?>
         </div>
     </div>

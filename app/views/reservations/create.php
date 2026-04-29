@@ -236,10 +236,8 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
                     <span class="ticket-row-label">Cancha</span>
                     <span class="ticket-row-value" id="ticket-cancha-cost"></span>
                 </div>
-                <div class="ticket-row" id="ticket-amenities-row">
-                    <span class="ticket-row-label">Amenidades extra</span>
-                    <span class="ticket-row-value" id="ticket-amenities-cost"></span>
-                </div>
+                <!-- Per-amenity rows rendered by JS -->
+                <div id="ticket-amenities-container"></div>
                 <div class="ticket-row">
                     <span class="ticket-row-label" style="font-weight:600;color:var(--text-pri)">Subtotal</span>
                     <span class="ticket-row-value" id="ticket-subtotal"></span>
@@ -783,12 +781,33 @@ function populateTicket(res, qrCode, amenities) {
     // ── Inject into ticket DOM ───────────────────────────────────
     document.getElementById('ticket-cancha-cost').textContent = fmt(spaceCost);
 
-    var amenRow = document.getElementById('ticket-amenities-row');
+    // Render per-amenity rows
+    var amenContainer = document.getElementById('ticket-amenities-container');
+    amenContainer.innerHTML = '';
     if (amenCost > 0) {
-        document.getElementById('ticket-amenities-cost').textContent = fmt(amenCost);
-        amenRow.style.display = '';
-    } else {
-        amenRow.style.display = 'none';
+        Object.entries(amenityQtys).forEach(function([id, qty]) {
+            if (qty > 0) {
+                var amenRowEl = document.querySelector('[data-amenity-id="' + id + '"]');
+                if (amenRowEl) {
+                    var nameEl = amenRowEl.querySelector('.amenity-name');
+                    var name   = nameEl ? nameEl.textContent.trim() : ('Amenidad #' + id);
+                    var price  = parseFloat(amenRowEl.dataset.price);
+                    var sub    = price * qty;
+                    var row    = document.createElement('div');
+                    row.className = 'ticket-row';
+                    var span1 = document.createElement('span');
+                    span1.className = 'ticket-row-label';
+                    span1.style.cssText = 'padding-left:0.75rem;color:var(--text-sec)';
+                    span1.textContent = name + ' \u00d7' + qty;
+                    var span2 = document.createElement('span');
+                    span2.className = 'ticket-row-value';
+                    span2.textContent = fmt(sub);
+                    row.appendChild(span1);
+                    row.appendChild(span2);
+                    amenContainer.appendChild(row);
+                }
+            }
+        });
     }
 
     document.getElementById('ticket-subtotal').textContent = fmt(subtotal);

@@ -114,7 +114,7 @@ class ReservationModel extends Model {
     }
 
     public function getActiveForUser($userId) {
-        return $this->findAll(
+        $rows = $this->findAll(
             "SELECT r.*, s.name as space_name, s.sport_type, s.photo as space_photo,
                     c.name as club_name, c.id as club_id, c.address as club_address
              FROM reservations r
@@ -127,6 +127,8 @@ class ReservationModel extends Model {
              ORDER BY r.date ASC, r.start_time ASC",
             [$userId]
         );
+        $this->loadAmenitiesForReservations($rows);
+        return $rows;
     }
 
     public function getTodayForUser($userId) {

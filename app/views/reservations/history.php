@@ -271,6 +271,18 @@ function sportSvgHist(string $type): string {
     </div>
     <?php else: ?>
 
+    <!-- Search / Filter input -->
+    <div style="margin-bottom:0.875rem;position:relative">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             style="position:absolute;left:0.875rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="searchHistory" placeholder="Buscar cancha o deporte..."
+               style="width:100%;box-sizing:border-box;background:var(--bg-card);border:1px solid var(--border-gl);border-radius:0.875rem;padding:0.625rem 0.875rem 0.625rem 2.5rem;font-size:0.875rem;color:var(--text-pri);outline:none;transition:border-color 140ms"
+               onfocus="this.style.borderColor='rgba(var(--primary-rgb),0.5)'"
+               onblur="this.style.borderColor='var(--border-gl)'">
+    </div>
+
     <?php
     $statusLabels = [
         'pending'     => ['label'=>'Pendiente',   'class'=>'hist-badge-pending'],
@@ -293,7 +305,8 @@ function sportSvgHist(string $type): string {
         $hasQr     = in_array($status, ['confirmed','active','in_progress','pending']);
         $amenDetails = json_encode($r['amenities_details'] ?? [], JSON_UNESCAPED_UNICODE);
     ?>
-    <div class="hist-card" style="margin-bottom:0">
+    <div class="hist-card" style="margin-bottom:0"
+         data-search="<?= strtolower(htmlspecialchars(($r['space_name'] ?? ''), ENT_QUOTES) . ' ' . htmlspecialchars(($r['sport_type'] ?? ''), ENT_QUOTES) . ' ' . htmlspecialchars(($r['club_name'] ?? ''), ENT_QUOTES)) ?>">
         <div class="hist-card-body">
             <div class="hist-icon">
                 <?= sportSvgHist($r['sport_type'] ?? 'football') ?>
@@ -474,5 +487,17 @@ function closeHistTicket() {
     document.getElementById('histModal').style.display = 'none';
     document.getElementById('hTicketQrCanvas').innerHTML = '';
     document.body.style.overflow = '';
+}
+
+// Search/filter for history cards
+var _searchInput = document.getElementById('searchHistory');
+if (_searchInput) {
+    _searchInput.addEventListener('keyup', function() {
+        var q = this.value.toLowerCase().trim();
+        document.querySelectorAll('.hist-grid .hist-card').forEach(function(card) {
+            var text = (card.getAttribute('data-search') || '').toLowerCase();
+            card.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+        });
+    });
 }
 </script>
