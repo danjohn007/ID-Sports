@@ -225,6 +225,26 @@ function sportSvgHist(string $type): string {
     border-color: rgba(239,68,68,0.2);
 }
 .hist-btn-cancel:hover { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.4); }
+.hist-btn-review {
+    background: rgba(245,158,11,0.1);
+    color: #f59e0b;
+    border-color: rgba(245,158,11,0.3);
+}
+.hist-btn-review:hover { background: rgba(245,158,11,0.2); border-color: rgba(245,158,11,0.55); }
+
+/* ── Review Modal ────────────────────────────────────── */
+.review-star-row { display:flex; justify-content:center; gap:0.5rem; direction:rtl; margin:1rem 0 0.5rem; }
+.review-star-row input[type=radio] { display:none; }
+.review-star-row label {
+    font-size:2rem;
+    color: var(--border-gl2);
+    cursor: pointer;
+    transition: color 140ms, transform 140ms;
+    line-height:1;
+}
+.review-star-row input[type=radio]:checked ~ label,
+.review-star-row label:hover,
+.review-star-row label:hover ~ label { color: #f59e0b; transform: scale(1.15); }
 
 /* ── Ticket Modal (centered) ─────────────────────────── */
 .hist-modal-backdrop {
@@ -434,6 +454,16 @@ function sportSvgHist(string $type): string {
                 </div>
             </div>
             <div class="hist-action-bar">
+                <?php if ($visualStatus === 'completed'): ?>
+                <button class="hist-btn hist-btn-review" onclick="openReviewModal(<?= $rid ?>, '<?= htmlspecialchars($r['space_name'],ENT_QUOTES) ?>', '<?= htmlspecialchars($r['club_name']??'',ENT_QUOTES) ?>', '<?= (int)($r['space_id'] ?? 0) ?>', '<?= $resDate ?>')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    Calificar Cancha
+                </button>
+                <button class="hist-btn" onclick="<?= $openTicketCall ?>">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                    Ver ticket
+                </button>
+                <?php else: ?>
                 <button class="hist-btn" onclick="<?= $openTicketCall ?>">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                     Ver ticket
@@ -443,6 +473,7 @@ function sportSvgHist(string $type): string {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     Cancelar
                 </button>
+                <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -519,6 +550,54 @@ function sportSvgHist(string $type): string {
     </div><!-- /.hist-boxes-grid -->
 
     <?php endif; ?>
+</div>
+
+<!-- ── Review Modal ───────────────────────────────────────────── -->
+<div id="reviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9100;align-items:center;justify-content:center;padding:1.25rem" onclick="closeReviewModal()">
+    <div style="background:var(--bg-mid);border:1px solid var(--border-gl2);border-radius:1.5rem;padding:1.5rem 1.375rem 1.75rem;max-width:380px;width:100%;position:relative;box-shadow:0 28px 64px rgba(0,0,0,0.65);animation:popIn 220ms ease" onclick="event.stopPropagation()">
+        <button onclick="closeReviewModal()" style="position:absolute;top:1rem;right:1rem;background:var(--bg-card);border:1px solid var(--border-gl2);border-radius:0.5rem;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-sec)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.125rem;padding-right:2rem">
+            <div style="width:3rem;height:3rem;border-radius:0.875rem;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0">
+                <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3v3.5M12 20.5v-3m-5-11l2.5 3M16.5 6l-2.5 3M4.5 15l3-1.5m9 0l3 1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+            </div>
+            <div style="min-width:0">
+                <h3 id="reviewSpaceName" style="font-family:'Jockey One',sans-serif;font-size:1rem;color:var(--text-pri);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></h3>
+                <p id="reviewClubDate" style="font-size:0.75rem;color:var(--text-muted);margin:0.2rem 0 0"></p>
+            </div>
+        </div>
+
+        <p style="font-family:'Jockey One',sans-serif;font-size:0.875rem;color:var(--text-sec);text-align:center;margin:0 0 0.25rem">¿Cómo calificarías la cancha?</p>
+
+        <!-- Star Rating -->
+        <div class="review-star-row" id="reviewStarRow">
+            <input type="radio" name="rev_rating" id="rev_s5" value="5"><label for="rev_s5">★</label>
+            <input type="radio" name="rev_rating" id="rev_s4" value="4"><label for="rev_s4">★</label>
+            <input type="radio" name="rev_rating" id="rev_s3" value="3"><label for="rev_s3">★</label>
+            <input type="radio" name="rev_rating" id="rev_s2" value="2"><label for="rev_s2">★</label>
+            <input type="radio" name="rev_rating" id="rev_s1" value="1"><label for="rev_s1">★</label>
+        </div>
+        <p id="reviewRatingErr" style="color:#f87171;font-size:0.75rem;text-align:center;margin:0 0 0.625rem;display:none">Por favor selecciona una calificación.</p>
+
+        <!-- Comment -->
+        <textarea id="reviewComment" rows="3" placeholder="¿Qué te pareció el estado de la cancha, la iluminación o la limpieza?"
+            style="width:100%;box-sizing:border-box;background:var(--bg-card);border:1px solid var(--border-gl);border-radius:0.875rem;padding:0.75rem;font-size:0.84rem;color:var(--text-pri);outline:none;resize:vertical;transition:border-color 140ms;font-family:inherit;line-height:1.5"
+            onfocus="this.style.borderColor='rgba(245,158,11,0.5)'"
+            onblur="this.style.borderColor='var(--border-gl)'"></textarea>
+
+        <input type="hidden" id="reviewResId"   value="">
+        <input type="hidden" id="reviewSpaceId" value="">
+
+        <button onclick="submitReview()" style="margin-top:0.875rem;width:100%;background:var(--primary);color:#fff;font-weight:700;font-size:0.9rem;padding:0.75rem;border-radius:0.875rem;border:none;cursor:pointer;transition:opacity 140ms;display:flex;align-items:center;justify-content:center;gap:0.5rem" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Enviar reseña
+        </button>
+        <p id="reviewSuccess" style="display:none;color:#10b981;font-size:0.8rem;text-align:center;margin:0.625rem 0 0;font-weight:600">¡Gracias! Tu reseña fue enviada.</p>
+        <p id="reviewError"   style="display:none;color:#f87171;font-size:0.8rem;text-align:center;margin:0.625rem 0 0"></p>
+    </div>
 </div>
 
 <!-- ── Cancel Reason Modal ───────────────────────────────────── -->
@@ -713,6 +792,58 @@ function submitCancelReason() {
     errEl.style.display = 'none';
     document.getElementById('cancelReasonHidden').value = reason;
     document.getElementById('cancelForm').submit();
+}
+
+/* ── Review Modal ─────────────────────────────────────── */
+function openReviewModal(resId, spaceName, clubName, spaceId, dateLabel) {
+    document.getElementById('reviewResId').value   = resId;
+    document.getElementById('reviewSpaceId').value = spaceId;
+    document.getElementById('reviewSpaceName').textContent = spaceName;
+    document.getElementById('reviewClubDate').textContent  = clubName + (dateLabel ? ' · ' + dateLabel : '');
+    document.getElementById('reviewComment').value = '';
+    document.getElementById('reviewRatingErr').style.display = 'none';
+    document.getElementById('reviewSuccess').style.display   = 'none';
+    document.getElementById('reviewError').style.display     = 'none';
+    document.querySelectorAll('input[name="rev_rating"]').forEach(function(r){ r.checked = false; });
+    var modal = document.getElementById('reviewModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeReviewModal() {
+    document.getElementById('reviewModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function submitReview() {
+    var rating = 0;
+    document.querySelectorAll('input[name="rev_rating"]').forEach(function(r){ if (r.checked) rating = parseInt(r.value); });
+    var errRating = document.getElementById('reviewRatingErr');
+    if (!rating) { errRating.style.display = 'block'; return; }
+    errRating.style.display = 'none';
+    var comment = document.getElementById('reviewComment').value.trim();
+    var resId   = document.getElementById('reviewResId').value;
+    var spaceId = document.getElementById('reviewSpaceId').value;
+    var btn = event.currentTarget;
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    fetch('<?= BASE_URL ?>reviews/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'reservation_id=' + encodeURIComponent(resId) + '&space_id=' + encodeURIComponent(spaceId) + '&rating=' + rating + '&comment=' + encodeURIComponent(comment)
+    }).then(function(r){ return r.json(); }).then(function(data){
+        btn.disabled = false; btn.style.opacity = '1';
+        if (data.success) {
+            document.getElementById('reviewSuccess').style.display = 'block';
+            document.getElementById('reviewError').style.display   = 'none';
+            setTimeout(closeReviewModal, 1800);
+        } else {
+            document.getElementById('reviewError').textContent = data.error || 'Error al enviar la reseña.';
+            document.getElementById('reviewError').style.display = 'block';
+        }
+    }).catch(function(){
+        btn.disabled = false; btn.style.opacity = '1';
+        document.getElementById('reviewError').textContent = 'Error de conexión. Inténtalo de nuevo.';
+        document.getElementById('reviewError').style.display = 'block';
+    });
 }
 
 /* ── Box filters ─────────────────────────────────────── */

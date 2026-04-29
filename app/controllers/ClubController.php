@@ -12,9 +12,34 @@ class ClubController extends Controller {
 
     public function index() {
         $this->requireAuth();
-        $search = $this->get('q');
-        $clubs = $this->clubModel->getActiveClubs($search);
-        $this->view('clubs/index', ['title' => 'Clubes Deportivos', 'clubs' => $clubs, 'search' => $search]);
+        $search       = $this->get('q');
+        $stateFilter  = $this->get('state');
+        $cityFilter   = $this->get('city');
+
+        $membershipModel = new ClubMembershipModel();
+        $userId          = $_SESSION['user_id'];
+        $followedIds     = $membershipModel->getClubIdsByUser($userId);
+
+        $clubs = $this->clubModel->discoverClubs($search, $stateFilter, $cityFilter);
+
+        // Attach following status and space count to each club
+        foreach ($clubs as &$club) {
+            $club['is_following'] = in_array((int)$club['id'], array_map('intval', $followedIds));
+        }
+        unset($club);
+
+        $states = $this->clubModel->getDistinctStates();
+        $cities = $this->clubModel->getDistinctCities($stateFilter);
+
+        $this->view('clubs/index', [
+            'title'       => 'Descubrir Clubes',
+            'clubs'       => $clubs,
+            'q'           => $search,
+            'stateFilter' => $stateFilter,
+            'cityFilter'  => $cityFilter,
+            'states'      => $states,
+            'cities'      => $cities,
+        ]);
     }
 
     public function detail($clubId = null) {

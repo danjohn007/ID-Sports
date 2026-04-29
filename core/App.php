@@ -50,6 +50,7 @@ class App {
             'clubs' => ['ClubController', 'index'],
             'clubs/detail' => ['ClubController', 'detail'],
             'clubs/toggle-follow' => ['ClubController', 'toggleFollow'],
+            'reviews/create'      => ['ReviewController', 'create'],
             'admin/dashboard' => ['AdminController', 'dashboard'],
             'admin/spaces' => ['AdminController', 'spaces'],
             'admin/schedules' => ['AdminController', 'schedules'],
