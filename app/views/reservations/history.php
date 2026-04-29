@@ -287,7 +287,6 @@ function sportSvgHist(string $type): string {
         $badge  = $statusLabels[$status] ?? ['label'=>ucfirst($status),'class'=>'hist-badge-completed'];
         $rid    = (int)$r['id'];
         $spaceCost = (float)($r['subtotal'] ?? 0);
-        $amenCost  = (float)($r['amenities_total'] ?? 0);
         $iva       = (float)($r['service_fee'] ?? 0);
         $total     = (float)($r['total'] ?? 0);
         $qrData    = htmlspecialchars($r['qr_code'] ?? ('RES-'.$rid), ENT_QUOTES);
@@ -427,7 +426,7 @@ function openHistTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost
     var amenTotal = 0;
     if (amenitiesDetails && amenitiesDetails.length > 0) {
         amenitiesDetails.forEach(function(a) {
-            var sub = parseFloat(a.subtotal) || (parseFloat(a.quantity) * parseFloat(a.price));
+            var sub = parseFloat(a.subtotal);
             amenTotal += sub;
             var row = document.createElement('div');
             row.className = 'hist-ticket-row';
