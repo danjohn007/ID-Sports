@@ -591,7 +591,7 @@ function sportSvgHist(string $type): string {
         <input type="hidden" id="reviewResId"   value="">
         <input type="hidden" id="reviewSpaceId" value="">
 
-        <button onclick="submitReview()" style="margin-top:0.875rem;width:100%;background:var(--primary);color:#fff;font-weight:700;font-size:0.9rem;padding:0.75rem;border-radius:0.875rem;border:none;cursor:pointer;transition:opacity 140ms;display:flex;align-items:center;justify-content:center;gap:0.5rem" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        <button onclick="submitReview(this)" style="margin-top:0.875rem;width:100%;background:var(--primary);color:#fff;font-weight:700;font-size:0.9rem;padding:0.75rem;border-radius:0.875rem;border:none;cursor:pointer;transition:opacity 140ms;display:flex;align-items:center;justify-content:center;gap:0.5rem" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             Enviar reseña
         </button>
@@ -813,7 +813,7 @@ function closeReviewModal() {
     document.getElementById('reviewModal').style.display = 'none';
     document.body.style.overflow = '';
 }
-function submitReview() {
+function submitReview(btn) {
     var rating = 0;
     document.querySelectorAll('input[name="rev_rating"]').forEach(function(r){ if (r.checked) rating = parseInt(r.value); });
     var errRating = document.getElementById('reviewRatingErr');
@@ -822,7 +822,6 @@ function submitReview() {
     var comment = document.getElementById('reviewComment').value.trim();
     var resId   = document.getElementById('reviewResId').value;
     var spaceId = document.getElementById('reviewSpaceId').value;
-    var btn = event.currentTarget;
     btn.disabled = true;
     btn.style.opacity = '0.6';
     fetch('<?= BASE_URL ?>reviews/create', {

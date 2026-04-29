@@ -78,11 +78,11 @@ class ClubModel extends Model {
     public function getActiveClubs($search = '') {
         if ($search) {
             return parent::findAll(
-                "SELECT c.*, (SELECT COUNT(*) FROM spaces s WHERE s.club_id = c.id AND s.status = 'active') as space_count FROM clubs c WHERE c.status = 'active' AND (c.name LIKE ? OR c.address LIKE ?) ORDER BY c.name",
+                "SELECT c.*, COUNT(s.id) as space_count FROM clubs c LEFT JOIN spaces s ON s.club_id = c.id AND s.status = 'active' WHERE c.status = 'active' AND (c.name LIKE ? OR c.address LIKE ?) GROUP BY c.id ORDER BY c.name",
                 ["%$search%", "%$search%"]
             );
         }
-        return parent::findAll("SELECT c.*, (SELECT COUNT(*) FROM spaces s WHERE s.club_id = c.id AND s.status = 'active') as space_count FROM clubs c WHERE c.status = 'active' ORDER BY c.name");
+        return parent::findAll("SELECT c.*, COUNT(s.id) as space_count FROM clubs c LEFT JOIN spaces s ON s.club_id = c.id AND s.status = 'active' WHERE c.status = 'active' GROUP BY c.id ORDER BY c.name");
     }
 
     public function discoverClubs($search = '', $state = '', $city = '') {
@@ -104,7 +104,7 @@ class ClubModel extends Model {
         }
         $where = implode(' AND ', $conditions);
         return parent::findAll(
-            "SELECT c.*, (SELECT COUNT(*) FROM spaces s WHERE s.club_id = c.id AND s.status = 'active') as space_count FROM clubs c WHERE $where ORDER BY c.name",
+            "SELECT c.*, COUNT(s.id) as space_count FROM clubs c LEFT JOIN spaces s ON s.club_id = c.id AND s.status = 'active' WHERE $where GROUP BY c.id ORDER BY c.name",
             $params
         );
     }

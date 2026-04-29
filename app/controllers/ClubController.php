@@ -19,12 +19,13 @@ class ClubController extends Controller {
         $membershipModel = new ClubMembershipModel();
         $userId          = $_SESSION['user_id'];
         $followedIds     = $membershipModel->getClubIdsByUser($userId);
+        $followedFlipped = array_flip(array_map('intval', $followedIds));
 
         $clubs = $this->clubModel->discoverClubs($search, $stateFilter, $cityFilter);
 
         // Attach following status and space count to each club
         foreach ($clubs as &$club) {
-            $club['is_following'] = in_array((int)$club['id'], array_map('intval', $followedIds));
+            $club['is_following'] = isset($followedFlipped[(int)$club['id']]);
         }
         unset($club);
 
