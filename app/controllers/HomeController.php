@@ -26,9 +26,9 @@ class HomeController extends Controller {
         // Active reservations (today + future, not cancelled/past)
         $activeReservations = $reservationModel->getActiveForUser($userId);
 
-        // 5-day availability picker (RF2.3)
+        // 15-day availability picker (RF2.3)
         $upcomingDays = [];
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 15; $i++) {
             $ts   = strtotime("+$i days");
             $date = date('Y-m-d', $ts);
             $days_es = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];

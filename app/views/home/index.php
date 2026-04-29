@@ -67,12 +67,13 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
 }
 .home-section-title {
     font-family: 'Jockey One', sans-serif;
-    font-size: 1.0625rem;
+    font-size: 1.375rem;
+    font-weight: 700;
     color: var(--text-pri);
     letter-spacing: 0.01em;
 }
 .home-section-link {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: var(--primary);
     text-decoration: none;
@@ -136,18 +137,31 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     .days-sports-grid { grid-template-columns: 1fr; }
 }
 
+/* ── Side-by-side grid: Clubes seguidos + Cerca de ti ────── */
+.clubs-nearby-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1.75rem;
+}
+.clubs-nearby-grid > .home-section { margin-bottom: 0; }
+@media (max-width: 767px) {
+    .clubs-nearby-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Day pills ─────────────────────────────────────────── */
 .day-pill {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1.125rem 1rem;
-    border-radius: 1.125rem;
+    padding: 1.25rem 1rem;
+    border-radius: 1.25rem;
     border: 1px solid var(--border-gl);
     background: var(--bg-card);
     text-decoration: none;
-    min-width: 90px;
+    min-width: 108px;
     transition: all 140ms;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
@@ -162,11 +176,11 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     box-shadow: 0 6px 22px rgba(var(--primary-rgb), 0.5);
     transform: translateY(-2px);
 }
-.day-pill .day-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+.day-pill .day-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
 .day-pill.active .day-label { color: rgba(255,255,255,0.8); }
-.day-pill .day-num { font-family: 'Jockey One', sans-serif; font-size: 2rem; color: var(--text-pri); line-height: 1.05; margin: 0.1rem 0; }
+.day-pill .day-num { font-family: 'Jockey One', sans-serif; font-size: 2.5rem; color: var(--text-pri); line-height: 1.05; margin: 0.15rem 0; }
 .day-pill.active .day-num { color: #fff; }
-.day-pill .day-avail { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
+.day-pill .day-avail { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-top: 4px; }
 .day-pill.active .day-avail { color: rgba(255,255,255,0.75); }
 
 /* ── Carousel wrapper ──────────────────────────────────── */
@@ -211,15 +225,15 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.75rem 0.5rem;
-    border-radius: 0.875rem;
+    gap: 0.6rem;
+    padding: 1rem 0.75rem;
+    border-radius: 1rem;
     text-decoration: none;
     border: 1px solid var(--border-gl);
     background: var(--bg-card);
     transition: all 150ms ease;
-    min-width: 88px;
-    max-width: 104px;
+    min-width: 108px;
+    max-width: 128px;
 }
 .sport-card:hover {
     border-color: rgba(var(--primary-rgb), 0.45);
@@ -227,22 +241,23 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.18);
 }
 .sport-icon-wrap {
-    width: 2.75rem; height: 2.75rem;
-    border-radius: 0.75rem;
+    width: 3.5rem; height: 3.5rem;
+    border-radius: 1rem;
     display: flex; align-items: center; justify-content: center;
     transition: transform 150ms;
     overflow: hidden;
 }
+.sport-icon-wrap svg { width: 30px; height: 30px; }
 .sport-icon-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
 .sport-card:hover .sport-icon-wrap { transform: scale(1.08); }
 .sport-card span {
     font-family: 'Jockey One', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     text-align: center;
     color: var(--text-sec);
     line-height: 1.2;
     word-break: break-word;
-    max-width: 90px;
+    max-width: 110px;
 }
 
 /* ── Club cards ─────────────────────────────────────────── */
@@ -254,13 +269,16 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     background: var(--bg-card);
     border: 1px solid var(--border-gl);
     transition: all 160ms ease;
+    flex-shrink: 0;
+    min-width: 220px;
+    max-width: 280px;
 }
 .club-card:hover {
     border-color: rgba(var(--primary-rgb), 0.4);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.15);
 }
-.club-cover { height: 7rem; position: relative; overflow: hidden; }
+.club-cover { height: 9rem; position: relative; overflow: hidden; }
 .club-cover-placeholder {
     width: 100%; height: 100%;
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -273,20 +291,20 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     backdrop-filter: blur(6px);
     border: 1px solid rgba(255,255,255,0.15);
     color: #fff;
-    font-size: 0.68rem; font-weight: 700;
-    padding: 0.2rem 0.5rem; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 700;
+    padding: 0.25rem 0.6rem; border-radius: 20px;
     display: flex; align-items: center; gap: 0.25rem;
 }
-.club-info { padding: 0.75rem; }
+.club-info { padding: 0.875rem; }
 .club-name {
     font-family: 'Jockey One', sans-serif;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--text-pri);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.25rem;
 }
-.club-city { font-size: 0.7rem; color: var(--text-sec); display: flex; align-items: center; gap: 0.25rem; }
-.club-cta { font-size: 0.7rem; font-weight: 600; color: var(--primary); margin-top: 0.4rem; }
+.club-city { font-size: 0.78rem; color: var(--text-sec); display: flex; align-items: center; gap: 0.25rem; }
+.club-cta { font-size: 0.78rem; font-weight: 600; color: var(--primary); margin-top: 0.5rem; }
 
 /* ── Active reservation rows ───────────────────────────── */
 .res-row {
@@ -459,10 +477,10 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     <!-- RF2.3 + RF2.4 – Side-by-side: Reservar por Día | Deportes -->
     <div class="days-sports-grid">
 
-        <!-- RF2.3 – 5-Day Quick Booking (Carousel) -->
+        <!-- RF2.3 – 15-Day Quick Booking (Carousel) -->
         <div class="home-section">
             <div class="home-section-header">
-                <h2 class="home-section-title">Reservar por Día</h2>
+                <h2 class="home-section-title">Anticipa tu jugada</h2>
                 <a href="<?= BASE_URL ?>reservations/search" class="home-section-link">Ver todo &rarr;</a>
             </div>
             <div class="carousel-wrap">
@@ -522,114 +540,150 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
         </div>
 
     </div><!-- /.days-sports-grid -->
-    <!-- RF2.5 – Clubes Seguidos -->
-    <div class="home-section">
-        <div class="home-section-header">
-            <h2 class="home-section-title">Clubes seguidos</h2>
-            <a href="<?= BASE_URL ?>clubs" class="home-section-link">Explorar &rarr;</a>
-        </div>
-        <?php if (!empty($followedClubs)): ?>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.75rem">
-            <?php foreach ($followedClubs as $club): ?>
-            <a href="<?= BASE_URL ?>clubs/detail/<?= (int)$club['club_id'] ?>" class="club-card">
-                <div class="club-cover">
-                    <?php if (!empty($club['cover_image'])): ?>
-                    <img src="<?= htmlspecialchars($club['cover_image']) ?>" style="width:100%;height:100%;object-fit:cover" alt="">
-                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent)"></div>
-                    <?php elseif (!empty($club['logo'])): ?>
-                    <div class="club-cover-placeholder" style="opacity:1">
-                        <img src="<?= htmlspecialchars($club['logo']) ?>" style="width:3rem;height:3rem;object-fit:contain;border-radius:0.5rem" alt="">
-                    </div>
-                    <?php else: ?>
-                    <div class="club-cover-placeholder">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                        </svg>
-                    </div>
-                    <?php endif; ?>
-                    <span class="club-dist-badge" style="background:rgba(var(--primary-rgb),0.5);border-color:rgba(var(--primary-rgb),0.3)">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Siguiendo
-                    </span>
-                </div>
-                <div class="club-info">
-                    <div class="club-name"><?= htmlspecialchars($club['club_name']) ?></div>
-                    <div class="club-city">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
-                        <?= htmlspecialchars($club['city'] ?? 'Querétaro') ?>
-                    </div>
-                    <div class="club-cta">Ver canchas &rarr;</div>
-                </div>
-            </a>
-            <?php endforeach; ?>
-        </div>
-        <?php else: ?>
-        <div class="empty-cta" style="padding:1.5rem;text-align:center">
-            <div class="empty-cta-icon" style="margin-bottom:0.75rem">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                </svg>
-            </div>
-            <p style="font-size:0.8125rem;color:var(--text-sec);margin:0 0 0.875rem">Aún no sigues ningún club</p>
-            <a href="<?= BASE_URL ?>clubs" class="home-cta-btn" style="font-size:0.8125rem;padding:0.5rem 1.25rem">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                Explorar clubes
-            </a>
-        </div>
-        <?php endif; ?>
-    </div>
+    <!-- RF2.5 + RF2.6 – Side-by-side: Clubes Seguidos | Cerca de ti -->
+    <div class="clubs-nearby-grid">
 
-    <!-- RF2.6 – Nearby Clubs -->
-    <?php if (!empty($nearbyClubs)): ?>
-    <div class="home-section">
-        <div class="home-section-header">
-            <h2 class="home-section-title">Cerca de ti</h2>
-            <button onclick="requestLocation()"
-                    style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:var(--primary);background:none;border:none;cursor:pointer;padding:0">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
-                    <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
-                    <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
-                </svg>
-                Actualizar
-            </button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.75rem">
-            <?php foreach ($nearbyClubs as $club): ?>
-            <a href="<?= BASE_URL ?>clubs/detail/<?= $club['id'] ?>" class="club-card">
-                <div class="club-cover">
-                    <?php if (!empty($club['cover_image'])): ?>
-                    <img src="<?= htmlspecialchars($club['cover_image']) ?>" style="width:100%;height:100%;object-fit:cover" alt="">
-                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent)"></div>
-                    <?php else: ?>
-                    <div class="club-cover-placeholder">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                        </svg>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($club['distance_km'])): ?>
-                    <span class="club-dist-badge">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
-                        <?= number_format($club['distance_km'], 1) ?> km
-                    </span>
-                    <?php endif; ?>
+        <!-- RF2.5 – Clubes Seguidos (Carousel) -->
+        <div class="home-section">
+            <div class="home-section-header">
+                <h2 class="home-section-title">Clubes seguidos</h2>
+                <a href="<?= BASE_URL ?>clubs" class="home-section-link">Explorar &rarr;</a>
+            </div>
+            <?php if (!empty($followedClubs)): ?>
+            <div class="carousel-wrap">
+                <button class="carousel-btn left" onclick="scrollCarousel('clubTrack',-1)" aria-label="Anterior">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="carousel-track" id="clubTrack">
+                    <?php foreach ($followedClubs as $club): ?>
+                    <a href="<?= BASE_URL ?>clubs/detail/<?= (int)$club['club_id'] ?>" class="club-card">
+                        <div class="club-cover">
+                            <?php if (!empty($club['cover_image'])): ?>
+                            <img src="<?= htmlspecialchars($club['cover_image']) ?>" style="width:100%;height:100%;object-fit:cover" alt="">
+                            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent)"></div>
+                            <?php elseif (!empty($club['logo'])): ?>
+                            <div class="club-cover-placeholder" style="opacity:1">
+                                <img src="<?= htmlspecialchars($club['logo']) ?>" style="width:3rem;height:3rem;object-fit:contain;border-radius:0.5rem" alt="">
+                            </div>
+                            <?php else: ?>
+                            <div class="club-cover-placeholder">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <?php endif; ?>
+                            <span class="club-dist-badge" style="background:rgba(var(--primary-rgb),0.5);border-color:rgba(var(--primary-rgb),0.3)">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                Siguiendo
+                            </span>
+                        </div>
+                        <div class="club-info">
+                            <div class="club-name"><?= htmlspecialchars($club['club_name']) ?></div>
+                            <div class="club-city">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+                                <?= htmlspecialchars($club['city'] ?? 'Querétaro') ?>
+                            </div>
+                            <div class="club-cta">Ver canchas &rarr;</div>
+                        </div>
+                    </a>
+                    <?php endforeach; ?>
                 </div>
-                <div class="club-info">
-                    <div class="club-name"><?= htmlspecialchars($club['name']) ?></div>
-                    <div class="club-city">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
-                        <?= htmlspecialchars($club['city'] ?? 'Querétaro') ?>
-                    </div>
-                    <div class="club-cta">Ver canchas &rarr;</div>
+                <button class="carousel-btn right" onclick="scrollCarousel('clubTrack',1)" aria-label="Siguiente">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+            <?php else: ?>
+            <div class="empty-cta" style="padding:1.5rem;text-align:center">
+                <div class="empty-cta-icon" style="margin-bottom:0.75rem">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
                 </div>
-            </a>
-            <?php endforeach; ?>
+                <p style="font-size:0.875rem;color:var(--text-sec);margin:0 0 0.875rem">Aún no sigues ningún club</p>
+                <a href="<?= BASE_URL ?>clubs" class="home-cta-btn" style="font-size:0.875rem;padding:0.55rem 1.25rem">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    Explorar clubes
+                </a>
+            </div>
+            <?php endif; ?>
         </div>
-    </div>
-    <?php endif; ?>
+
+        <!-- RF2.6 – Cerca de ti (Carousel) -->
+        <div class="home-section">
+            <div class="home-section-header">
+                <h2 class="home-section-title">Cerca de ti</h2>
+                <button onclick="requestLocation()"
+                        style="display:flex;align-items:center;gap:0.3rem;font-size:0.8125rem;font-weight:600;color:var(--primary);background:none;border:none;cursor:pointer;padding:0">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                        <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+                        <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+            <?php if (!empty($nearbyClubs)): ?>
+            <div class="carousel-wrap">
+                <button class="carousel-btn left" onclick="scrollCarousel('nearbyTrack',-1)" aria-label="Anterior">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="carousel-track" id="nearbyTrack">
+                    <?php foreach ($nearbyClubs as $club): ?>
+                    <a href="<?= BASE_URL ?>clubs/detail/<?= $club['id'] ?>" class="club-card">
+                        <div class="club-cover">
+                            <?php if (!empty($club['cover_image'])): ?>
+                            <img src="<?= htmlspecialchars($club['cover_image']) ?>" style="width:100%;height:100%;object-fit:cover" alt="">
+                            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent)"></div>
+                            <?php else: ?>
+                            <div class="club-cover-placeholder">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <?php endif; ?>
+                            <?php if (!empty($club['distance_km'])): ?>
+                            <span class="club-dist-badge">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+                                <?= number_format($club['distance_km'], 1) ?> km
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="club-info">
+                            <div class="club-name"><?= htmlspecialchars($club['name']) ?></div>
+                            <div class="club-city">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+                                <?= htmlspecialchars($club['city'] ?? 'Querétaro') ?>
+                            </div>
+                            <div class="club-cta">Ver canchas &rarr;</div>
+                        </div>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+                <button class="carousel-btn right" onclick="scrollCarousel('nearbyTrack',1)" aria-label="Siguiente">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+            <?php else: ?>
+            <div class="empty-cta" style="padding:1.5rem;text-align:center">
+                <div class="empty-cta-icon" style="margin-bottom:0.75rem">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <p style="font-size:0.875rem;color:var(--text-sec);margin:0 0 0.875rem">Activa tu ubicación para ver clubes cercanos</p>
+                <button onclick="requestLocation()" class="home-cta-btn" style="font-size:0.875rem;padding:0.55rem 1.25rem;border:none;cursor:pointer">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Activar ubicación
+                </button>
+            </div>
+            <?php endif; ?>
+        </div>
+
+    </div><!-- /.clubs-nearby-grid -->
 
     <!-- Active Reservations -->
     <?php if (!empty($activeReservations)): ?>
