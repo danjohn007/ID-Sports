@@ -95,6 +95,54 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     border-color: var(--border-gl2);
 }
 
+/* ── Today Ticket Card ──────────────────────────────────── */
+.today-ticket-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-gl2);
+    border-radius: 1.375rem;
+    overflow: hidden;
+    box-shadow: 0 10px 36px rgba(0,0,0,0.4);
+}
+.today-ticket-head {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 1.125rem 1.25rem;
+}
+.today-ticket-body {
+    padding: 1rem 1.25rem;
+}
+
+/* ── Recent reservation Glassmorphism card ──────────────── */
+.recent-res-card {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-gl);
+    border-radius: 1.125rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    text-decoration: none;
+    transition: all 180ms ease;
+}
+.recent-res-card:hover {
+    background: var(--bg-card-hover);
+    border-color: rgba(var(--primary-rgb), 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.recent-res-icon {
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
 /* ── Today widget ──────────────────────────────────────── */
 .today-card {
     position: relative;
@@ -453,50 +501,128 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
         </button>
     </div>
 
-    <!-- RF2.2 – Today's Reservation Widget -->
-    <?php if (!empty($todayReservation)): ?>
-    <?php
-        $res = $todayReservation;
-        $nowTs   = time();
-        $startTs = strtotime(date('Y-m-d') . ' ' . $res['start_time']);
-        $diffH   = ($startTs - $nowTs) / 3600;
-        if ($diffH <= 0)       $diffMsg = 'ahora mismo';
-        elseif ($diffH < 1)    $diffMsg = 'en ' . round($diffH * 60) . ' min';
-        elseif ($diffH < 2)    $diffMsg = 'en 1 hora';
-        else                   $diffMsg = 'en ' . round($diffH) . ' horas';
-    ?>
-    <div class="home-section today-card">
-        <div style="position:relative;z-index:1">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem">
-                <div style="flex:1;min-width:0">
-                    <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.7);margin-bottom:0.375rem">
-                        Reserva de hoy
-                    </p>
-                    <h3 style="font-family:'Jockey One',sans-serif;font-size:1.25rem;color:#fff;line-height:1.2;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                        <?= htmlspecialchars($res['space_name']) ?>
-                    </h3>
-                    <p style="font-size:0.8rem;color:rgba(255,255,255,0.65);margin-top:0.2rem"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
+    <!-- RF2.2 – Today's Tickets Carousel -->
+    <?php if (!empty($todayReservations)): ?>
+    <div class="home-section" id="todayTicketsSection">
+        <div class="home-section-header">
+            <h2 class="home-section-title">🎫 Tickets de Hoy</h2>
+            <?php if (count($todayReservations) > 1): ?>
+            <span style="font-size:0.8rem;color:var(--text-muted)"><?= count($todayReservations) ?> reservas</span>
+            <?php endif; ?>
+        </div>
+        <?php if (count($todayReservations) > 1): ?>
+        <div class="carousel-wrap">
+            <button class="carousel-btn left" onclick="scrollCarousel('todayTrack',-1)" aria-label="Anterior">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="carousel-track" id="todayTrack" style="gap:0.875rem">
+        <?php else: ?>
+        <div style="display:flex" id="todayTrack">
+        <?php endif; ?>
+
+        <?php foreach ($todayReservations as $res):
+            $nowTs   = time();
+            $startTs = strtotime(date('Y-m-d') . ' ' . $res['start_time']);
+            $diffH   = ($startTs - $nowTs) / 3600;
+            if ($diffH <= 0)       $diffMsg = 'Ahora mismo';
+            elseif ($diffH < 1)    $diffMsg = 'En ' . round($diffH * 60) . ' min';
+            elseif ($diffH < 2)    $diffMsg = 'En 1 hora';
+            else                   $diffMsg = 'En ' . round($diffH) . ' horas';
+
+            $qrData    = $res['qr_code'] ?? ('RES-' . $res['id']);
+            $spaceCost = (float)($res['subtotal'] ?? 0);
+            $amenCost  = (float)($res['amenities_total'] ?? 0);
+            $subT      = $spaceCost + $amenCost;
+            $iva       = (float)($res['service_fee'] ?? 0);
+            $total     = (float)($res['total'] ?? 0);
+
+            $statusLabels = [
+                'confirmed'   => 'Confirmada',
+                'active'      => 'Activa',
+                'in_progress' => 'En curso',
+                'pending'     => 'Pendiente',
+            ];
+            $status = $res['status'] ?? 'confirmed';
+        ?>
+        <div class="today-ticket-card" style="flex-shrink:0;<?= count($todayReservations) > 1 ? 'min-width:min(88vw,340px)' : 'width:100%' ?>">
+            <!-- Card Header (gradient) -->
+            <div class="today-ticket-head">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                    <div style="flex:1;min-width:0">
+                        <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.7);margin:0 0 0.25rem">Ticket de Reserva</p>
+                        <h3 style="font-family:'Jockey One',sans-serif;font-size:1.25rem;color:#fff;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($res['space_name']) ?></h3>
+                        <p style="font-size:0.8rem;color:rgba(255,255,255,0.65);margin:0.15rem 0 0"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
+                    </div>
+                    <div style="flex-shrink:0;width:3rem;height:3rem;border-radius:0.875rem;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff">
+                        <?= sportSvg($res['sport_type'] ?? 'football') ?>
+                    </div>
                 </div>
-                <div style="flex-shrink:0;width:3rem;height:3rem;border-radius:0.875rem;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff">
-                    <?= sportSvg($res['sport_type'] ?? 'football') ?>
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.75rem">
+                    <span style="font-size:0.72rem;font-weight:700;background:rgba(255,255,255,0.2);color:#fff;padding:0.2rem 0.6rem;border-radius:20px">
+                        <?= $statusLabels[$status] ?? ucfirst($status) ?>
+                    </span>
+                    <span style="font-size:0.78rem;color:rgba(255,255,255,0.75)"><?= $diffMsg ?> &middot; <?= substr($res['start_time'],0,5) ?> – <?= substr($res['end_time'],0,5) ?></span>
                 </div>
             </div>
-            <p style="margin-top:0.75rem;font-size:0.8125rem;color:rgba(255,255,255,0.75)">
-                Tienes un partido <strong style="color:#fff"><?= $diffMsg ?></strong>
-                &nbsp;&middot;&nbsp;
-                <?= substr($res['start_time'], 0, 5) ?> – <?= substr($res['end_time'], 0, 5) ?>
-            </p>
-            <button onclick="openQrModal('<?= htmlspecialchars($res['qr_code'] ?? 'RES-' . $res['id'], ENT_QUOTES) ?>','<?= htmlspecialchars($res['space_name'], ENT_QUOTES) ?>','<?= htmlspecialchars($res['club_name'] ?? '', ENT_QUOTES) ?>','<?= htmlspecialchars(date('d/m/Y'), ENT_QUOTES) ?>','<?= htmlspecialchars(substr($res['start_time'],0,5).' – '.substr($res['end_time'],0,5), ENT_QUOTES) ?>','')"
-                    style="margin-top:1rem;display:inline-flex;align-items:center;gap:0.5rem;background:#fff;color:var(--primary);font-weight:700;font-size:0.8125rem;padding:0.55rem 1.1rem;border-radius:0.75rem;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:all 140ms"
-                    onmouseover="this.style.filter='brightness(0.95)'"
-                    onmouseout="this.style.filter='none'">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
-                </svg>
-                Ver QR de Acceso
-            </button>
+            <!-- Ticket Body: desglose -->
+            <div class="today-ticket-body">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.4rem">
+                    <span style="color:var(--text-muted)">Fecha</span>
+                    <span style="color:var(--text-pri);font-weight:600"><?= date('d/m/Y') ?></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.625rem">
+                    <span style="color:var(--text-muted)">Horario</span>
+                    <span style="color:var(--text-pri);font-weight:600"><?= substr($res['start_time'],0,5) ?> – <?= substr($res['end_time'],0,5) ?></span>
+                </div>
+                <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.12);margin:0.5rem 0">
+                <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:0 0 0.5rem">Desglose de Pago</p>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
+                    <span style="color:var(--text-muted)">Cancha</span>
+                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($spaceCost,2) ?></span>
+                </div>
+                <?php if ($amenCost > 0): ?>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
+                    <span style="color:var(--text-muted)">Amenidades</span>
+                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($amenCost,2) ?></span>
+                </div>
+                <?php endif; ?>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
+                    <span style="color:var(--text-muted);font-weight:600">Subtotal</span>
+                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($subT,2) ?></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
+                    <span style="color:var(--text-muted)">IVA (16%)</span>
+                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($iva,2) ?></span>
+                </div>
+                <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.12);margin:0.5rem 0">
+                <div style="display:flex;justify-content:space-between;align-items:baseline">
+                    <span style="font-size:0.875rem;font-weight:700;color:var(--text-pri)">Total Pagado</span>
+                    <span style="font-size:1.25rem;font-weight:800;color:#10b981">$<?= number_format($total,2) ?></span>
+                </div>
+            </div>
+            <!-- Punch hole divider -->
+            <div style="position:relative;margin:0;border-top:1.5px dashed rgba(255,255,255,0.1)">
+                <div style="position:absolute;left:-0.75rem;top:50%;transform:translateY(-50%);width:1.25rem;height:1.25rem;border-radius:50%;background:var(--bg-mid)"></div>
+                <div style="position:absolute;right:-0.75rem;top:50%;transform:translateY(-50%);width:1.25rem;height:1.25rem;border-radius:50%;background:var(--bg-mid)"></div>
+            </div>
+            <!-- QR -->
+            <div style="text-align:center;padding:0.875rem 1.25rem 1.125rem">
+                <p style="font-size:0.72rem;color:var(--text-muted);margin:0 0 0.625rem">Muestra este QR en la entrada del club</p>
+                <div style="background:#fff;border-radius:0.75rem;padding:0.5rem;display:inline-block" class="today-qr-canvas" data-qr="<?= htmlspecialchars($qrData) ?>"></div>
+                <p style="font-family:monospace;font-size:0.6rem;color:var(--text-muted);word-break:break-all;margin-top:0.375rem"><?= htmlspecialchars($qrData) ?></p>
+            </div>
         </div>
+        <?php endforeach; ?>
+
+        <?php if (count($todayReservations) > 1): ?>
+            </div><!-- /.carousel-track -->
+            <button class="carousel-btn right" onclick="scrollCarousel('todayTrack',1)" aria-label="Siguiente">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div><!-- /.carousel-wrap -->
+        <?php else: ?>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
@@ -711,47 +837,42 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
 
     </div><!-- /.clubs-nearby-grid -->
 
-    <!-- Active Reservations -->
-    <?php if (!empty($activeReservations)): ?>
+    <!-- Historial Reciente: last 3 reservations (Glassmorphism cards) -->
+    <?php $displayReservations = !empty($recentReservations) ? $recentReservations : (!empty($activeReservations) ? array_slice($activeReservations, 0, 3) : []); ?>
+    <?php if (!empty($displayReservations)): ?>
     <div class="home-section">
         <div class="home-section-header">
             <h2 class="home-section-title">Mis Reservaciones</h2>
             <a href="<?= BASE_URL ?>reservations/history" class="home-section-link">Ver historial &rarr;</a>
         </div>
-        <div style="display:flex;flex-direction:column;gap:0.5rem">
-            <?php foreach (array_slice($activeReservations, 0, 5) as $res):
-                $nowTs   = time();
-                $resDate = $res['date'];
-                $startTs = strtotime($resDate . ' ' . $res['start_time']);
-                $endTs   = strtotime($resDate . ' ' . $res['end_time']);
-                $isNow   = $nowTs >= $startTs && $nowTs < $endTs;
-                $isSoon  = !$isNow && $startTs > $nowTs && ($startTs - $nowTs) < 7200;
-                if ($res['status'] === 'in_progress' || $isNow)
-                                   { $badgeClass = 'res-badge-now';  $badgeText = 'En curso'; }
-                elseif ($isSoon)   { $badgeClass = 'res-badge-soon'; $badgeText = 'Próxima'; }
-                elseif ($res['status'] === 'pending') { $badgeClass = 'res-badge-pend'; $badgeText = 'Pendiente'; }
-                else               { $badgeClass = 'res-badge-soon'; $badgeText = 'Confirmada'; }
-                $resId     = (int)$res['id'];
-                $qrData    = htmlspecialchars($res['qr_code'] ?? ('RES-' . $res['id']), ENT_QUOTES);
-                $spaceName = htmlspecialchars($res['space_name'], ENT_QUOTES);
-                $clubName  = htmlspecialchars($res['club_name'] ?? '', ENT_QUOTES);
-                $dateLabel = htmlspecialchars(date('d/m/Y', strtotime($resDate)), ENT_QUOTES);
-                $timeLabel = htmlspecialchars(substr($res['start_time'],0,5).' – '.substr($res['end_time'],0,5), ENT_QUOTES);
-                $total     = htmlspecialchars('$'.number_format($res['total'],0), ENT_QUOTES);
+        <div style="display:flex;flex-direction:column;gap:0.625rem">
+            <?php foreach (array_slice($displayReservations, 0, 3) as $res):
+                $status = $res['status'] ?? 'pending';
+                $statusBadges = [
+                    'confirmed'   => ['bg' => 'rgba(16,185,129,0.18)', 'color' => '#10b981', 'label' => 'Confirmada'],
+                    'active'      => ['bg' => 'rgba(16,185,129,0.18)', 'color' => '#10b981', 'label' => 'Activa'],
+                    'in_progress' => ['bg' => 'rgba(14,165,233,0.18)', 'color' => '#0ea5e9', 'label' => 'En curso'],
+                    'pending'     => ['bg' => 'rgba(245,158,11,0.18)', 'color' => '#f59e0b', 'label' => 'Pendiente'],
+                    'cancelled'   => ['bg' => 'rgba(239,68,68,0.18)',  'color' => '#ef4444', 'label' => 'Cancelada'],
+                    'completed'   => ['bg' => 'rgba(148,163,184,0.15)','color' => '#94a3b8', 'label' => 'Completada'],
+                ];
+                $badge = $statusBadges[$status] ?? $statusBadges['pending'];
+                $resId = (int)$res['id'];
             ?>
-            <a class="res-row" href="<?= BASE_URL ?>reservations/confirm?id=<?= $resId ?>" style="text-decoration:none">
-                <div class="res-icon">
+            <a class="recent-res-card" href="<?= BASE_URL ?>reservations/confirm?id=<?= $resId ?>">
+                <div class="recent-res-icon">
                     <?= sportSvg($res['sport_type'] ?? 'football') ?>
                 </div>
                 <div style="flex:1;min-width:0">
-                    <p style="font-weight:600;font-size:0.875rem;color:var(--text-pri);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0"><?= htmlspecialchars($res['space_name']) ?></p>
-                    <p style="font-size:0.7rem;color:var(--text-muted);margin:1px 0 0"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
-                    <span class="<?= $badgeClass ?>"><?= $badgeText ?></span>
+                    <p style="font-weight:600;font-size:0.875rem;color:var(--text-pri);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0"><?= htmlspecialchars($res['space_name'] ?? '') ?></p>
+                    <p style="font-size:0.72rem;color:var(--text-muted);margin:0.125rem 0 0"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
+                    <p style="font-size:0.72rem;color:var(--text-muted);margin:0.1rem 0 0">
+                        <?= date('d/m/Y', strtotime($res['date'])) ?> &middot; <?= substr($res['start_time'],0,5) ?>–<?= substr($res['end_time'],0,5) ?>
+                    </p>
                 </div>
                 <div style="text-align:right;flex-shrink:0">
-                    <p style="font-weight:700;font-size:0.875rem;color:var(--text-pri);margin:0">$<?= number_format($res['total'],0) ?></p>
-                    <p style="font-size:0.68rem;color:var(--text-muted);margin:2px 0 0"><?= date('d/m', strtotime($res['date'])) ?> · <?= substr($res['start_time'],0,5) ?></p>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="margin-top:4px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                    <span style="font-size:0.7rem;font-weight:700;background:<?= $badge['bg'] ?>;color:<?= $badge['color'] ?>;padding:0.2rem 0.55rem;border-radius:20px;display:inline-block;margin-bottom:0.375rem"><?= $badge['label'] ?></span>
+                    <p style="font-weight:700;font-size:0.9375rem;color:var(--text-pri);margin:0">$<?= number_format($res['total'],0) ?></p>
                 </div>
             </a>
             <?php endforeach; ?>
@@ -871,4 +992,15 @@ function scrollCarousel(trackId, dir) {
     var itemW = track.firstElementChild ? track.firstElementChild.offsetWidth + 8 : 100;
     track.scrollBy({ left: dir * itemW, behavior: 'smooth' });
 }
+
+/* ── Generate QR codes for today's ticket cards ──────── */
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.today-qr-canvas[data-qr]').forEach(function(el) {
+        var code = el.getAttribute('data-qr');
+        if (!code) return;
+        var canvas = document.createElement('canvas');
+        el.appendChild(canvas);
+        QRCode.toCanvas(canvas, code, {width:140, margin:1, color:{dark:'#000',light:'#fff'}}, function(){});
+    });
+});
 </script>

@@ -113,6 +113,19 @@ class ReservationModel extends Model {
         );
     }
 
+    public function getTodayAllForUser($userId) {
+        return $this->findAll(
+            "SELECT r.*, s.name as space_name, s.sport_type, c.name as club_name
+             FROM reservations r
+             LEFT JOIN spaces s ON r.space_id = s.id
+             LEFT JOIN clubs c ON s.club_id = c.id
+             WHERE r.user_id = ? AND r.date = CURDATE()
+               AND r.status IN ('active','confirmed','in_progress','pending')
+             ORDER BY r.start_time ASC",
+            [$userId]
+        );
+    }
+
     public function getTodayForClub($clubId) {
         return $this->findAll(
             "SELECT r.*, s.name as space_name, u.name as user_name
