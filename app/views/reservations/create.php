@@ -54,7 +54,7 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
         <div style="padding:0.5rem 1rem 0;display:flex;gap:0.375rem;align-items:center" id="stepPills">
             <span id="stepPill1" style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:rgba(var(--primary-rgb),0.12);color:var(--primary);border:1px solid rgba(var(--primary-rgb),0.25)">1 Inicio</span>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            <span id="stepPill2" style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:transparent;color:var(--text-muted);border:1px solid var(--border-gl2)">2 Fin</span>
+            <span id="stepPill2" style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:20px;background:transparent;color:var(--text-muted);border:1px solid var(--border-gl2)">2 Duración</span>
         </div>
         <div class="b-cell-body" id="slotsBody">
             <div class="slot-empty">
@@ -176,7 +176,7 @@ $pricePerHour = (float)($space['price_per_hour'] ?? 0);
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 Proceder al Pago
             </button>
-            <p class="validation-hint" id="validHint">Selecciona fecha, hora de inicio y hora de fin</p>
+            <p class="validation-hint" id="validHint">Selecciona fecha, hora de inicio y duración</p>
         </div>
     </div>
 
@@ -265,7 +265,8 @@ const SPACE_ID           = <?= (int)$space['id'] ?>;
 const PRICE_PER_HR       = <?= (float)$space['price_per_hour'] ?>;
 const CLOSED_DAYS        = <?= json_encode(array_map('intval', $closedDays)) ?>;
 const BASE_URL           = '<?= BASE_URL ?>';
-const MAX_DURATION_SLOTS = <?= (int)(($space['max_booking_hours'] ?? 4) * 2) ?>; // × 30 min slots
+const MAX_DURATION_MINS  = <?= (int)($space['max_duration_minutes'] ?? 240) ?>; // minutes
+const MAX_DURATION_SLOTS = Math.floor(MAX_DURATION_MINS / 30); // 30-min slot units
 
 let calYear  = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-indexed
@@ -413,39 +414,46 @@ function renderStartSlots() {
     body.appendChild(grid);
 }
 
-/** STEP 2: user picked startTime → show end-time options */
+/** STEP 2: user picked startTime → show duration buttons */
 function pickStartTime(time) {
     startTime = time;
     endTime   = null;
     updateSummary();
     setStepPill(2);
-    renderEndSlots();
+    renderDurationButtons();
 }
 
 function formatDuration(minutes) {
-    if (minutes < 60) return minutes + 'min';
+    if (minutes < 60) return minutes + ' min';
     var h = minutes / 60;
-    return h % 1 === 0 ? h + 'h' : h.toFixed(1) + 'h';
+    return h % 1 === 0 ? h + (h === 1 ? ' hora' : ' horas') : h.toFixed(1) + ' horas';
 }
 
-/** Compute which end-time slots are valid from the current startTime */
+/**
+ * Compute valid end times starting from startTime.
+ * Scans forward slot by slot: stops at the first BUSY slot (cannot skip reserved blocks)
+ * and caps at MAX_DURATION_SLOTS.
+ * Returns an array of end-time strings ['HH:MM', ...] corresponding to durations
+ * 30min, 1h, 1.5h, ... up to the first obstacle.
+ */
 function getValidEndSlots() {
     if (!startTime || !allSlots.length) return [];
     var startIdx = allSlots.findIndex(function(s) { return s.time === startTime; });
     if (startIdx < 0) return [];
-    // Scan forward from startIdx:
-    //  - stop when we hit a BUSY slot (cannot jump over reserved blocks)
-    //  - stop after MAX_DURATION_SLOTS consecutive slots
     var valid = [];
     for (var i = startIdx + 1; i < allSlots.length && i <= startIdx + MAX_DURATION_SLOTS; i++) {
-        if (!allSlots[i].available) break; // stop at first busy slot
-        // end time = allSlots[i].time
+        if (!allSlots[i].available) break; // stop at first busy slot — cannot jump over it
         valid.push(allSlots[i].time);
     }
     return valid;
 }
 
-function renderEndSlots() {
+/**
+ * STEP 2: show duration buttons (30min, 1h, 1.5h …) instead of raw end times.
+ * Each button label is the total duration; clicking it sets endTime from the
+ * pre-computed valid end slots array.
+ */
+function renderDurationButtons() {
     var body = document.getElementById('slotsBody');
     var validEnds = getValidEndSlots();
 
@@ -456,40 +464,46 @@ function renderEndSlots() {
 
     var heading = document.createElement('p');
     heading.style.cssText = 'font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin:0 0 0.5rem';
-    heading.textContent = 'Selecciona hora de fin';
+    heading.textContent = 'Selecciona la duración';
+
+    body.innerHTML = '';
+    body.appendChild(backBtn);
 
     if (validEnds.length === 0) {
-        body.innerHTML = '';
-        body.appendChild(backBtn);
         var msg = document.createElement('div');
         msg.className = 'slot-empty'; msg.textContent = 'No hay duración disponible desde este horario';
         body.appendChild(msg);
         return;
     }
 
+    body.appendChild(heading);
+
     var grid = document.createElement('div');
     grid.className = 'slot-grid';
+
     validEnds.forEach(function(eTime, idx) {
         var durationMins = (idx + 1) * 30;
         var durLabel = formatDuration(durationMins);
+        var isSelected = eTime === endTime;
         var btn = document.createElement('button');
-        btn.className = 'slot-btn' + (eTime === endTime ? ' slot-selected' : '');
-        btn.innerHTML = '<span style="display:block;font-size:0.8rem">' + eTime + '</span><span style="display:block;font-size:0.6rem;color:' + (eTime === endTime ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)') + ';margin-top:1px">+' + durLabel + '</span>';
-        btn.dataset.time = eTime;
-        btn.addEventListener('click', function() { pickEndTime(eTime); });
+        btn.className = 'slot-btn' + (isSelected ? ' slot-selected' : '');
+        btn.innerHTML =
+            '<span style="display:block;font-size:0.85rem;font-weight:700">' + durLabel + '</span>' +
+            '<span style="display:block;font-size:0.6rem;color:' + (isSelected ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)') + ';margin-top:2px">hasta ' + eTime + '</span>';
+        btn.dataset.endTime = eTime;
+        btn.addEventListener('click', (function(et) {
+            return function() { pickEndTime(et); };
+        })(eTime));
         grid.appendChild(btn);
     });
 
-    body.innerHTML = '';
-    body.appendChild(backBtn);
-    body.appendChild(heading);
     body.appendChild(grid);
 }
 
 function pickEndTime(time) {
     endTime = time;
     updateSummary();
-    renderEndSlots(); // re-render to highlight selection
+    renderDurationButtons(); // re-render to highlight selection
 }
 
 /* ── Amenities ─────────────────────────────────────────── */
@@ -568,7 +582,7 @@ function updateSummary() {
     btn.disabled = !valid;
     if (!hasDate)        hint.textContent = 'Selecciona una fecha';
     else if (!hasStart)  hint.textContent = 'Selecciona la hora de inicio';
-    else if (!hasEnd)    hint.textContent = 'Selecciona la hora de fin';
+    else if (!hasEnd)    hint.textContent = 'Selecciona la duración';
     else                 hint.textContent = '';
 }
 

@@ -35,22 +35,14 @@ class SpaceController extends Controller {
             $isFollowing = $membershipModel->isMember($_SESSION['user_id'], $space['club_id']);
         }
 
-        // Pre-compute available slots for today and next 4 days
-        $slotsPreview = [];
-        for ($i = 0; $i < 5; $i++) {
-            $date = date('Y-m-d', strtotime("+$i days"));
-            $slotsPreview[$date] = $this->spaceModel->getAvailableSlots($spaceId, $date);
-        }
-
         $this->view('spaces/detail', [
-            'title'        => $space['name'],
-            'space'        => $space,
-            'schedules'    => $schedules,
-            'amenities'    => $amenities,
-            'reviews'      => $reviews,
-            'avgRating'    => $avgRating,
-            'isFollowing'  => $isFollowing,
-            'slotsPreview' => $slotsPreview,
+            'title'       => $space['name'],
+            'space'       => $space,
+            'schedules'   => $schedules,
+            'amenities'   => $amenities,
+            'reviews'     => $reviews,
+            'avgRating'   => $avgRating,
+            'isFollowing' => $isFollowing,
         ]);
     }
 
