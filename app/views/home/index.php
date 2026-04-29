@@ -132,7 +132,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     align-items: start;
     margin-bottom: 1.75rem;
 }
-.days-sports-grid > .home-section { margin-bottom: 0; }
+.days-sports-grid > .home-section { margin-bottom: 0; min-width: 0; }
 @media (max-width: 767px) {
     .days-sports-grid { grid-template-columns: 1fr; }
 }
@@ -145,7 +145,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     align-items: start;
     margin-bottom: 1.75rem;
 }
-.clubs-nearby-grid > .home-section { margin-bottom: 0; }
+.clubs-nearby-grid > .home-section { margin-bottom: 0; min-width: 0; }
 @media (max-width: 767px) {
     .clubs-nearby-grid { grid-template-columns: 1fr; }
 }
@@ -158,23 +158,26 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     align-items: center;
     padding: 1.25rem 1rem;
     border-radius: 1.25rem;
-    border: 1px solid var(--border-gl);
-    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     text-decoration: none;
     min-width: 108px;
-    transition: all 140ms;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all 300ms ease;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
 .day-pill:hover {
-    border-color: rgba(var(--primary-rgb), 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(var(--primary-rgb),0.18);
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(var(--primary-rgb), 0.55);
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(var(--primary-rgb),0.25);
 }
 .day-pill.active {
     background: var(--primary);
     border-color: var(--primary);
     box-shadow: 0 6px 22px rgba(var(--primary-rgb), 0.5);
-    transform: translateY(-2px);
+    transform: scale(1.04);
 }
 .day-pill .day-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
 .day-pill.active .day-label { color: rgba(255,255,255,0.8); }
@@ -189,6 +192,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     display: flex;
     align-items: center;
     gap: 0;
+    min-width: 0;
 }
 .carousel-track {
     display: flex;
@@ -229,16 +233,20 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     padding: 1rem 0.75rem;
     border-radius: 1rem;
     text-decoration: none;
-    border: 1px solid var(--border-gl);
-    background: var(--bg-card);
-    transition: all 150ms ease;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 300ms ease;
     min-width: 108px;
     max-width: 128px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
 }
 .sport-card:hover {
-    border-color: rgba(var(--primary-rgb), 0.45);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.18);
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(var(--primary-rgb), 0.55);
+    transform: scale(1.05);
+    box-shadow: 0 8px 28px rgba(var(--primary-rgb), 0.25);
 }
 .sport-icon-wrap {
     width: 3.5rem; height: 3.5rem;
@@ -266,17 +274,21 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     border-radius: 1rem;
     overflow: hidden;
     text-decoration: none;
-    background: var(--bg-card);
-    border: 1px solid var(--border-gl);
-    transition: all 160ms ease;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 300ms ease;
     flex-shrink: 0;
     min-width: 220px;
     max-width: 280px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
 }
 .club-card:hover {
-    border-color: rgba(var(--primary-rgb), 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.15);
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(var(--primary-rgb), 0.5);
+    transform: scale(1.03);
+    box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.2);
 }
 .club-cover { height: 9rem; position: relative; overflow: hidden; }
 .club-cover-placeholder {
@@ -311,12 +323,14 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     display: flex; align-items: center; gap: 0.875rem;
     padding: 0.875rem;
     border-radius: 0.875rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border-gl);
-    transition: all 140ms;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 300ms ease;
     cursor: pointer;
 }
-.res-row:hover { border-color: rgba(var(--primary-rgb), 0.4); background: var(--bg-card-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(var(--primary-rgb),0.12); }
+.res-row:hover { border-color: rgba(var(--primary-rgb), 0.5); background: rgba(255,255,255,0.09); transform: scale(1.01); box-shadow: 0 6px 20px rgba(var(--primary-rgb),0.18); }
 .res-icon {
     width: 2.625rem; height: 2.625rem;
     border-radius: 0.625rem;
@@ -335,8 +349,10 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     text-align: center;
     padding: 2.5rem 1.5rem;
     border-radius: 1.25rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border-gl);
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 .empty-cta-icon {
     width: 3.5rem; height: 3.5rem;
@@ -394,7 +410,7 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
 </style>
 
 <!-- ── HOME CONTENT ─────────────────────────────────────────── -->
-<div style="max-width:100%">
+<div style="max-width:100%;overflow-x:hidden">
 
     <!-- RF2.1 – Header: Avatar + Greeting + Bell -->
     <div class="home-section" style="display:flex;align-items:center;gap:0.875rem;padding-top:0.25rem;padding-bottom:0.25rem;">
