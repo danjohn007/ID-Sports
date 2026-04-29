@@ -228,6 +228,73 @@ Migración: `database/migration_v4_sports.sql`
 mysql -u root -p id_sports < database/migration_v4_sports.sql
 ```
 
-#### 📋 Dropdown de deporte en admin de canchas
+---
 
-El select de `sport_type` en la pantalla de administración de canchas ahora carga dinámicamente desde `sport_types`, con fallback estático si la migración aún no se ha ejecutado.
+### v1.4 — Flujo de Reserva End-to-End (Detail-First, Grid 2×2, QR Ticket con Desglose)
+
+#### 🔄 Flujo de navegación
+`Buscar cancha → Detalle → Reserva → Pago → Ticket QR`
+
+#### 🏟️ Pantalla 1 — Detalles de Cancha (`spaces/detail`)
+
+Vista **estrictamente informativa** antes de reservar:
+- Hero con imagen o SVG fallback por deporte
+- Tarjeta info: nombre, club, precio/hr, badge de deporte, capacidad, **superficie** (nuevo), rating, dirección + Maps
+- Tarjeta descripción (si tiene)
+- **Tarjeta Reglas** (nuevo — campo `spaces.rules`)
+- **Tarjeta Horario** (nuevo — tabla Lun–Dom con hora apertura/cierre o "Cerrado"; incluye duración máxima)
+- Tarjeta amenidades: **solo lectura** (Disponible/Agotado), sin selección de cantidad
+- Tarjeta reseñas
+- **Barra sticky inferior**: botón "Reservar esta cancha →" con overlay de carga suave
+
+#### 📅 Pantalla 2 — Configuración de Reserva (`reservations/create`)
+
+Grid 2×2 en escritorio, 1 columna en móvil:
+- **Celda 1** — Calendario mensual; días sin horario deshabilitados (via `getClosedDays()`)
+- **Celda 2** — Selector en 2 pasos: ① Hora de Inicio → ② Botones de Duración (30 min, 1 h, 1.5 h…). Cada botón muestra "hasta HH:MM". Se detiene si hay un bloque reservado o si supera `max_duration_minutes`.
+- **Celda 3** — Amenidades filtradas por `space_amenities` con buscador de texto, +/− con tope de stock
+- **Celda 4** — Resumen vivo: Cancha + Amenidades + IVA 16%; botón "Proceder al Pago" habilitado solo al seleccionar fecha, inicio y duración
+
+#### 💳 Flujo de Pago y Ticket
+
+1. Modal de pago → loader → `POST reservations/pay` (AJAX)
+2. Ráfaga de confeti (`canvas-confetti`)
+3. Grid se oculta; aparece el Ticket QR con **Desglose de Pago**:
+
+| Línea | ID del elemento |
+|-------|----------------|
+| Cancha (precio × horas) | `ticket-cancha-cost` |
+| Amenidades extra (oculto si $0) | `ticket-amenities-cost` / fila `ticket-amenities-row` |
+| Subtotal | `ticket-subtotal` |
+| IVA (16%) | `ticket-iva` |
+| **Total Pagado** | `ticket-total` |
+
+Montos formateados con `Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN' })`.
+
+#### 🔐 Check-in Admin (`reservations/scan-qr`)
+
+- Escanea QR → valida ventana de tiempo (15 min antes hasta fin de reserva)
+- Actualiza status: `confirmed` → `in_progress`
+- Endpoint `reservations/complete` (admin) → `completed` + restaura stock amenidades
+
+#### 🗃️ Migraciones
+
+| Archivo | Descripción |
+|---------|-------------|
+| `migration_v5_reservations.sql` | ENUM `status` agrega `pending` e `in_progress`; crea `reservation_amenities` |
+| `migration_v6_space_amenities.sql` | Tabla pivote `space_amenities(space_id, amenity_id)` con FK; instalaciones limpias parten vacía |
+| `migration_v7_spaces_extra.sql` | Agrega `surface_type`, `rules`, `max_duration_minutes` a `spaces` |
+| `migration_v8_reset_space_amenities.sql` | `TRUNCATE TABLE space_amenities` — limpiar instalaciones previas con datos cruzados entre deportes |
+
+```bash
+mysql -u root -p id_sports < database/migration_v5_reservations.sql
+mysql -u root -p id_sports < database/migration_v6_space_amenities.sql
+mysql -u root -p id_sports < database/migration_v7_spaces_extra.sql
+# Solo si instalación existente con amenidades cruzadas entre deportes:
+mysql -u root -p id_sports < database/migration_v8_reset_space_amenities.sql
+```
+
+#### 🐛 Fixes
+- Avatar del usuario ahora aparece correctamente en la barra lateral de **todas** las páginas (Buscar, Detalle, Reservar), no solo en Home — se normaliza la ruta relativa con `BASE_URL`
+- `AmenityModel::findBySpace()` envuelto en `try/catch(PDOException)` para fallback gracioso si `space_amenities` aún no existe en producción
+

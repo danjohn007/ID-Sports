@@ -20,11 +20,15 @@ class HomeController extends Controller {
             $sportTypeMap = [];
         }
 
-        // Today's reservation (RF2.2)
-        $todayReservation = $reservationModel->getTodayForUser($userId);
+        // Today's reservations (RF2.2) — all of today's bookings for the ticket carousel
+        $todayReservation  = $reservationModel->getTodayForUser($userId);   // legacy single (kept for compatibility)
+        $todayReservations = $reservationModel->getTodayAllForUser($userId);
 
         // Active reservations (today + future, not cancelled/past)
         $activeReservations = $reservationModel->getActiveForUser($userId);
+
+        // Last 3 reservations regardless of status (for recent history widget)
+        $recentReservations = array_slice($reservationModel->findByUser($userId), 0, 3);
 
         // 15-day availability picker (RF2.3)
         $upcomingDays = [];
@@ -56,7 +60,9 @@ class HomeController extends Controller {
         $this->view('home/index', [
             'title'               => 'Inicio',
             'todayReservation'    => $todayReservation,
+            'todayReservations'   => $todayReservations,
             'activeReservations'  => $activeReservations,
+            'recentReservations'  => $recentReservations,
             'upcomingDays'        => $upcomingDays,
             'followedClubs'       => $followedClubs,
             'nearbyClubs'         => $nearbyClubs,

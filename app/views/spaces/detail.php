@@ -116,6 +116,7 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .jockey-one { font-family: 'Jockey One', sans-serif; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
 <?php
@@ -207,6 +208,12 @@ function detSportSvg(string $type, int $size = 80): string {
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                     <?= (int)($space['capacity'] ?? 2) ?> personas
                 </span>
+                <?php if (!empty($space['surface_type'])): ?>
+                <span class="badge-pill">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+                    <?= htmlspecialchars($space['surface_type']) ?>
+                </span>
+                <?php endif; ?>
                 <?php if ($avgRating > 0): ?>
                 <span class="badge-pill">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="color:#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -246,70 +253,62 @@ function detSportSvg(string $type, int $size = 80): string {
     </div>
     <?php endif; ?>
 
-    <!-- Calendar + Time Slots -->
+    <!-- Rules -->
+    <?php if (!empty($space['rules'])): ?>
     <div class="detail-card">
         <div class="detail-card-body">
             <h2 class="detail-section-title">
-                <span class="detail-section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-                Elegir día y hora
+                <span class="detail-section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>
+                Reglas del lugar
             </h2>
+            <p style="font-size:0.8125rem;color:var(--text-sec);line-height:1.7;margin:0">
+                <?= nl2br(htmlspecialchars($space['rules'])) ?>
+            </p>
+        </div>
+    </div>
+    <?php endif; ?>
 
-            <!-- Day picker -->
-            <div style="display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:4px" class="scrollbar-hide" id="dayPicker">
-                <?php foreach ($slotsPreview as $date => $slots): ?>
-                <?php
-                    $ts       = strtotime($date);
-                    $isToday  = $date === date('Y-m-d');
-                    $days_es  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-                    $dayLabel = $isToday ? 'Hoy' : strtoupper($days_es[(int)date('w', $ts)]);
-                    $dayNum   = date('j', $ts);
-                    $hasSlots = count(array_filter($slots, fn($s) => $s['available'])) > 0;
-                ?>
-                <button onclick="selectDay('<?= $date ?>')"
-                        data-date="<?= $date ?>"
-                        class="day-btn-det <?= $isToday ? 'active-day' : '' ?> <?= !$hasSlots ? '' : '' ?>"
-                        style="<?= !$hasSlots ? 'opacity:0.45' : '' ?>">
-                    <span class="d-label"><?= $dayLabel ?></span>
-                    <span class="d-num"><?= $dayNum ?></span>
-                </button>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Slots grid -->
-            <div id="slotsContainer" style="margin-top:1rem">
-                <?php $firstDate = array_key_first($slotsPreview); $firstSlots = $slotsPreview[$firstDate] ?? []; ?>
-                <?php if (empty($firstSlots)): ?>
-                <p style="font-size:0.8125rem;color:var(--text-muted);text-align:center;padding:1rem 0">Sin horarios disponibles este día</p>
-                <?php else: ?>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem">
-                    <?php foreach ($firstSlots as $slot): ?>
-                    <button onclick="selectSlot('<?= $slot['time'] ?>', this)"
-                            class="slot-btn-det <?= !$slot['available'] ? '' : '' ?>"
-                            <?= !$slot['available'] ? 'disabled' : '' ?>>
-                        <?= $slot['time'] ?>
-                    </button>
-                    <?php endforeach; ?>
+    <!-- Schedule / Hours (informational) -->
+    <?php
+    $daysEs = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    $scheduleMap = [];
+    foreach ($schedules as $sch) {
+        $scheduleMap[(int)$sch['day_of_week']] = $sch;
+    }
+    ?>
+    <div class="detail-card">
+        <div class="detail-card-body">
+            <h2 class="detail-section-title">
+                <span class="detail-section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                Horario de apertura
+            </h2>
+            <div style="display:flex;flex-direction:column;gap:0.375rem">
+                <?php for ($dow = 0; $dow <= 6; $dow++): ?>
+                <?php $sch = $scheduleMap[$dow] ?? null; $isOpen = !empty($sch) && (int)($sch['is_open'] ?? 0) === 1; ?>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid var(--border-gl)">
+                    <span style="font-size:0.8125rem;font-weight:600;color:<?= $isOpen ? 'var(--text-pri)' : 'var(--text-muted)' ?>">
+                        <?= $daysEs[$dow] ?>
+                    </span>
+                    <?php if ($isOpen): ?>
+                    <span style="font-size:0.78rem;font-weight:600;color:var(--primary)">
+                        <?= substr($sch['open_time'], 0, 5) ?> – <?= substr($sch['close_time'], 0, 5) ?>
+                    </span>
+                    <?php else: ?>
+                    <span style="font-size:0.78rem;color:var(--text-muted)">Cerrado</span>
+                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
+                <?php endfor; ?>
             </div>
-
-            <!-- Duration -->
-            <div id="durationSection" style="display:none;margin-top:1rem">
-                <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.5rem">Duración</p>
-                <div style="display:flex;gap:0.5rem">
-                    <?php foreach ([1, 1.5, 2] as $dur): ?>
-                    <button onclick="selectDuration(<?= $dur ?>, this)"
-                            data-duration="<?= $dur ?>"
-                            class="duration-btn-det <?= $dur == 1 ? 'active-dur' : '' ?>">
-                        <?= $dur == 1 ? '1h' : ($dur == 1.5 ? '1.5h' : '2h') ?>
-                    </button>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+            <?php if (!empty($space['max_duration_minutes'])): ?>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.625rem;margin-bottom:0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Duración máxima por reserva: <strong><?= (int)($space['max_duration_minutes'] ?? 240) ?> min</strong>
+            </p>
+            <?php endif; ?>
         </div>
     </div>
 
-    <!-- Amenities -->
+    <!-- Amenities (informational — no qty selector) -->
     <?php if (!empty($amenities)): ?>
     <div class="detail-card">
         <div class="detail-card-body">
@@ -317,22 +316,24 @@ function detSportSvg(string $type, int $size = 80): string {
                 <span class="detail-section-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
                 Extras disponibles
             </h2>
-            <div id="amenitiesList">
+            <div style="display:flex;flex-direction:column;gap:0.5rem">
                 <?php foreach ($amenities as $amenity): ?>
-                <div class="amenity-row">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.75rem;background:rgba(var(--primary-rgb),0.05);border:1px solid var(--border-gl);border-radius:0.75rem">
                     <div style="flex:1;min-width:0">
                         <p style="font-size:0.875rem;font-weight:600;color:var(--text-pri);margin:0"><?= htmlspecialchars($amenity['name']) ?></p>
-                        <p style="font-size:0.72rem;color:var(--text-muted);margin:2px 0 0">$<?= number_format($amenity['price'], 2) ?> c/u</p>
+                        <p style="font-size:0.72rem;color:var(--text-muted);margin:2px 0 0">$<?= number_format($amenity['price'], 2) ?> c/u · Stock: <?= (int)($amenity['stock'] ?? 0) ?></p>
                     </div>
-                    <div style="display:flex;align-items:center;gap:0.5rem;margin-left:0.75rem">
-                        <button onclick="changeQty(<?= $amenity['id'] ?>, -1)" class="qty-btn qty-dec">−</button>
-                        <span id="qty-<?= $amenity['id'] ?>" data-price="<?= $amenity['price'] ?>"
-                              style="min-width:1.25rem;text-align:center;font-weight:700;font-size:0.875rem;color:var(--text-pri)">0</span>
-                        <button onclick="changeQty(<?= $amenity['id'] ?>, 1)" class="qty-btn qty-inc">+</button>
-                    </div>
+                    <?php if ((int)($amenity['stock'] ?? 0) <= 0): ?>
+                    <span style="font-size:0.7rem;font-weight:700;color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);padding:0.15rem 0.5rem;border-radius:20px">Agotado</span>
+                    <?php else: ?>
+                    <span style="font-size:0.7rem;font-weight:700;color:#10b981;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);padding:0.15rem 0.5rem;border-radius:20px">Disponible</span>
+                    <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>
+            <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.625rem;margin-bottom:0">
+                Podrás añadir extras al momento de hacer tu reserva.
+            </p>
         </div>
     </div>
     <?php endif; ?>
@@ -370,95 +371,37 @@ function detSportSvg(string $type, int $size = 80): string {
 </div>
 
 <!-- Fixed Reserve Bar -->
-<div class="reserve-bar">
+<div class="reserve-bar" id="reserveBar">
     <div>
-        <p style="font-size:0.7rem;color:var(--text-muted);margin:0">Total estimado</p>
-        <p id="totalPrice" style="font-family:'Jockey One',sans-serif;font-size:1.25rem;color:var(--text-pri);margin:0">$<?= number_format($space['price_per_hour'], 0) ?></p>
+        <p style="font-size:0.7rem;color:var(--text-muted);margin:0">Desde</p>
+        <p style="font-family:'Jockey One',sans-serif;font-size:1.25rem;color:var(--text-pri);margin:0">$<?= number_format($space['price_per_hour'], 0) ?><span style="font-size:0.75rem;font-family:inherit;color:var(--text-muted)"> /hr</span></p>
     </div>
     <a id="reserveBtn"
-       href="<?= BASE_URL ?>reservations/create/<?= (int)$space['id'] ?>"
-       class="reserve-btn">
-        RESERVAR HORARIO
+       href="<?= BASE_URL ?>reservations/create/<?= (int)$space['id'] ?><?= !empty($_GET['date']) ? '?date='.urlencode($_GET['date']) : '' ?>"
+       class="reserve-btn"
+       onclick="navigateToBooking(event, this.href)">
+        Reservar esta cancha
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:0.375rem"><polyline points="9 18 15 12 9 6"/></svg>
     </a>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<!-- Page transition overlay -->
+<div id="pageTransition" style="display:none;position:fixed;inset:0;background:var(--bg-mid);z-index:100;opacity:0;transition:opacity 300ms;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+    <div style="width:2rem;height:2rem;border-radius:50%;border:3px solid rgba(var(--primary-rgb),0.2);border-top-color:var(--primary);animation:spin 700ms linear infinite"></div>
+    <p style="font-size:0.875rem;font-weight:600;color:var(--primary)">Cargando reserva…</p>
+</div>
+
 <script>
-const pricePerHour = <?= (float)($space['price_per_hour'] ?? 0) ?>;
-const spaceId = <?= (int)$space['id'] ?>;
-let selectedDate = '<?= $firstDate ?>';
-let selectedTime = null;
-let selectedDuration = 1;
-let amenityTotal = 0;
-
-function selectDay(date) {
-    selectedDate = date;
-    selectedTime = null;
-    document.getElementById('durationSection').style.display = 'none';
-    document.querySelectorAll('.day-btn-det').forEach(btn => {
-        const active = btn.dataset.date === date;
-        btn.classList.toggle('active-day', active);
-    });
-    fetch(`<?= BASE_URL ?>spaces/slots/<?= (int)$space['id'] ?>?date=${date}`)
-        .then(r => r.json())
-        .then(slots => {
-            const c = document.getElementById('slotsContainer');
-            if (!slots.length) {
-                c.innerHTML = '<p style="font-size:0.8125rem;color:var(--text-muted);text-align:center;padding:1rem 0">Sin horarios disponibles</p>';
-                return;
-            }
-            let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem">';
-            slots.forEach(s => {
-                html += `<button onclick="selectSlot('${s.time}',this)" class="slot-btn-det" ${!s.available?'disabled':''}>${s.time}</button>`;
-            });
-            html += '</div>';
-            c.innerHTML = html;
+function navigateToBooking(e, href) {
+    e.preventDefault();
+    var overlay = document.getElementById('pageTransition');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            overlay.style.opacity = '1';
+            setTimeout(function() { window.location.href = href; }, 350);
         });
-}
-
-function selectSlot(time, btn) {
-    selectedTime = time;
-    document.querySelectorAll('.slot-btn-det').forEach(b => b.classList.remove('active-slot'));
-    btn.classList.add('active-slot');
-    document.getElementById('durationSection').style.display = 'block';
-    updateReserveBtn();
-}
-
-function selectDuration(dur, btn) {
-    selectedDuration = dur;
-    document.querySelectorAll('.duration-btn-det').forEach(b => b.classList.remove('active-dur'));
-    btn.classList.add('active-dur');
-    updateTotal();
-}
-
-function changeQty(id, delta) {
-    const el = document.getElementById('qty-' + id);
-    let qty = parseInt(el.textContent) + delta;
-    if (qty < 0) qty = 0;
-    el.textContent = qty;
-    updateAmenityTotal();
-}
-
-function updateAmenityTotal() {
-    amenityTotal = 0;
-    document.querySelectorAll('[id^="qty-"]').forEach(el => {
-        amenityTotal += (parseInt(el.textContent)||0) * (parseFloat(el.dataset.price)||0);
     });
-    updateTotal();
-}
-
-function updateTotal() {
-    const total = pricePerHour * selectedDuration + amenityTotal;
-    document.getElementById('totalPrice').textContent = '$' + total.toFixed(0);
-    updateReserveBtn();
-}
-
-function updateReserveBtn() {
-    if (!selectedTime) return;
-    const endH = parseFloat(selectedTime.split(':')[0]) + selectedDuration;
-    const endTime = Math.floor(endH).toString().padStart(2,'0') + ':' + (endH % 1 === 0.5 ? '30' : '00');
-    document.getElementById('reserveBtn').href =
-        `<?= BASE_URL ?>reservations/create/${spaceId}?date=${selectedDate}&time=${selectedTime}&end_time=${endTime}`;
 }
 
 function shareSpace() {
@@ -472,9 +415,9 @@ function shareSpace() {
 function toggleFollow(clubId) {
     if (!clubId) return;
     fetch('<?= BASE_URL ?>clubs/toggle-follow/' + clubId, { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-            const btn = document.getElementById('followBtn');
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var btn = document.getElementById('followBtn');
             if (data.following) {
                 btn.classList.add('following');
                 btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span id="followLabel">Siguiendo</span>';
