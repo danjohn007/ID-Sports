@@ -95,21 +95,51 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
     border-color: var(--border-gl2);
 }
 
-/* ── Today Ticket Card ──────────────────────────────────── */
-.today-ticket-card {
+/* ── Today Mini Ticket Card ──────────────────────────────── */
+.today-mini-card {
     background: var(--bg-card);
     border: 1px solid var(--border-gl2);
-    border-radius: 1.375rem;
+    border-radius: 1.25rem;
     overflow: hidden;
-    box-shadow: 0 10px 36px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    transition: all 160ms ease;
 }
-.today-ticket-head {
+.today-mini-card:hover {
+    border-color: rgba(var(--primary-rgb), 0.45);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+}
+.today-mini-head {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
-    padding: 1.125rem 1.25rem;
+    padding: 0.875rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
-.today-ticket-body {
-    padding: 1rem 1.25rem;
+.today-mini-foot {
+    padding: 0.625rem 1rem;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
+.today-mini-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 0.625rem;
+    padding: 0.4rem 0.875rem;
+    cursor: pointer;
+    transition: background 140ms;
+    white-space: nowrap;
+}
+.today-mini-btn:hover { background: rgba(255,255,255,0.28); }
 
 /* ── Recent reservation Glassmorphism card ──────────────── */
 .recent-res-card {
@@ -535,73 +565,40 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
                 'pending'     => 'Pendiente',
             ];
             $status = $res['status'] ?? 'confirmed';
+            $amenDetailsJs = htmlspecialchars(json_encode($res['amenities_details'] ?? [], JSON_UNESCAPED_UNICODE), ENT_QUOTES);
         ?>
-        <div class="today-ticket-card" style="flex-shrink:0;<?= count($todayReservations) > 1 ? 'min-width:min(88vw,340px)' : 'width:100%' ?>">
-            <!-- Card Header (gradient) -->
-            <div class="today-ticket-head">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start">
-                    <div style="flex:1;min-width:0">
-                        <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.7);margin:0 0 0.25rem">Ticket de Reserva</p>
-                        <h3 style="font-family:'Jockey One',sans-serif;font-size:1.25rem;color:#fff;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($res['space_name']) ?></h3>
-                        <p style="font-size:0.8rem;color:rgba(255,255,255,0.65);margin:0.15rem 0 0"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
-                    </div>
-                    <div style="flex-shrink:0;width:3rem;height:3rem;border-radius:0.875rem;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff">
-                        <?= sportSvg($res['sport_type'] ?? 'football') ?>
-                    </div>
+        <div class="today-mini-card" style="flex-shrink:0;<?= count($todayReservations) > 1 ? 'min-width:min(80vw,300px)' : 'width:100%' ?>">
+            <!-- Gradient head -->
+            <div class="today-mini-head">
+                <div style="flex-shrink:0;width:2.625rem;height:2.625rem;border-radius:0.75rem;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:#fff">
+                    <?= sportSvg($res['sport_type'] ?? 'football') ?>
                 </div>
-                <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.75rem">
-                    <span style="font-size:0.72rem;font-weight:700;background:rgba(255,255,255,0.2);color:#fff;padding:0.2rem 0.6rem;border-radius:20px">
-                        <?= $statusLabels[$status] ?? ucfirst($status) ?>
-                    </span>
-                    <span style="font-size:0.78rem;color:rgba(255,255,255,0.75)"><?= $diffMsg ?> &middot; <?= substr($res['start_time'],0,5) ?> – <?= substr($res['end_time'],0,5) ?></span>
+                <div style="flex:1;min-width:0">
+                    <h3 style="font-family:'Jockey One',sans-serif;font-size:1.05rem;color:#fff;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($res['space_name']) ?></h3>
+                    <p style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin:0.1rem 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($res['club_name'] ?? '') ?></p>
                 </div>
             </div>
-            <!-- Ticket Body: desglose -->
-            <div class="today-ticket-body">
-                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.4rem">
+            <!-- Mini body -->
+            <div style="padding:0.75rem 1rem">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.25rem">
                     <span style="color:var(--text-muted)">Fecha</span>
                     <span style="color:var(--text-pri);font-weight:600"><?= date('d/m/Y') ?></span>
                 </div>
-                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.625rem">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem">
                     <span style="color:var(--text-muted)">Horario</span>
                     <span style="color:var(--text-pri);font-weight:600"><?= substr($res['start_time'],0,5) ?> – <?= substr($res['end_time'],0,5) ?></span>
                 </div>
-                <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.12);margin:0.5rem 0">
-                <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:0 0 0.5rem">Desglose de Pago</p>
-                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
-                    <span style="color:var(--text-muted)">Cancha</span>
-                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($spaceCost,2) ?></span>
-                </div>
-                <?php foreach (($res['amenities_details'] ?? []) as $ad): ?>
-                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
-                    <span style="color:var(--text-sec);padding-left:0.75rem"><?= htmlspecialchars($ad['name']) ?> &times;<?= (int)$ad['quantity'] ?></span>
-                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format((float)$ad['subtotal'],2) ?></span>
-                </div>
-                <?php endforeach; ?>
-                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
-                    <span style="color:var(--text-muted);font-weight:600">Subtotal</span>
-                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($subT,2) ?></span>
-                </div>
-                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
-                    <span style="color:var(--text-muted)">IVA (16%)</span>
-                    <span style="color:var(--text-pri);font-weight:600">$<?= number_format($iva,2) ?></span>
-                </div>
-                <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.12);margin:0.5rem 0">
-                <div style="display:flex;justify-content:space-between;align-items:baseline">
-                    <span style="font-size:0.875rem;font-weight:700;color:var(--text-pri)">Total Pagado</span>
-                    <span style="font-size:1.25rem;font-weight:800;color:#10b981">$<?= number_format($total,2) ?></span>
-                </div>
             </div>
-            <!-- Punch hole divider -->
-            <div style="position:relative;margin:0;border-top:1.5px dashed rgba(255,255,255,0.1)">
-                <div style="position:absolute;left:-0.75rem;top:50%;transform:translateY(-50%);width:1.25rem;height:1.25rem;border-radius:50%;background:var(--bg-mid)"></div>
-                <div style="position:absolute;right:-0.75rem;top:50%;transform:translateY(-50%);width:1.25rem;height:1.25rem;border-radius:50%;background:var(--bg-mid)"></div>
-            </div>
-            <!-- QR -->
-            <div style="text-align:center;padding:0.875rem 1.25rem 1.125rem">
-                <p style="font-size:0.72rem;color:var(--text-muted);margin:0 0 0.625rem">Muestra este QR en la entrada del club</p>
-                <div style="background:#fff;border-radius:0.75rem;padding:0.5rem;display:inline-block" class="today-qr-canvas" data-qr="<?= htmlspecialchars($qrData) ?>"></div>
-                <p style="font-family:monospace;font-size:0.6rem;color:var(--text-muted);word-break:break-all;margin-top:0.375rem"><?= htmlspecialchars($qrData) ?></p>
+            <!-- Footer -->
+            <div class="today-mini-foot">
+                <span style="font-size:0.7rem;font-weight:700;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.2);padding:0.18rem 0.55rem;border-radius:20px">
+                    <?= $statusLabels[$status] ?? ucfirst($status) ?> &middot; <?= $diffMsg ?>
+                </span>
+                <button class="today-mini-btn"
+                    onclick="openHomeTicket(<?= (int)$res['id'] ?>, '<?= htmlspecialchars($res['space_name'],ENT_QUOTES) ?>', '<?= htmlspecialchars($res['club_name']??'',ENT_QUOTES) ?>', '<?= date('d/m/Y') ?>', '<?= substr($res['start_time'],0,5).' – '.substr($res['end_time'],0,5) ?>', <?= $spaceCost ?>, <?= $iva ?>, <?= $total ?>, '<?= htmlspecialchars($qrData,ENT_QUOTES) ?>', <?= $amenDetailsJs ?>)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                    Ver Ticket
+                </button>
             </div>
         </div>
         <?php endforeach; ?>
@@ -891,6 +888,62 @@ $homeSports = array_values(array_slice($sportMap, 0, 8, true));
 
 </div>
 
+<!-- ── Home Ticket Modal ──────────────────────────────────────── -->
+<div id="homeTicketModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:70;display:none;align-items:center;justify-content:center;padding:1.25rem" onclick="closeHomeTicket()">
+    <div style="background:var(--bg-mid);border:1px solid var(--border-gl2);border-radius:1.375rem;padding:1.375rem;max-width:340px;width:100%;max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.6)" onclick="event.stopPropagation()">
+        <button onclick="closeHomeTicket()" style="position:absolute;top:1rem;right:1rem;background:var(--bg-card);border:1px solid var(--border-gl2);border-radius:0.5rem;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-sec)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <h3 style="font-family:'Jockey One',sans-serif;font-size:1.125rem;color:var(--text-pri);margin:0 0 1.125rem">Ticket de Reserva</h3>
+
+        <div style="background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:1.125rem 1.125rem 0 0;padding:1.125rem 1.25rem">
+            <p style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.65);margin:0 0 0.25rem">Ticket de Reserva</p>
+            <h3 id="htSpace" style="font-family:'Jockey One',sans-serif;font-size:1.2rem;color:#fff;margin:0 0 0.125rem"></h3>
+            <p id="htClub" style="font-size:0.8rem;color:rgba(255,255,255,0.65);margin:0"></p>
+        </div>
+        <div style="background:var(--bg-card);border-radius:0 0 1.125rem 1.125rem;border:1px solid var(--border-gl2);border-top:none;padding:1rem 1.25rem">
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
+                <span style="color:var(--text-muted)">Fecha</span>
+                <span id="htDate" style="color:var(--text-pri);font-weight:600"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.625rem">
+                <span style="color:var(--text-muted)">Horario</span>
+                <span id="htTime" style="color:var(--text-pri);font-weight:600"></span>
+            </div>
+            <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.1);margin:0.5rem 0">
+            <p style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:0 0 0.5rem">Desglose de Pago</p>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
+                <span style="color:var(--text-muted)">Cancha</span>
+                <span id="htCancha" style="color:var(--text-pri);font-weight:600"></span>
+            </div>
+            <div id="htAmenContainer"></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem;margin-top:0.25rem">
+                <span style="color:var(--text-pri);font-weight:600">Subtotal</span>
+                <span id="htSubtotal" style="color:var(--text-pri);font-weight:600"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.375rem">
+                <span style="color:var(--text-muted)">IVA (16%)</span>
+                <span id="htIva" style="color:var(--text-pri);font-weight:600"></span>
+            </div>
+            <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.1);margin:0.5rem 0">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <span style="font-size:0.875rem;font-weight:700;color:var(--text-pri)">Total Pagado</span>
+                <span id="htTotal" style="font-size:1.25rem;font-weight:800;color:#10b981"></span>
+            </div>
+        </div>
+        <!-- Punch + QR -->
+        <div style="position:relative;border-top:1.5px dashed rgba(255,255,255,0.08);margin:0 -0.25rem">
+            <div style="position:absolute;left:-0.625rem;top:50%;transform:translateY(-50%);width:1.125rem;height:1.125rem;border-radius:50%;background:var(--bg-mid)"></div>
+            <div style="position:absolute;right:-0.625rem;top:50%;transform:translateY(-50%);width:1.125rem;height:1.125rem;border-radius:50%;background:var(--bg-mid)"></div>
+        </div>
+        <div style="text-align:center;padding:1rem 0 0">
+            <p style="font-size:0.72rem;color:var(--text-muted);margin:0 0 0.625rem">Muestra este QR en la entrada del club</p>
+            <div style="background:#fff;border-radius:0.75rem;padding:0.5rem;display:inline-block" id="htQrCanvas"></div>
+            <p id="htQrCode" style="font-family:monospace;font-size:0.6rem;color:var(--text-muted);word-break:break-all;margin-top:0.375rem"></p>
+        </div>
+    </div>
+</div>
+
 <!-- ── QR Modal (RF2.2) ──────────────────────────────────────── -->
 <div id="qrModal" style="display:none" class="qr-backdrop" onclick="closeQrModal()">
     <div class="qr-sheet" onclick="event.stopPropagation()">
@@ -941,6 +994,60 @@ if (!sessionStorage.getItem('ids_loc')) {
     }
 }
 
+/* ── Home Ticket Modal ────────────────────────────────── */
+var _htFmt = new Intl.NumberFormat('es-MX', {style:'currency', currency:'MXN'});
+
+function openHomeTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost, iva, total, qrCode, amenitiesDetails) {
+    document.getElementById('htSpace').textContent   = spaceName;
+    document.getElementById('htClub').textContent    = clubName;
+    document.getElementById('htDate').textContent    = dateLabel;
+    document.getElementById('htTime').textContent    = timeLabel;
+    document.getElementById('htCancha').textContent  = _htFmt.format(spaceCost);
+
+    var amenContainer = document.getElementById('htAmenContainer');
+    amenContainer.innerHTML = '';
+    var amenTotal = 0;
+    if (amenitiesDetails && amenitiesDetails.length) {
+        amenitiesDetails.forEach(function(a) {
+            var sub = parseFloat(a.subtotal);
+            amenTotal += sub;
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.35rem';
+            var s1 = document.createElement('span');
+            s1.style.cssText = 'color:var(--text-sec);padding-left:0.75rem';
+            s1.textContent = a.name + ' \u00d7' + a.quantity;
+            var s2 = document.createElement('span');
+            s2.style.cssText = 'color:var(--text-pri);font-weight:600';
+            s2.textContent = _htFmt.format(sub);
+            row.appendChild(s1); row.appendChild(s2);
+            amenContainer.appendChild(row);
+        });
+    }
+
+    document.getElementById('htSubtotal').textContent = _htFmt.format(spaceCost + amenTotal);
+    document.getElementById('htIva').textContent      = _htFmt.format(iva);
+    document.getElementById('htTotal').textContent    = _htFmt.format(total);
+    document.getElementById('htQrCode').textContent   = qrCode;
+
+    var wrap = document.getElementById('htQrCanvas');
+    wrap.innerHTML = '';
+    if (qrCode) {
+        var canvas = document.createElement('canvas');
+        wrap.appendChild(canvas);
+        QRCode.toCanvas(canvas, qrCode, {width:160, margin:1, color:{dark:'#000',light:'#fff'}}, function(){});
+    }
+
+    var modal = document.getElementById('homeTicketModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeHomeTicket() {
+    document.getElementById('homeTicketModal').style.display = 'none';
+    document.getElementById('htQrCanvas').innerHTML = '';
+    document.body.style.overflow = '';
+}
+
 /* ── QR Modal ─────────────────────────────────────────── */
 function openQrModal(code, spaceName, clubName, dateLabel, timeLabel, total) {
     document.getElementById('qrSpaceName').textContent = spaceName;
@@ -984,15 +1091,4 @@ function scrollCarousel(trackId, dir) {
     var itemW = track.firstElementChild ? track.firstElementChild.offsetWidth + 8 : 100;
     track.scrollBy({ left: dir * itemW, behavior: 'smooth' });
 }
-
-/* ── Generate QR codes for today's ticket cards ──────── */
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.today-qr-canvas[data-qr]').forEach(function(el) {
-        var code = el.getAttribute('data-qr');
-        if (!code) return;
-        var canvas = document.createElement('canvas');
-        el.appendChild(canvas);
-        QRCode.toCanvas(canvas, code, {width:140, margin:1, color:{dark:'#000',light:'#fff'}}, function(){});
-    });
-});
 </script>

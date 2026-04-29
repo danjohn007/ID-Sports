@@ -22,6 +22,7 @@
                 <option value="pending" <?= ($_GET['status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pendiente</option>
                 <option value="confirmed" <?= ($_GET['status'] ?? '') === 'confirmed' ? 'selected' : '' ?>>Confirmada</option>
                 <option value="cancelled" <?= ($_GET['status'] ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelada</option>
+                <option value="refund_pending" <?= ($_GET['status'] ?? '') === 'refund_pending' ? 'selected' : '' ?>>Reembolso pendiente</option>
                 <option value="completed" <?= ($_GET['status'] ?? '') === 'completed' ? 'selected' : '' ?>>Completada</option>
             </select>
         </div>
@@ -45,8 +46,8 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
                 <?php
-                $statusColors = ['pending' => 'bg-amber-100 text-amber-700', 'confirmed' => 'bg-green-100 text-green-700', 'cancelled' => 'bg-red-100 text-red-700', 'completed' => 'bg-gray-100 text-gray-600'];
-                $statusLabels = ['pending' => 'Pendiente', 'confirmed' => 'Confirmada', 'cancelled' => 'Cancelada', 'completed' => 'Completada'];
+                $statusColors = ['pending' => 'bg-amber-100 text-amber-700', 'confirmed' => 'bg-green-100 text-green-700', 'cancelled' => 'bg-red-100 text-red-700', 'completed' => 'bg-gray-100 text-gray-600', 'refund_pending' => 'bg-orange-100 text-orange-700'];
+                $statusLabels = ['pending' => 'Pendiente', 'confirmed' => 'Confirmada', 'cancelled' => 'Cancelada', 'completed' => 'Completada', 'refund_pending' => '⚠ Reembolso pendiente'];
                 foreach ($reservations as $r):
                 $st = $r['status'] ?? 'pending';
                 ?>
