@@ -116,6 +116,7 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .jockey-one { font-family: 'Jockey One', sans-serif; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
 <?php
@@ -370,16 +371,24 @@ function detSportSvg(string $type, int $size = 80): string {
 </div>
 
 <!-- Fixed Reserve Bar -->
-<div class="reserve-bar">
+<div class="reserve-bar" id="reserveBar">
     <div>
         <p style="font-size:0.7rem;color:var(--text-muted);margin:0">Total estimado</p>
         <p id="totalPrice" style="font-family:'Jockey One',sans-serif;font-size:1.25rem;color:var(--text-pri);margin:0">$<?= number_format($space['price_per_hour'], 0) ?></p>
     </div>
     <a id="reserveBtn"
-       href="<?= BASE_URL ?>reservations/create/<?= (int)$space['id'] ?>"
-       class="reserve-btn">
-        RESERVAR HORARIO
+       href="<?= BASE_URL ?>reservations/create/<?= (int)$space['id'] ?><?= !empty($_GET['date']) ? '?date='.urlencode($_GET['date']) : '' ?>"
+       class="reserve-btn"
+       onclick="navigateToBooking(event, this.href)">
+        Reservar ahora
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:0.375rem"><polyline points="9 18 15 12 9 6"/></svg>
     </a>
+</div>
+
+<!-- Page transition overlay -->
+<div id="pageTransition" style="display:none;position:fixed;inset:0;background:var(--bg-mid);z-index:100;opacity:0;transition:opacity 300ms;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+    <div style="width:2rem;height:2rem;border-radius:50%;border:3px solid rgba(var(--primary-rgb),0.2);border-top-color:var(--primary);animation:spin 700ms linear infinite"></div>
+    <p style="font-size:0.875rem;font-weight:600;color:var(--primary)">Cargando reserva…</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
@@ -459,6 +468,18 @@ function updateReserveBtn() {
     const endTime = Math.floor(endH).toString().padStart(2,'0') + ':' + (endH % 1 === 0.5 ? '30' : '00');
     document.getElementById('reserveBtn').href =
         `<?= BASE_URL ?>reservations/create/${spaceId}?date=${selectedDate}&time=${selectedTime}&end_time=${endTime}`;
+}
+
+function navigateToBooking(e, href) {
+    e.preventDefault();
+    var overlay = document.getElementById('pageTransition');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            overlay.style.opacity = '1';
+            setTimeout(function() { window.location.href = href; }, 350);
+        });
+    });
 }
 
 function shareSpace() {

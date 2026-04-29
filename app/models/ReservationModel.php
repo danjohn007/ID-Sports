@@ -179,6 +179,18 @@ class ReservationModel extends Model {
         }
     }
 
+    /** Mark a reservation as completed and restore amenity stock */
+    public function complete($reservationId) {
+        $updated = $this->execute(
+            "UPDATE reservations SET status = 'completed' WHERE id = ? AND status IN ('confirmed','in_progress')",
+            [(int)$reservationId]
+        );
+        if ($updated) {
+            $this->restoreAmenityStock($reservationId);
+        }
+        return $updated;
+    }
+
     public function countByClub($clubId) {
         $row = $this->findOne("SELECT COUNT(*) as cnt FROM reservations r JOIN spaces s ON r.space_id = s.id WHERE s.club_id = ?", [$clubId]);
         return $row['cnt'] ?? 0;

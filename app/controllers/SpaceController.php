@@ -22,7 +22,7 @@ class SpaceController extends Controller {
         }
 
         $schedules  = $this->spaceModel->getSchedules($spaceId);
-        $amenities  = $this->amenityModel->findByClub($space['club_id'] ?? 0);
+        $amenities  = $this->amenityModel->findBySpace($spaceId);
         $reviews    = $this->reviewModel->findBySpace($spaceId);
         $avgRating  = count($reviews)
             ? round(array_sum(array_column($reviews, 'rating')) / count($reviews), 1)

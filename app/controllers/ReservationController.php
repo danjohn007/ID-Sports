@@ -225,6 +225,24 @@ class ReservationController extends Controller {
         }
 
         if ($reservation['status'] === 'confirmed') {
+            // Validate that current time is within the reservation window
+            $now        = time();
+            $resDate    = $reservation['date'];
+            $windowStart = strtotime($resDate . ' ' . $reservation['start_time']) - 900; // 15-min early window
+            $windowEnd   = strtotime($resDate . ' ' . $reservation['end_time']);
+
+            if ($now < $windowStart) {
+                $minutesLeft = (int)ceil(($windowStart - $now) / 60);
+                http_response_code(409);
+                echo json_encode(['error' => "La reservación aún no está activa. Inicia en aprox. {$minutesLeft} min."]);
+                exit;
+            }
+            if ($now >= $windowEnd) {
+                http_response_code(409);
+                echo json_encode(['error' => 'El tiempo de la reservación ya expiró.']);
+                exit;
+            }
+
             $this->reservationModel->checkIn($reservation['id']);
             $reservation['status'] = 'in_progress';
             echo json_encode(['success' => true, 'reservation' => $reservation, 'message' => 'Check-in exitoso. Sesión iniciada.']);
@@ -234,6 +252,36 @@ class ReservationController extends Controller {
             http_response_code(409);
             echo json_encode(['error' => 'La reservación no puede hacer check-in en estado: ' . $reservation['status']]);
         }
+        exit;
+    }
+
+    /** Admin: mark reservation as completed, restoring amenity stock */
+    public function complete() {
+        $this->requireAuth(['club_admin', 'super_admin']);
+        header('Content-Type: application/json');
+
+        $id = (int)($this->isPost() ? $this->post('id') : $this->get('id'));
+        if (!$id) {
+            http_response_code(422);
+            echo json_encode(['error' => 'ID de reservación requerido.']);
+            exit;
+        }
+
+        $reservation = $this->reservationModel->findById($id);
+        if (!$reservation) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Reservación no encontrada.']);
+            exit;
+        }
+
+        if (!in_array($reservation['status'], ['confirmed', 'in_progress'])) {
+            http_response_code(409);
+            echo json_encode(['error' => 'Solo se pueden completar reservaciones confirmadas o en progreso.']);
+            exit;
+        }
+
+        $this->reservationModel->complete($id);
+        echo json_encode(['success' => true, 'message' => 'Reservación completada y stock de amenidades restaurado.']);
         exit;
     }
 
