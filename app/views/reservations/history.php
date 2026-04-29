@@ -36,7 +36,86 @@ function sportSvgHist(string $type): string {
     margin: 0;
 }
 
-/* Status badge */
+/* ── Two-box side-by-side grid ───────────────────────── */
+.hist-boxes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+.hist-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-gl);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 270px);
+    min-height: 200px;
+}
+.hist-box-active {
+    border-color: rgba(var(--primary-rgb), 0.3);
+}
+.hist-box-header {
+    padding: 1rem 1rem 0;
+    flex-shrink: 0;
+}
+.hist-box-filters {
+    padding: 0 1rem 0.75rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.hist-box-scroll {
+    flex: 1;
+    min-height: 0;      /* critical: lets flex child shrink so overflow-y activates */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.875rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--primary-rgb),0.25) transparent;
+}
+.hist-box-scroll::-webkit-scrollbar { width: 4px; }
+.hist-box-scroll::-webkit-scrollbar-track { background: transparent; }
+.hist-box-scroll::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb),0.3); border-radius: 4px; }
+/* Mobile: stack vertically, remove fixed height */
+@media (max-width: 767px) {
+    .hist-boxes-grid { grid-template-columns: 1fr; gap: 0.875rem; }
+    .hist-box { max-height: none; }
+    .hist-box-scroll { max-height: 70vh; }
+}
+/* Filter row inside each box */
+.hist-box-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.625rem;
+}
+.hist-box-filter-input {
+    background: var(--bg-mid);
+    border: 1px solid var(--border-gl);
+    border-radius: 0.75rem;
+    padding: 0.45rem 0.7rem 0.45rem 2rem;
+    font-size: 0.78rem;
+    color: var(--text-pri);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+.hist-box-filter-date,
+.hist-box-filter-select {
+    background: var(--bg-mid);
+    border: 1px solid var(--border-gl);
+    border-radius: 0.75rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+    color: var(--text-pri);
+    outline: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
 .hist-badge {
     display: inline-flex;
     align-items: center;
@@ -47,12 +126,13 @@ function sportSvgHist(string $type): string {
     border-radius: 20px;
     white-space: nowrap;
 }
-.hist-badge-confirmed   { background: rgba(16,185,129,0.15);  color: #10b981; }
-.hist-badge-active      { background: rgba(16,185,129,0.15);  color: #10b981; }
-.hist-badge-in_progress { background: rgba(14,165,233,0.15);  color: #38bdf8; }
-.hist-badge-pending     { background: rgba(245,158,11,0.15);  color: #f59e0b; }
-.hist-badge-cancelled   { background: rgba(239,68,68,0.15);   color: #f87171; }
-.hist-badge-completed   { background: rgba(148,163,184,0.12); color: #94a3b8; }
+.hist-badge-confirmed      { background: rgba(16,185,129,0.15);  color: #10b981; }
+.hist-badge-active         { background: rgba(16,185,129,0.15);  color: #10b981; }
+.hist-badge-in_progress    { background: rgba(14,165,233,0.15);  color: #38bdf8; }
+.hist-badge-pending        { background: rgba(245,158,11,0.15);  color: #f59e0b; }
+.hist-badge-cancelled      { background: rgba(239,68,68,0.15);   color: #f87171; }
+.hist-badge-completed      { background: rgba(148,163,184,0.12); color: #94a3b8; }
+.hist-badge-refund_pending { background: rgba(245,158,11,0.18);  color: #fbbf24; }
 
 /* Glassmorphism reservation card */
 .hist-card {
@@ -269,72 +349,188 @@ function sportSvgHist(string $type): string {
             Buscar Canchas
         </a>
     </div>
-    <?php else: ?>
+    <?php else:
+    $statusLabels = [
+        'pending'        => ['label'=>'Pendiente',            'class'=>'hist-badge-pending'],
+        'confirmed'      => ['label'=>'Confirmada',           'class'=>'hist-badge-confirmed'],
+        'in_progress'    => ['label'=>'En curso',             'class'=>'hist-badge-in_progress'],
+        'cancelled'      => ['label'=>'Cancelada',            'class'=>'hist-badge-cancelled'],
+        'completed'      => ['label'=>'Completada',           'class'=>'hist-badge-completed'],
+        'active'         => ['label'=>'Activa',               'class'=>'hist-badge-active'],
+        'refund_pending' => ['label'=>'Reembolso pendiente',  'class'=>'hist-badge-refund_pending'],
+    ];
+    $activeStatuses   = ['confirmed','pending','in_progress','active'];
+    $finishedStatuses = ['completed','cancelled','refund_pending'];
+    $today   = date('Y-m-d');
+    $nowTime = date('H:i:s');
+    // Box A: active status AND (future date OR today with time still remaining)
+    $resActive = array_values(array_filter($reservations, function($r) use ($activeStatuses, $today, $nowTime) {
+        if (!in_array($r['status'] ?? '', $activeStatuses)) return false;
+        $d = $r['date'] ?? '';
+        return $d > $today || ($d === $today && ($r['end_time'] ?? '00:00:00') > $nowTime);
+    }));
+    // Box B: everything else (finished statuses + past-dated "active" ones)
+    $activeIds   = array_map('intval', array_column($resActive, 'id'));
+    $resFinished = array_values(array_filter($reservations, fn($r) => !in_array((int)$r['id'], $activeIds)));
+
+    ?>
 
     <?php
-    $statusLabels = [
-        'pending'     => ['label'=>'Pendiente',   'class'=>'hist-badge-pending'],
-        'confirmed'   => ['label'=>'Confirmada',  'class'=>'hist-badge-confirmed'],
-        'in_progress' => ['label'=>'En curso',    'class'=>'hist-badge-in_progress'],
-        'cancelled'   => ['label'=>'Cancelada',   'class'=>'hist-badge-cancelled'],
-        'completed'   => ['label'=>'Completada',  'class'=>'hist-badge-completed'],
-        'active'      => ['label'=>'Activa',      'class'=>'hist-badge-active'],
-    ];
-    ?>
-    <div class="hist-grid" style="display:grid;grid-template-columns:repeat(1,1fr);gap:1rem">
-    <?php foreach ($reservations as $r):
-        $status = $r['status'] ?? 'pending';
-        $badge  = $statusLabels[$status] ?? ['label'=>ucfirst($status),'class'=>'hist-badge-completed'];
-        $rid    = (int)$r['id'];
+    /* Helper to render a single history card */
+    function renderHistCard(array $r, array $statusLabels): void {
+        $status    = $r['status'] ?? 'pending';
+        $badge     = $statusLabels[$status] ?? ['label'=>ucfirst($status),'class'=>'hist-badge-completed'];
+        $rid       = (int)$r['id'];
         $spaceCost = (float)($r['subtotal'] ?? 0);
         $iva       = (float)($r['service_fee'] ?? 0);
         $total     = (float)($r['total'] ?? 0);
         $qrData    = htmlspecialchars($r['qr_code'] ?? ('RES-'.$rid), ENT_QUOTES);
-        $hasQr     = in_array($status, ['confirmed','active','in_progress','pending']);
-        $amenDetails = json_encode($r['amenities_details'] ?? [], JSON_UNESCAPED_UNICODE);
-    ?>
-    <div class="hist-card" style="margin-bottom:0">
-        <div class="hist-card-body">
-            <div class="hist-icon">
-                <?= sportSvgHist($r['sport_type'] ?? 'football') ?>
+        $amenDetails = htmlspecialchars(json_encode($r['amenities_details'] ?? [], JSON_UNESCAPED_UNICODE), ENT_QUOTES);
+        $searchAttr  = strtolower(
+            htmlspecialchars(($r['space_name'] ?? ''), ENT_QUOTES) . ' ' .
+            htmlspecialchars(($r['sport_type']  ?? ''), ENT_QUOTES) . ' ' .
+            htmlspecialchars(($r['club_name']   ?? ''), ENT_QUOTES)
+        );
+        $resDate = date('d/m/Y', strtotime($r['date']));
+        $openTicketCall = "openHistTicket({$rid},'".htmlspecialchars($r['space_name'],ENT_QUOTES)."','".htmlspecialchars($r['club_name']??'',ENT_QUOTES)."','{$resDate}','".substr($r['start_time'],0,5).' – '.substr($r['end_time'],0,5)."',{$spaceCost},{$iva},{$total},'{$qrData}',{$amenDetails})";
+        ?>
+        <div class="hist-card" style="margin-bottom:0"
+             data-search="<?= $searchAttr ?>"
+             data-status="<?= htmlspecialchars($status, ENT_QUOTES) ?>"
+             data-date="<?= htmlspecialchars($r['date'], ENT_QUOTES) ?>">
+            <div class="hist-card-body">
+                <div class="hist-icon"><?= sportSvgHist($r['sport_type'] ?? 'football') ?></div>
+                <div class="hist-info">
+                    <p class="hist-info-name"><?= htmlspecialchars($r['space_name'] ?? '') ?></p>
+                    <p class="hist-info-sub"><?= htmlspecialchars($r['club_name'] ?? '') ?></p>
+                    <p class="hist-info-date">
+                        <?= $resDate ?> &middot; <?= substr($r['start_time'],0,5) ?> – <?= substr($r['end_time'],0,5) ?>
+                    </p>
+                </div>
+                <div class="hist-right">
+                    <span class="hist-badge <?= $badge['class'] ?>"><?= $badge['label'] ?></span>
+                    <p class="hist-total" style="margin-top:0.375rem">$<?= number_format($total, 2) ?></p>
+                </div>
             </div>
-            <div class="hist-info">
-                <p class="hist-info-name"><?= htmlspecialchars($r['space_name'] ?? '') ?></p>
-                <p class="hist-info-sub"><?= htmlspecialchars($r['club_name'] ?? '') ?></p>
-                <p class="hist-info-date">
-                    <?= date('d/m/Y', strtotime($r['date'])) ?>
-                    &middot;
-                    <?= substr($r['start_time'],0,5) ?> – <?= substr($r['end_time'],0,5) ?>
-                </p>
-            </div>
-            <div class="hist-right">
-                <span class="hist-badge <?= $badge['class'] ?>"><?= $badge['label'] ?></span>
-                <p class="hist-total" style="margin-top:0.375rem">$<?= number_format($total, 2) ?></p>
-            </div>
-        </div>
-
-        <!-- Action bar -->
-        <div class="hist-action-bar">
-            <?php if ($hasQr): ?>
-            <button class="hist-btn" onclick="openHistTicket(<?= $rid ?>, '<?= htmlspecialchars($r['space_name'],ENT_QUOTES) ?>', '<?= htmlspecialchars($r['club_name']??'',ENT_QUOTES) ?>', '<?= date('d/m/Y',strtotime($r['date'])) ?>', '<?= substr($r['start_time'],0,5).' – '.substr($r['end_time'],0,5) ?>', <?= $spaceCost ?>, <?= $iva ?>, <?= $total ?>, '<?= $qrData ?>', <?= htmlspecialchars($amenDetails, ENT_QUOTES) ?>)">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                Ver ticket
-            </button>
-            <?php endif; ?>
-            <?php if (in_array($status, ['confirmed','pending'])): ?>
-            <form method="POST" action="<?= BASE_URL ?>reservations/cancel" onsubmit="return confirm('¿Cancelar esta reservación?')" style="margin:0">
-                <input type="hidden" name="id" value="<?= $rid ?>">
-                <button type="submit" class="hist-btn hist-btn-cancel">
+            <div class="hist-action-bar">
+                <button class="hist-btn" onclick="<?= $openTicketCall ?>">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                    Ver ticket
+                </button>
+                <?php if (in_array($status, ['confirmed','pending'])): ?>
+                <button class="hist-btn hist-btn-cancel" onclick="openCancelModal(<?= $rid ?>, '<?= htmlspecialchars($r['space_name'],ENT_QUOTES) ?>')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     Cancelar
                 </button>
-            </form>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+    }
+    ?>
+
+    <!-- ── Side-by-side grid wrapper ───────────────────── -->
+    <div class="hist-boxes-grid">
+
+    <!-- BOX A: Reservas Activas -->
+    <div class="hist-box hist-box-active">
+        <div class="hist-box-header">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+                <span style="width:0.5rem;height:0.5rem;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 6px #10b981"></span>
+                <h3 style="font-family:'Jockey One',sans-serif;font-size:0.9375rem;color:var(--text-pri);margin:0">Reservas Activas</h3>
+                <span style="font-size:0.68rem;font-weight:700;background:rgba(16,185,129,0.15);color:#10b981;padding:0.12rem 0.45rem;border-radius:20px;margin-left:auto"><?= count($resActive) ?></span>
+            </div>
+        </div>
+        <div class="hist-box-filters">
+            <div class="hist-box-filter-row">
+                <div style="flex:1;min-width:0;position:relative">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:0.625rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchBoxA" placeholder="Buscar cancha…" oninput="filterBox('A')" class="hist-box-filter-input">
+                </div>
+                <input type="date" id="dateBoxA" onchange="filterBox('A')" class="hist-box-filter-date">
+                <select id="statusBoxA" onchange="filterBox('A')" class="hist-box-filter-select">
+                    <option value="">Estado</option>
+                    <option value="confirmed">Confirmada</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="in_progress">En curso</option>
+                    <option value="active">Activa</option>
+                </select>
+            </div>
+        </div>
+        <div class="hist-box-scroll" id="gridBoxA">
+            <?php if (empty($resActive)): ?>
+            <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:2rem 0">No hay reservas activas</p>
+            <?php else: foreach ($resActive as $r): renderHistCard($r, $statusLabels); endforeach; endif; ?>
         </div>
     </div>
-    <?php endforeach; ?>
+
+    <!-- BOX B: Finalizadas / Canceladas -->
+    <div class="hist-box">
+        <div class="hist-box-header">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+                <span style="width:0.5rem;height:0.5rem;border-radius:50%;background:#94a3b8;display:inline-block"></span>
+                <h3 style="font-family:'Jockey One',sans-serif;font-size:0.9375rem;color:var(--text-pri);margin:0">Finalizadas / Canceladas</h3>
+                <span style="font-size:0.68rem;font-weight:700;background:rgba(148,163,184,0.15);color:#94a3b8;padding:0.12rem 0.45rem;border-radius:20px;margin-left:auto"><?= count($resFinished) ?></span>
+            </div>
+        </div>
+        <div class="hist-box-filters">
+            <div class="hist-box-filter-row">
+                <div style="flex:1;min-width:0;position:relative">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:0.625rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchBoxB" placeholder="Buscar cancha…" oninput="filterBox('B')" class="hist-box-filter-input">
+                </div>
+                <input type="date" id="dateBoxB" onchange="filterBox('B')" class="hist-box-filter-date">
+                <select id="statusBoxB" onchange="filterBox('B')" class="hist-box-filter-select">
+                    <option value="">Estado</option>
+                    <option value="completed">Completada</option>
+                    <option value="cancelled">Cancelada</option>
+                    <option value="refund_pending">Reembolso pend.</option>
+                </select>
+            </div>
+        </div>
+        <div class="hist-box-scroll" id="gridBoxB">
+            <?php if (empty($resFinished)): ?>
+            <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:2rem 0">Sin reservas finalizadas</p>
+            <?php else: foreach ($resFinished as $r): renderHistCard($r, $statusLabels); endforeach; endif; ?>
+        </div>
     </div>
+
+    </div><!-- /.hist-boxes-grid -->
+
     <?php endif; ?>
+</div>
+
+<!-- ── Cancel Reason Modal ───────────────────────────────────── -->
+<div id="cancelModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:70;align-items:center;justify-content:center;padding:1.25rem" onclick="closeCancelModal()">
+    <div style="background:var(--bg-mid);border:1px solid var(--border-gl2);border-radius:1.25rem;padding:1.375rem;max-width:340px;width:100%;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.6)" onclick="event.stopPropagation()">
+        <button onclick="closeCancelModal()" style="position:absolute;top:1rem;right:1rem;background:var(--bg-card);border:1px solid var(--border-gl2);border-radius:0.5rem;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-sec)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.875rem">
+            <span style="width:2.25rem;height:2.25rem;background:rgba(245,158,11,0.15);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:#f59e0b;flex-shrink:0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <div>
+                <h3 style="font-family:'Jockey One',sans-serif;font-size:1rem;color:var(--text-pri);margin:0">Solicitar Cancelación</h3>
+                <p id="cancelSpaceName" style="font-size:0.75rem;color:var(--text-muted);margin:0"></p>
+            </div>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-sec);margin:0 0 1rem;line-height:1.5">Esta solicitud será enviada al administrador del club para revisión y aprobación del reembolso.</p>
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text-pri);display:block;margin-bottom:0.375rem">Motivo de cancelación <span style="color:#f87171">*</span></label>
+        <textarea id="cancelReason" rows="3" placeholder="Describe el motivo de tu cancelación..."
+                  style="width:100%;box-sizing:border-box;background:var(--bg-card);border:1px solid var(--border-gl);border-radius:0.875rem;padding:0.75rem;font-size:0.85rem;color:var(--text-pri);outline:none;resize:vertical;transition:border-color 140ms;font-family:inherit"
+                  onfocus="this.style.borderColor='rgba(var(--primary-rgb),0.5)'"
+                  onblur="this.style.borderColor='var(--border-gl)'"></textarea>
+        <p id="cancelReasonErr" style="color:#f87171;font-size:0.75rem;margin:0.25rem 0 0;display:none">El motivo es obligatorio.</p>
+        <form id="cancelForm" method="POST" action="<?= BASE_URL ?>reservations/cancel" style="margin-top:0.875rem;display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+            <input type="hidden" id="cancelResId" name="id" value="">
+            <input type="hidden" id="cancelReasonHidden" name="cancel_reason" value="">
+            <button type="button" onclick="closeCancelModal()" style="font-size:0.8125rem;font-weight:600;color:var(--text-sec);background:var(--bg-card);border:1px solid var(--border-gl2);padding:0.625rem;border-radius:0.75rem;cursor:pointer">Mantener</button>
+            <button type="button" onclick="submitCancelReason()" style="font-size:0.8125rem;font-weight:700;color:#fff;background:#ef4444;border:none;padding:0.625rem;border-radius:0.75rem;cursor:pointer;transition:background 140ms" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                Solicitar cancelación
+            </button>
+        </form>
+    </div>
 </div>
 
 <!-- ── Ticket Modal ─────────────────────────────────────── -->
@@ -420,7 +616,7 @@ function openHistTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost
     document.getElementById('hTicketTime').textContent  = timeLabel;
     document.getElementById('hTicketCancha').textContent = _fmt.format(spaceCost);
 
-    // Render per-amenity rows
+    // Render per-amenity rows (safe DOM, no innerHTML)
     var amenContainer = document.getElementById('hTicketAmenContainer');
     amenContainer.innerHTML = '';
     var amenTotal = 0;
@@ -430,9 +626,14 @@ function openHistTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost
             amenTotal += sub;
             var row = document.createElement('div');
             row.className = 'hist-ticket-row';
-            row.innerHTML = '<span class="hist-ticket-label" style="padding-left:0.75rem;color:var(--text-sec)">'
-                + a.name + ' &times;' + a.quantity
-                + '</span><span class="hist-ticket-value">' + _fmt.format(sub) + '</span>';
+            var s1 = document.createElement('span');
+            s1.className = 'hist-ticket-label';
+            s1.style.cssText = 'padding-left:0.75rem;color:var(--text-sec)';
+            s1.textContent = a.name + ' \u00d7' + a.quantity;
+            var s2 = document.createElement('span');
+            s2.className = 'hist-ticket-value';
+            s2.textContent = _fmt.format(sub);
+            row.appendChild(s1); row.appendChild(s2);
             amenContainer.appendChild(row);
         });
     }
@@ -443,25 +644,19 @@ function openHistTicket(id, spaceName, clubName, dateLabel, timeLabel, spaceCost
     document.getElementById('hTicketTotal').textContent    = _fmt.format(total);
     document.getElementById('hTicketQrCode').textContent   = qrCode;
 
-    // QR
     var wrap = document.getElementById('hTicketQrCanvas');
     wrap.innerHTML = '';
-    var canvas = document.createElement('canvas');
-    wrap.appendChild(canvas);
-    QRCode.toCanvas(canvas, qrCode, {width:160, margin:1, color:{dark:'#000',light:'#fff'}}, function(){});
+    if (qrCode) {
+        var canvas = document.createElement('canvas');
+        wrap.appendChild(canvas);
+        QRCode.toCanvas(canvas, qrCode, {width:160, margin:1, color:{dark:'#000',light:'#fff'}}, function(){});
+    }
 
-    // Share button
     document.getElementById('hShareBtn').onclick = function() {
         var text = '¡Reserva confirmada!\n' + spaceName + ' (' + clubName + ')\n' + dateLabel + ' ' + timeLabel + '\nTotal: ' + _fmt.format(total);
         if (navigator.share) { navigator.share({title:'Ticket ID Sports', text:text}); }
         else if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(function() { alert('Información copiada al portapapeles'); });
-        } else {
-            var el = document.createElement('textarea');
-            el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
-            document.body.appendChild(el); el.focus(); el.select();
-            try { document.execCommand('copy'); alert('Información copiada al portapapeles'); } catch(e) {}
-            document.body.removeChild(el);
         }
     };
 
@@ -474,5 +669,45 @@ function closeHistTicket() {
     document.getElementById('histModal').style.display = 'none';
     document.getElementById('hTicketQrCanvas').innerHTML = '';
     document.body.style.overflow = '';
+}
+
+/* ── Cancel Reason Modal ──────────────────────────────── */
+function openCancelModal(reservationId, spaceName) {
+    document.getElementById('cancelResId').value    = reservationId;
+    document.getElementById('cancelSpaceName').textContent = spaceName;
+    document.getElementById('cancelReason').value   = '';
+    document.getElementById('cancelReasonErr').style.display = 'none';
+    var modal = document.getElementById('cancelModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeCancelModal() {
+    document.getElementById('cancelModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function submitCancelReason() {
+    var reason = document.getElementById('cancelReason').value.trim();
+    var errEl  = document.getElementById('cancelReasonErr');
+    if (!reason) { errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+    document.getElementById('cancelReasonHidden').value = reason;
+    document.getElementById('cancelForm').submit();
+}
+
+/* ── Box filters ─────────────────────────────────────── */
+function filterBox(box) {
+    var q      = (document.getElementById('searchBox' + box).value || '').toLowerCase().trim();
+    var date   = (document.getElementById('dateBox'   + box).value || '').trim();
+    var status = (document.getElementById('statusBox' + box).value || '').trim();
+    var grid   = document.getElementById('gridBox' + box);
+    if (!grid) return;
+    grid.querySelectorAll('.hist-card').forEach(function(card) {
+        var matchQ   = !q      || (card.getAttribute('data-search') || '').indexOf(q) !== -1;
+        var matchD   = !date   || card.getAttribute('data-date') === date;
+        var matchS   = !status || card.getAttribute('data-status') === status;
+        card.style.display = (matchQ && matchD && matchS) ? '' : 'none';
+        card.style.transition = 'opacity 200ms';
+        card.style.opacity = (matchQ && matchD && matchS) ? '1' : '0';
+    });
 }
 </script>

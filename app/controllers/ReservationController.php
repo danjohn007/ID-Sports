@@ -293,18 +293,55 @@ class ReservationController extends Controller {
         exit;
     }
 
-    /** User cancel reservation */
+    /** User cancel reservation → sets refund_pending + notifies club admin */
     public function cancel() {
         $this->requireAuth();
         $userId = $_SESSION['user_id'];
         $id     = (int)($this->isPost() ? $this->post('id') : $this->get('id'));
+        $reason = trim($this->isPost() ? ($this->post('cancel_reason') ?? '') : '');
+
         if ($id) {
             $res = $this->reservationModel->findById($id);
             if ($res && $res['user_id'] == $userId && in_array($res['status'], ['pending','confirmed'])) {
-                $this->reservationModel->updateStatus($id, 'cancelled');
+                if (empty($reason)) {
+                    $this->setFlash('error', 'Debes indicar el motivo de cancelación.');
+                    $this->redirect('reservations/history');
+                    return;
+                }
+                $this->reservationModel->cancelWithReason($id, $reason);
                 // Restore amenity stock
                 $this->reservationModel->restoreAmenityStock($id);
-                $this->setFlash('success', 'Reservación cancelada.');
+
+                // Notify club admin
+                try {
+                    $notifModel   = new NotificationModel();
+                    $ownerId      = $this->reservationModel->getClubOwnerForReservation($id);
+                    $userName     = htmlspecialchars($_SESSION['user_name'] ?? 'Usuario', ENT_QUOTES);
+                    $spaceName    = htmlspecialchars($res['space_name'] ?? 'cancha', ENT_QUOTES);
+                    $safeReason   = htmlspecialchars($reason, ENT_QUOTES);
+                    $resDate      = date('d/m/Y', strtotime($res['date']));
+                    if ($ownerId) {
+                        $notifModel->create(
+                            $ownerId,
+                            '⚠ Solicitud de reembolso pendiente',
+                            $userName . ' solicitó cancelar la reserva de ' . $spaceName
+                                . ' (' . $resDate . '). Motivo: ' . $safeReason,
+                            'refund',
+                            $id
+                        );
+                    }
+                    // Also notify the user
+                    $notifModel->create(
+                        $userId,
+                        'Solicitud de cancelación enviada',
+                        'Tu solicitud para cancelar la reserva de ' . $spaceName
+                            . ' el ' . $resDate . ' fue enviada al club. Espera la confirmación.',
+                        'refund',
+                        $id
+                    );
+                } catch (\Exception $e) {}
+
+                $this->setFlash('success', 'Solicitud de cancelación enviada. El club revisará tu caso.');
             } else {
                 $this->setFlash('error', 'No se puede cancelar esta reservación.');
             }

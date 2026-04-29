@@ -31,6 +31,7 @@ class AdminController extends Controller {
         $revenue = $this->reservationModel->revenueByClub($clubId);
         $spaces = $this->spaceModel->findByClub($clubId);
         $incidents = $this->incidentModel->countByClub($clubId, 'open');
+        $refundPendingCount = $this->reservationModel->countRefundPendingByClub($clubId);
 
         $this->view('admin/dashboard', [
             'title' => 'Panel de Administración',
@@ -40,6 +41,7 @@ class AdminController extends Controller {
             'revenue' => $revenue,
             'activeSpaces' => count($spaces),
             'openIncidents' => $incidents,
+            'refundPendingCount' => $refundPendingCount,
         ], 'admin');
     }
 

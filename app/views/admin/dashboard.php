@@ -1,4 +1,20 @@
 <div class="space-y-6">
+    <?php if (!empty($refundPendingCount) && $refundPendingCount > 0): ?>
+    <div class="flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
+        <span class="text-xl">⚠️</span>
+        <div class="flex-1">
+            <p class="font-semibold text-orange-800 text-sm">
+                <?= $refundPendingCount ?> solicitud<?= $refundPendingCount > 1 ? 'es' : '' ?> de reembolso pendiente<?= $refundPendingCount > 1 ? 's' : '' ?> de revisión
+            </p>
+            <p class="text-xs text-orange-600 mt-0.5">Un cliente ha solicitado cancelar su reserva. Revisa y aprueba o rechaza desde Reservaciones.</p>
+        </div>
+        <a href="<?= BASE_URL ?>admin/reservations?status=refund_pending"
+           class="text-xs font-bold text-orange-700 bg-orange-100 border border-orange-300 rounded-xl px-3 py-1.5 hover:bg-orange-200 transition-all whitespace-nowrap">
+            Ver ahora
+        </a>
+    </div>
+    <?php endif; ?>
+
     <!-- Stats row -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <?php

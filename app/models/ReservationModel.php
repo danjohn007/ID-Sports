@@ -100,6 +100,36 @@ class ReservationModel extends Model {
         return $this->execute("UPDATE reservations SET status = ? WHERE id = ?", [$status, $id]);
     }
 
+    /** Set status to refund_pending and store cancellation reason */
+    public function cancelWithReason($id, $reason) {
+        try {
+            return $this->execute(
+                "UPDATE reservations SET status = 'refund_pending', cancel_reason = ? WHERE id = ?",
+                [$reason, $id]
+            );
+        } catch (\PDOException $e) {
+            // Fallback if cancel_reason column not migrated yet: store in notes
+            return $this->execute(
+                "UPDATE reservations SET status = 'refund_pending',
+                 notes = CONCAT(IFNULL(notes,''), IF(notes IS NULL OR notes='','',CHAR(10)), '[Motivo cancelación]: ', ?)
+                 WHERE id = ?",
+                [$reason, $id]
+            );
+        }
+    }
+
+    /** Returns the club owner (user_id) for a given reservation */
+    public function getClubOwnerForReservation($reservationId) {
+        $row = $this->findOne(
+            "SELECT c.owner_id FROM reservations r
+             JOIN spaces s ON r.space_id = s.id
+             JOIN clubs  c ON s.club_id  = c.id
+             WHERE r.id = ?",
+            [$reservationId]
+        );
+        return $row['owner_id'] ?? null;
+    }
+
     public function updatePaymentRef($id, $ref) {
         return $this->execute("UPDATE reservations SET payment_ref = ? WHERE id = ?", [$ref, $id]);
     }
@@ -114,7 +144,7 @@ class ReservationModel extends Model {
     }
 
     public function getActiveForUser($userId) {
-        return $this->findAll(
+        $rows = $this->findAll(
             "SELECT r.*, s.name as space_name, s.sport_type, s.photo as space_photo,
                     c.name as club_name, c.id as club_id, c.address as club_address
              FROM reservations r
@@ -127,6 +157,8 @@ class ReservationModel extends Model {
              ORDER BY r.date ASC, r.start_time ASC",
             [$userId]
         );
+        $this->loadAmenitiesForReservations($rows);
+        return $rows;
     }
 
     public function getTodayForUser($userId) {
@@ -151,6 +183,7 @@ class ReservationModel extends Model {
              LEFT JOIN clubs c ON s.club_id = c.id
              WHERE r.user_id = ? AND r.date = CURDATE()
                AND r.status IN ('active','confirmed','in_progress','pending')
+               AND r.end_time > CURTIME()
              ORDER BY r.start_time ASC",
             [$userId]
         );
@@ -168,6 +201,16 @@ class ReservationModel extends Model {
              ORDER BY r.start_time",
             [$clubId]
         );
+    }
+
+    public function countRefundPendingByClub($clubId) {
+        $row = $this->findOne(
+            "SELECT COUNT(*) as cnt FROM reservations r
+             JOIN spaces s ON r.space_id = s.id
+             WHERE s.club_id = ? AND r.status = 'refund_pending'",
+            [$clubId]
+        );
+        return (int)($row['cnt'] ?? 0);
     }
 
     public function getSystemStats() {
